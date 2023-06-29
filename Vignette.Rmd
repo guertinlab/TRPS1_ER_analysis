@@ -1,0 +1,40 @@
+---
+title: \sf TRPS1-ER Analysis Vignette
+header-includes:
+- \usepackage{color}
+- \usepackage{float}
+- \DeclareUnicodeCharacter{2212}{-}
+output:
+  bookdown::html_document2:
+    toc: true
+fontsize: 14pt
+geometry: margin=1in
+date: "Last compiled on `r format(Sys.time(), '%d %B %Y')`"
+---
+
+```{css, echo=FALSE}
+body .main-container {
+  max-width: 1600px !important;
+  width: 1600px !important;
+}
+body {
+  max-width: 1600px !important;
+}
+
+pre {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 600px;
+}
+```
+
+# Download the raw sequencing data
+
+Note to self: Once these files are confirmed by GEO, we can update the SRR numbers.
+
+```{r engine='bash', eval=F, echo=TRUE}
+fasterq-dump SRRTBD
+```
