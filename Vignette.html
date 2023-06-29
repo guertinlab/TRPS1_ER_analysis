@@ -825,7 +825,8 @@ I also downloaded the list of annotated luminal breast cancer cell lines from th
 </div>
 <div id="plot-the-data-figure-1bc" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Plot the data (Figure 1B,C)</h2>
-<pre class="bash"><code>setwd(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/DepMap/&quot;)
+<p>R code chunks will be in light blue, to distinguish from bash code chunks in grey.</p>
+<pre class="r bg-info"><code>setwd(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/DepMap/&quot;)
 library(tidyverse)
 library(dplyr)
 library(ggrepel)
@@ -1520,7 +1521,6 @@ done</code></pre>
 </div>
 <div id="combine-scaled-bigwigs-into-one-bedgraph-and-bigwig-per-condition-for-visualization-on-the-genome-browser" class="section level2" number="6.5">
 <h2><span class="header-section-number">6.5</span> Combine scaled bigWigs into one bedGraph and bigWig per condition for visualization on the genome browser</h2>
-<p>c</p>
 <pre class="bash"><code>#! /bin/bash
 directory=/scratch/$USER/TRPS1_timecourse_ATAC
 
@@ -1650,7 +1650,6 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_siz
 <p>#Now run 230417_ATAC_DESeq_to_AME.R (I usually do this interactively locally) to get the peak sets for AME</p>
 <div id="identify-differentially-accessible-peaks-with-deseq2-figure-3a" class="section level2" number="7.1">
 <h2><span class="header-section-number">7.1</span> Identify differentially accessible peaks with DESeq2 (Figure 3A)</h2>
-<p>R code chunks will be in light blue, to distinguish from bash code chunks in grey.</p>
 <pre class="r bg-info"><code>direc = &#39;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/&#39;
 setwd(direc)
 
