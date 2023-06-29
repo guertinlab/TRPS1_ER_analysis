@@ -1,5 +1,5 @@
 ---
-title: \sf TRPS1-ER Analysis Vignette
+title: \sf TRPS1-ER Analysis Vignette 
 header-includes:
 - \usepackage{color}
 - \usepackage{float}
