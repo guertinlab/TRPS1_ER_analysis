@@ -59,7 +59,9 @@ I also downloaded the list of annotated luminal breast cancer cell lines from th
 
 ## Plot the data (Figure 1B,C)
 
-```{r engine='bash', eval=F, echo=TRUE}
+R code chunks will be in light blue, to distinguish from bash code chunks in grey.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 setwd("~/Library/CloudStorage/Box-Box/GuertinLab/DepMap/")
 library(tidyverse)
 library(dplyr)
@@ -812,7 +814,6 @@ done
 
 ## Combine scaled bigWigs into one bedGraph and bigWig per condition for visualization on the genome browser
 
-c
 ```{r engine='bash', eval=F, echo=TRUE}
 #! /bin/bash
 directory=/scratch/$USER/TRPS1_timecourse_ATAC
@@ -973,8 +974,6 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_siz
 #Now run 230417_ATAC_DESeq_to_AME.R (I usually do this interactively locally) to get the peak sets for AME
 
 ## Identify differentially accessible peaks with DESeq2 (Figure 3A)
-
-R code chunks will be in light blue, to distinguish from bash code chunks in grey.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
