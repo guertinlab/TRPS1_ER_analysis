@@ -31,6 +31,10 @@ pre[class] {
 }
 ```
 
+# Introduction
+
+This is a work in progress.
+
 # Download the raw sequencing data
 
 Note to self: Once these files are confirmed by GEO, we can update the SRR numbers.
