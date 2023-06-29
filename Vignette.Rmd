@@ -33,12 +33,1371 @@ pre[class] {
 
 # Introduction
 
-This is a work in progress. Testing.
+This is a work in progress. Code chunks will be preceded by a brief description.
 
-# Download the raw sequencing data
+# GWAS summary statistics processing
+
+## Make the file to upload to LocusZoom (Figure 1A)
+
+Here we just focus on chromosome 8 (where TRPS1 is located) and a subset of columns to keep the file size manageable.
+I uploaded this file to LocusZoom to make the plot.
+
+```{r engine='bash', eval=F, echo=TRUE}
+wget https://bcac.ccge.medschl.cam.ac.uk/files/icogs_onco_gwas_meta_overall_breast_cancer_summary_level_statistics.txt.zip
+unzip icogs_onco_gwas_meta_overall_breast_cancer_summary_level_statistics.txt.zip
+head -n 1 icogs_onco_gwas_meta_overall_breast_cancer_summary_level_statistics.txt > Breast_cancer_GWAS_PMID_32424353_chr8.txt
+grep '^8_' icogs_onco_gwas_meta_overall_breast_cancer_summary_level_statistics.txt >> Breast_cancer_GWAS_PMID_32424353_chr8.txt
+awk '{OFS = "\t"; print $9, $10, $41, $40, $46}' Breast_cancer_GWAS_PMID_32424353_chr8.txt > Breast_cancer_GWAS_PMID_32424353_chr8_subset.txt
+```
+
+# Cancer Dependency Map data processing
+
+## Download the data
+
+I downloaded the 22Q1 data release from the DepMap portal, with the TRPS1 and ESR1 CRISPR gene effect (Chronos) scores for all cell lines.
+I also downloaded the list of annotated luminal breast cancer cell lines from the DepMap portal as of March 13, 2022.
+
+## Plot the data (Figure 1B,C)
+
+```{r engine='bash', eval=F, echo=TRUE}
+setwd("~/Library/CloudStorage/Box-Box/GuertinLab/DepMap/")
+library(tidyverse)
+library(dplyr)
+library(ggrepel)
+library(ggsignif)
+`%notin%` <- Negate(`%in%`)
+
+Chronos <- read_csv("Chronos.csv")
+colnames(Chronos)[c(2,3)] <- c("ESR1", "TRPS1")
+Luminal <- read_csv("cell lines in luminal.csv")
+Chronos_luminal_last <- rbind.data.frame(Chronos[Chronos$`DepMap ID` %notin% Luminal$`Depmap Id`,],
+                                         Chronos[Chronos$`DepMap ID` %in% Luminal$`Depmap Id`,])
+cols = ifelse(Chronos_luminal_last$`DepMap ID` %in% Luminal$`Depmap Id`, "red", "black")
+pdf("Chronos_ESR1_vs_TRPS1_Luminal.pdf")
+ggplot(Chronos_luminal_last, aes(x = ESR1, y = TRPS1, color = cols)) +
+  geom_point() +
+  scale_color_manual(values = c("black", "red")) +
+  geom_text_repel(aes(label=ifelse(`DepMap ID` %in% Luminal$`Depmap Id`, 
+                                   as.character(`Cell Line Name`),'')),
+                  max.overlaps = nrow(Chronos_luminal_last)) + 
+  xlab("ESR1 knockout score") +
+  ylab("TRPS1 knockout score") +
+  coord_fixed(ratio = 1, xlim = c(-1.2, 0.5), ylim = c(-1.2, 0.5)) +
+  theme_bw() +
+  theme(text = element_text(size = 20), legend.position="none")
+dev.off()
+
+pdf("Chronos_TRPS1_score_by_class.pdf")
+ggplot(Chronos_luminal_last, aes(x = cols, y = TRPS1, color = cols)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  #geom_signif(comparisons = list(c("black", "red")), map_signif_level=F)
+  geom_hline(yintercept = 0, linetype="dashed") +
+  scale_color_manual(values = c("black", "red")) +
+  ylim(-1.2, 0.5) +
+  ylab("TRPS1 knockout score") +
+  xlab("Cell line class") +
+  theme_bw() +
+  theme(legend.position="none")
+dev.off()
+
+#0.002235
+t.test(Chronos_luminal_last$TRPS1[cols == "red"],
+       Chronos_luminal_last$TRPS1[cols == "black"])
+#3.204e-05
+wilcox.test(Chronos_luminal_last$TRPS1[cols == "red"],
+       Chronos_luminal_last$TRPS1[cols == "black"])
+```
+
+# ChIP-seq data pre-processing 
+
+## Download the raw sequencing data
 
 Note to self: Once these files are confirmed by GEO, we can update the SRR numbers.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 fasterq-dump SRRTBD
 ```
+
+## Set up
+
+```{r engine='bash', eval=F, echo=TRUE}
+#Copy code to the cluster
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/Code/
+scp 230322_chipseq_analysis_on_input_file.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
+scp 230308_macs2.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
+scp 230317_meme.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
+scp 230317_meme_short.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
+scp 230313_ChIPQC.R ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
+
+#Log in to the cluster
+ssh -Y ts2hx@rivanna.hpc.virginia.edu
+ijob -A gioeli_lab -p standard --cpus-per-task=10 --time=8:00:00
+module load sratoolkit/2.10.5
+vdb-config -i #press x to exit
+
+#Make directories
+title=ChIP
+scripts=/scratch/ts2hx/scripts
+main=/scratch/ts2hx/${title}/results
+
+mkdir -p /scratch/ts2hx/${title}/logs
+mkdir -p /scratch/ts2hx/${title}/raw_data
+mkdir -p ${main}/fastqc
+mkdir -p ${main}/bowtie2/controls
+mkdir -p ${main}/macs2
+mkdir -p ${main}/meme
+mkdir -p ${main}/chipqc/meta
+mkdir -p ${main}/chipqc/bams
+mkdir -p ${main}/counts
+mkdir -p ${main}/bigWigs
+```
+
+## Download the raw data (from both sequencing runs)
+
+```{r engine='bash', eval=F, echo=TRUE}
+#Download the fastq's
+cd /scratch/ts2hx/${title}/raw_data
+wget http://guertinlab.cam.uchc.edu/230302_tgs_pool1.zip
+md5sum 230302_tgs_pool1.zip
+unzip 230302_tgs_pool1.zip
+
+wget http://guertinlab.cam.uchc.edu/230306_tgs_pool2.zip
+md5sum 230306_tgs_pool2.zip
+unzip 230306_tgs_pool2.zip
+#There are no "x" samples in this pool
+rm -r *_x_*
+
+#Rename files
+for i in *_R1_001.fastq.gz
+do
+  name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
+  echo $name
+  mv ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz
+  mv ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz
+done
+
+#Resequenced
+wget http://guertinlab.cam.uchc.edu/230320_tgs_ChIP_pool1.zip
+md5sum 230320_tgs_ChIP_pool1.zip
+unzip 230320_tgs_ChIP_pool1.zip
+wget http://guertinlab.cam.uchc.edu/230321_TGS_ChIP_pool2.zip
+md5sum 230321_TGS_ChIP_pool2.zip
+unzip 230321_TGS_ChIP_pool2.zip
+#There are no "x" samples in this pool
+rm -r *_x_*
+
+for i in *_R1_001.fastq.gz
+do
+  name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
+  echo $name
+  cat ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz > ${name}_tmp.fastq.gz
+  mv ${name}_tmp.fastq.gz ${name}_PE1.fastq.gz
+  rm ${name}_*_R1_001.fastq.gz
+  cat ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz > ${name}_tmp.fastq.gz
+  mv ${name}_tmp.fastq.gz ${name}_PE2.fastq.gz
+  rm ${name}_*_R2_001.fastq.gz
+done
+
+#Combine the libraries with 2 indices each
+#Also process each separately as "HAx" and "HAy" to see if they cluster with the combined "HA"
+for i in *_x_*
+do
+  factor=$(echo $i | awk -F"_" '{print $3}')
+  treatment=$(echo $i | awk -F"_" '{print $4}')
+  pre=$(echo $i | awk -F"_$factor" '{print $1}')
+  post=$(echo $i | awk -F"_x_" '{print $2}')
+  echo $factor
+  echo $treatment
+  echo $pre
+  echo $post
+  mv $i ${pre}_${factor}x_${treatment}_${post}
+  mv ${pre}_${factor}_${treatment}_${post} ${pre}_${factor}y_${treatment}_${post}
+  cat ${pre}_${factor}x_${treatment}_${post} ${pre}_${factor}y_${treatment}_${post} > \
+    ${pre}_${factor}_${treatment}_${post}
+done
+```
+
+## Process each sample. Just re-processing the re-sequenced samples now.
+
+The script used in the next code chunk (230322_chipseq_analysis_on_input_file.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#!/bin/bash/
+
+# This script takes a gzip'd fastq file of ChIP-seq data, runs FastQC, removes adapters,
+# and outputs a bam file for peak calling, a bed file for counting reads in peaks, 
+# and a bigWig file for visualization.
+# USAGE: sh chipseq_analysis_on_input_file.sh <path to the gzip'd PE1 file> <path to main results directory>
+
+cores=$SLURM_CPUS_PER_TASK
+
+#For fastq_pair
+PATH=$HOME/bin:$PATH
+
+#Change this to your main results directory
+main=$2
+
+#Change this to the location of the blacklist
+blacklist=$HOME/hg38/hg38.blacklist.bed
+
+# grab base of filename for naming outputs
+name=`basename $1 _PE1.fastq.gz`
+echo "Sample name is $name"
+
+# grab the directory
+dir=`dirname $1`
+cd $dir
+
+# directory with bowtie genome index
+genome=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome 
+
+#Set up more variables for additional directories to help clean up the results folder
+fastqc_out=${main}/fastqc/
+bowtie_results=${main}/bowtie2
+chipqc_out=${main}/chipqc/bams
+counts_out=${main}/counts
+bigWigs_out=${main}/bigWigs
+
+#Set up the software environment
+module load fastqc/0.11.5
+module load cutadapt/3.4
+module load gcc/9.2.0 pigz/2.4
+module load bowtie2/2.2.9 
+module load samtools/1.12
+module load wigtobigwig/2.8
+module load bedtools/2.29.2
+
+#Unzip
+gunzip ${name}_PE1.fastq.gz
+gunzip ${name}_PE2.fastq.gz
+
+#Run FastQC and move output to the appropriate folder
+fastqc ${name}_PE1.fastq
+fastqc ${name}_PE2.fastq
+mv ${dir}/${name}_PE*_fastqc.* $fastqc_out
+
+#Count raw reads for complexity estimate
+raw_reads=$(wc -l ${name}_PE1.fastq | awk '{print $1/4}')
+echo "Raw reads: $raw_reads"
+
+#Remove adapters
+cutadapt -j $cores -m 10 -O 1 -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA ${name}_PE1.fastq -o ${name}_PE1_noadap.fastq
+cutadapt -j $cores -m 10 -O 1 -a AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT ${name}_PE2.fastq -o ${name}_PE2_noadap.fastq
+
+#Pair reads
+reads=$(wc -l ${name}_PE1_noadap.fastq | awk '{print $1/4}')
+fastq_pair -t $reads ${name}_PE1_noadap.fastq ${name}_PE2_noadap.fastq
+
+#Align to the genome and keep concordantly aligned, unique reads
+#Also print statistics on duplication rate and estimated library complexity
+cd $bowtie_results
+bowtie2 -p $((cores-5)) --maxins 1000 -x $genome \
+  -1 ${dir}/${name}_PE1_noadap.fastq.paired.fq -2 ${dir}/${name}_PE2_noadap.fastq.paired.fq | \
+  samtools view -bS -f 0x2 - | samtools sort -n - | samtools fixmate -m - - | samtools sort - | \
+  samtools markdup -s -r - ${name}.bam
+samtools index ${name}.bam
+
+#Isolate PE1 for ChIPQC
+samtools view -f 0x42 ${name}.bam -o ${chipqc_out}/${name}_ChIPQC.bam
+samtools index ${chipqc_out}/${name}_ChIPQC.bam ${chipqc_out}/${name}_ChIPQC.bam.bai
+  
+#Convert bam to bed for counting
+samtools sort -n ${name}.bam | bedtools bamtobed -i stdin -bedpe | \
+  awk 'BEGIN { OFS = "\t"} { print $1, $2, $6, ".", "1" }' |
+  grep -v "random" | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | grep -v "alt" | \
+  intersectBed -v -a stdin -b $blacklist | sort -k1,1 -k2,2n > ${counts_out}/${name}_not_scaled.bed
+
+#Count resultant reads for complexity estimate
+resultant_reads=$(wc -l ${counts_out}/${name}_not_scaled.bed | awk '{print $1}')
+echo "Resultant reads: $resultant_reads"
+
+#Zip and delete files
+cd $dir
+pigz -p $cores ${name}_PE1.fastq
+pigz -p $cores ${name}_PE2.fastq
+rm ${name}_*noadap*
+
+#Deeptools wasn't loading python/numpy before, but purging and reloading helped (this may be unnecessary now)
+module purge
+module load deeptools/3.5.1
+
+#Convert bam to bigWig for coverage visualization
+bamCoverage --bam ${bowtie_results}/${name}.bam -o ${bigWigs_out}/${name}_not_scaled.bw -p $cores \
+  --binSize 1 --extendReads --centerReads
+```
+
+(wait for these jobs to finish before proceeding)
+
+```{r engine='bash', eval=F, echo=TRUE}
+chmod +x ${scripts}/230322_chipseq_analysis_on_input_file.sh
+for fastq in *_HA*_PE1.fastq.gz *_ER_*_PE1.fastq.gz *_IgG_*_PE1.fastq.gz
+do
+  name=`basename $fastq _PE1.fastq.gz`
+  fastq=/scratch/ts2hx/${title}/raw_data/${fastq}
+  sbatch -p standard -A gioeli_lab -t 8:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name chipseq-analysis \
+    -o /scratch/ts2hx/${title}/logs/${name}_chipseq.log  \
+    --wrap="sh ${scripts}/230322_chipseq_analysis_on_input_file.sh $fastq $main"
+  sleep 1
+done
+```
+
+## Call peaks
+
+The script used in the next code chunk (230308_macs2.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#!/bin/bash
+
+samples=$1
+control=$2
+factor=$3
+main=$4
+
+blacklist=$HOME/hg38/hg38.blacklist.bed
+
+module load macs2/2.2.7.1 gcc/7.1.0 openmpi/3.1.4 intel/18.0 intelmpi/18.0 R/4.1.1 bedtools/2.26.0
+
+macs2 callpeak -t ${samples}_*.bam -c ${control}_*.bam -f BAMPE -g hs -n $factor --keep-dup all \
+  --outdir ${main}/macs2 
+grep -v "random" ${main}/macs2/${factor}_summits.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+  intersectBed -v -a stdin -b $blacklist | slopBed -b 50 -i stdin -g $HOME/hg38/hg38.chrom.sizes > \
+  ${main}/macs2/${factor}_summit_window.bed
+```
+
+(wait for these jobs to finish before proceeding)
+
+```{r engine='bash', eval=F, echo=TRUE}
+#Move IgG samples to subdirectory
+cd ${main}/bowtie2/
+mv *IgG*.bam* controls/
+
+#Call peaks for each factor 
+chmod +x ${scripts}/230308_macs2.sh
+for bam in *_DMSO_rep1.bam
+do
+  name=`basename $bam _DMSO_rep1.bam`
+  factor=$(echo $name | awk -F"_" '{print $3}')
+  samples=T47D_Clone28_${factor}
+  control=controls/T47D_Clone28_IgG
+  sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-name macs2 \
+    -o /scratch/ts2hx/${title}/logs/${factor}_macs2.log \
+    --wrap="sh ${scripts}/230308_macs2.sh $samples $control $factor $main"
+  sleep 1
+done
+```
+
+## Count reads in peaks
+
+```{r engine='bash', eval=F, echo=TRUE}
+#Remove blacklist before counting in peaks
+blacklist=$HOME/hg38/hg38.blacklist.bed
+module load gcc/9.2.0 bedtools/2.29.2
+for bam in *_DMSO_rep1.bam
+do
+  name=`basename $bam _DMSO_rep1.bam`
+  factor=$(echo $name | awk -F"_" '{print $3}')
+  grep -v "random" ${main}/macs2/${factor}_peaks.narrowPeak | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+    intersectBed -v -a stdin -b $blacklist > ${factor}_tmp.txt
+  mv ${factor}_tmp.txt ${main}/macs2/${factor}_peaks.narrowPeak 
+  grep -v "random" ${main}/macs2/${factor}_summits.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+    intersectBed -v -a stdin -b $blacklist > ${factor}_tmp.txt
+  mv ${factor}_tmp.txt ${main}/macs2/${factor}_summits.bed 
+done
+
+#Count reads in peaks (wait for these jobs to finish before proceeding)
+cd ${main}/counts/
+for bed in `ls *_not_scaled.bed | grep -v IgG`
+do
+  name=`basename $bed _not_scaled.bed`
+  factor=$(echo $name | awk -F"_" '{print $3}')
+  sbatch -p standard -A gioeli_lab -t 10:00 -N 1 -n 1 --job-name ${name}_mapBed \
+    -o /scratch/ts2hx/${title}/logs/${name}_mapBed.log \
+    --wrap="module load gcc/9.2.0 bedtools/2.29.2; \
+      mapBed -null "0" -a ${main}/macs2/${factor}_peaks.narrowPeak -b $bed > ${name}_peak_counts.txt"
+  sleep 1 # wait 1 second between each job submission
+done
+
+#Just keep the last column (the counts)
+for counts in T47D_Clone28_*_peak_counts.txt
+do
+  name=`basename $counts _peak_counts.txt`
+  awk '{print $NF}' ${name}_peak_counts.txt > ${name}_peak_counts_only.txt
+  echo $name | cat - ${name}_peak_counts_only.txt > ${name}_peak_counts.txt
+  rm ${name}_peak_counts_only.txt
+done
+
+#Combine into 1 file per factor
+for peaks in ../macs2/*_peaks.narrowPeak
+do
+  factor=`basename $peaks _peaks.narrowPeak`
+  awk '{OFS = "\t"} {print $1, $2, $3}' $peaks > peaks.bed
+  echo -e "chr\tstart\tend" | cat - peaks.bed > peaks_header.bed
+  paste -d'\t' peaks_header.bed T47D_Clone28_${factor}_*_peak_counts.txt > Combined_${factor}_peak_counts.txt
+  rm peaks*
+done
+```
+
+## Call TRPS1 peaks with the dTAG samples as a control
+
+The script used in the next code chunk (230322_macs2.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#!/bin/bash
+
+samples=$1
+control=$2
+factor=$3
+main=$4
+
+blacklist=$HOME/hg38/hg38.blacklist.bed
+
+module load macs2/2.2.7.1 gcc/7.1.0 openmpi/3.1.4 intel/18.0 intelmpi/18.0 R/4.1.1 bedtools/2.26.0
+
+macs2 callpeak --call-summits -t ${samples}_*.bam -c ${control}_*.bam -f BAMPE -g hs -n $factor --keep-dup all \
+  --outdir ${main}/macs2 
+grep -v "random" ${main}/macs2/${factor}_peaks.narrowPeak | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+  grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${factor}_tmp.txt
+mv ${factor}_tmp.txt ${main}/macs2/${factor}_peaks.narrowPeak 
+grep -v "random" ${main}/macs2/${factor}_summits.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+    grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${factor}_tmp.txt
+mv ${factor}_tmp.txt ${main}/macs2/${factor}_summits.bed 
+slopBed -b 50 -i ${main}/macs2/${factor}_summits.bed -g $HOME/hg38/hg38.chrom.sizes > \
+  ${main}/macs2/${factor}_summit_window.bed
+```
+
+Call peaks
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ${main}/bowtie2/
+factor=HA_DMSO_vs_dTAG
+samples=T47D_Clone28_HA_DMSO
+control=T47D_Clone28_HA_dTAG
+sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-name macs2 \
+  -o /scratch/ts2hx/${title}/logs/${factor}_macs2.log \
+  --wrap="sh ${scripts}/230322_macs2.sh $samples $control $factor $main"
+```
+
+Count reads in peaks
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ${main}/counts/
+#Just count read fragments that overlap the summit
+peaks=${main}/macs2/${factor}_summits.bed
+for bed in T47D_Clone28_HA_*_not_scaled.bed T47D_Clone28_IgG_*_not_scaled.bed
+do
+  name=`basename $bed _not_scaled.bed`
+  echo $name
+  name=${name}_${factor}
+  mapBed -null "0" -a $peaks -b $bed > ${name}_peak_counts.txt
+  awk '{print $NF}' ${name}_peak_counts.txt > ${name}_peak_counts_only.txt
+  echo $name | cat - ${name}_peak_counts_only.txt > ${name}_peak_counts.txt
+  rm ${name}_peak_counts_only.txt
+done
+
+echo -e "chr\tstart\tend\tname\tqvalue" | cat - $peaks | \
+  paste -d'\t' - *${factor}_peak_counts.txt > Combined_${factor}_peak_counts.txt
+rm T47D_Clone28_*${factor}_peak_counts.txt
+```
+
+## Leave the cluster environment, and copy files to your local computer
+
+```{r engine='bash', eval=F, echo=TRUE}
+exit
+exit
+
+title=ChIP
+main=/scratch/ts2hx/${title}/results
+cd /Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/${title}/results
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/fastqc/ .
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/macs2/*_summit* macs2/
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/macs2/*peaks.narrowPeak macs2/
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/counts/Combined* counts/
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*HA_*_not_scaled.bw bigWigs/
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*ER_*_not_scaled.bw bigWigs/
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*IgG_*_not_scaled.bw bigWigs/
+```
+
+# TRPS1 ChIP-seq analysis
+
+## Heatmap (Figure 2C)
+
+```{r engine='bash', eval=F, echo=TRUE}
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=20 --time=12:00:00
+main=/scratch/ts2hx/ChIP/results
+cd $main
+mkdir -p heatmaps
+cd heatmaps
+
+module load deeptools/3.5.1
+#Defined functional TRPS1 peaks by MACS2 q-value < 10^(-30)
+awk '$5 > 30' /scratch/ts2hx/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed > \
+  Functional_TRPS1_summits.bed
+
+#Make the matrix (this can be used for a composite profile as well)
+computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
+  -R Functional_TRPS1_summits.bed \
+  -S /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_DMSO_combined_normalized.bigWig \
+  /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_dTAG_combined_normalized.bigWig \
+  -o matrix_HA_ChIP_TRPS1_peaks.gz --outFileSortedRegions TRPS1_peaks_sorted_for_heatmap.bed
+  
+#Make the heatmap
+plotHeatmap -m matrix_HA_ChIP_TRPS1_peaks.gz -out heatmap_HA_ChIP_TRPS1_peaks.pdf --heatmapHeight 14 \
+   --regionsLabel "Functional TRPS1 peaks" --xAxisLabel "Distance from summit" \
+   --samplesLabel "DMSO" "dTAG" --colorMap Purples --whatToShow "heatmap and colorbar" 
+
+exit
+exit
+
+#Copy files
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
+scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .
+```
+
+## MA plot (Figure 2D)
+
+First get the complexity estimate file for size factors (total aligned reads)
+
+```{r engine='bash', eval=F, echo=TRUE}
+title=ChIP
+cd /Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/${title}/
+scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/${title}/logs/*chipseq.log logs/
+scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/${title}/results/chipqc/chipObj.R results/chipqc/
+
+cd logs
+echo -e "name\traw_reads\taligned_reads\tunique_reads\testimated_size\tresultant_reads" > \
+  230322_complexity_estimate.txt
+for i in *_HA_*_chipseq.log *_ER_*_chipseq.log *_IgG_*_chipseq.log
+do
+  name=`basename $i _chipseq.log`
+  raw_reads=`grep "Raw reads:" $i | awk '{print $3}'`
+  aligned_reads=`grep "READ:" $i | awk '{print $2/2}'`
+  unique_reads=`grep "WRITTEN:" $i | awk '{print $2/2}'`
+  estimated_size=`grep "ESTIMATED_LIBRARY_SIZE:" $i | awk '{print $2}'`
+  resultant_reads=`grep "Resultant reads:" $i | awk '{print $3}'`
+  echo -e "$name\t$raw_reads\t$aligned_reads\t$unique_reads\t$estimated_size\t$resultant_reads" >> \
+    230322_complexity_estimate.txt
+done
+```
+Now use DESeq2 to identify differentially bound peaks (all of them)
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = '~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/'
+setwd(direc)
+
+library(DESeq2)
+library(lattice)
+library(viridis)
+library(DEGreport)
+library(lattice)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(data.table)
+
+#Make sure IgG counts aren't changing
+x <- read.table("Combined_HA_DMSO_vs_dTAG_peak_counts.txt", sep = '\t', header = TRUE)
+rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
+peak_name = x[,4]
+peak_qvalue = x[,5]
+x = x[,-c(1:6)]
+colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), "Clone28_"), "[", 2), "_HA_DMSO"), "[", 1)
+x = x[,9:16]
+treatment = factor(sapply(strsplit(colnames(x), '_'), '[', 2), levels = c("DMSO", "dTAG"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, rep), ~ treatment)
+factors <- read.table("IgG_sizeFactor.txt")
+size_factors = factors$V2
+names(size_factors) = factors$V1
+sizeFactors(deseq.df) <- size_factors
+deseq.df = DESeq(deseq.df)
+
+res.deseq = results(deseq.df, contrast = c("treatment", "dTAG", "DMSO"))
+sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
+pdf("MA_IgG.pdf")
+plotMA(res.deseq, ylim = c(-8,8))
+dev.off()
+
+#Get read depth
+complexity_estimate <- read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/logs/230322_complexity_estimate.txt", header = T)
+name = sapply(strsplit(complexity_estimate$name, "Clone28_"), "[", 2)
+complexity_estimate = t(complexity_estimate$unique_reads)
+colnames(complexity_estimate) = name
+complexity_estimate = complexity_estimate[,-grep("ER", colnames(complexity_estimate))]
+
+x <- read.table("Combined_HA_DMSO_vs_dTAG_peak_counts.txt", sep = '\t', header = TRUE)
+rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
+peak_name = x[,4]
+peak_qvalue = x[,5]
+x = x[,-c(1:6)]
+colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), "Clone28_"), "[", 2), "_HA_DMSO"), "[", 1)
+
+background <- sweep(x[,grep("IgG", colnames(x))], 2, complexity_estimate[grep("IgG", names(complexity_estimate))], FUN = "/")
+background = rowMeans(background)
+background = cbind.data.frame(background, background, background, background, background, background, background, background)
+background <- sweep(as.data.frame(background), 2, complexity_estimate[grep("HA", names(complexity_estimate))], FUN = "*")
+background = round(background, digits = 0)
+
+x = x[,grep("HA", colnames(x))] - background
+x[x < 0] = 0
+
+treatment = factor(sapply(strsplit(colnames(x), '_'), '[', 2), levels = c("DMSO", "dTAG"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, rep), ~ treatment)
+factors <- read.table("HA_sizeFactor.txt")
+size_factors = factors$V2
+names(size_factors) = factors$V1
+sizeFactors(deseq.df) <- size_factors
+deseq.df = DESeq(deseq.df)
+
+pdf("MA_HA_DMSO_vs_dTAG_subtract_IgG_qvalue_30.pdf")
+res.deseq = results(deseq.df[peak_qvalue > 30,], contrast = c("treatment", "dTAG", "DMSO"))
+save(res.deseq, file = "res.deseq.HA.q30.Rdata")
+plotMA(res.deseq, ylim = c(-4,4))
+dev.off()
+```
+
+# ATAC-seq data pre-processing
+
+## Download the raw sequencing data
+
+Note to self: Once these files are confirmed by GEO, we can update the SRR numbers.
+
+```{r engine='bash', eval=F, echo=TRUE}
+fasterq-dump SRRTBD
+```
+
+## Get the required scripts and files onto the computing cluster
+
+```{r engine='bash', eval=F, echo=TRUE}
+#Copy scripts
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/Code
+scp 230417_*.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts 
+
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=10 --time=8:00:00
+main=/scratch/ts2hx/TRPS1_timecourse_ATAC
+cd $main
+
+#First get the required script for bigWig merging and move to a directory that will end up in the $PATH
+wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
+chmod +x normalize_bedGraph.py
+mv normalize_bedGraph.py $HOME/bin/
+
+#Get the ENCODE blacklist
+wget https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/hg38-blacklist.v2.bed.gz -P $HOME/hg38/
+gunzip $HOME/hg38/hg38-blacklist.v2.bed.gz
+mv $HOME/hg38/hg38-blacklist.v2.bed $HOME/hg38/hg38.blacklist.bed
+
+#Get chrM for pre-alignment
+module load gcc/9.2.0 bowtie2/2.2.9 
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromFa.tar.gz
+tar -xzf hg38.chromFa.tar.gz
+mkdir -p $HOME/hg38
+mv chroms/chrM.fa $HOME/hg38
+rm -r chroms
+rm hg38.chromFa.tar.gz
+ls $HOME/hg38
+bowtie2-build $HOME/hg38/chrM.fa $HOME/hg38/chrM_hg38
+
+#Make tallymer and table for seqOutBias (this takes a while)
+cd $HOME/seqOutBias/
+seqOutBias seqtable /project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome.fa --read-size=62
+```
+
+## Change the file names
+
+This may be unnecessary if the SRA downloads are already named appropriately. 
+
+```{r engine='bash', eval=F, echo=TRUE}
+#Move everything out of subfolders and remove the folders
+cd $main
+mv */* .
+rm -r M260TS4219*
+
+#Rename
+for i in *_R1_001.fastq.gz
+do
+name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
+echo $name
+hyphenless=${name//-/_}
+echo $hyphenless
+newname=${hyphenless//05hour/0.5hour}
+echo $newname
+mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
+mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
+done
+```
+
+## Process the samples in parallel (wait until these jobs finish before proceeding)
+
+The script used in the next code chunk (230417_ATACseq_analysis_on_input_file.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#! /bin/bash
+directory=/scratch/$USER/TRPS1_timecourse_ATAC
+read_size=62
+cores=$SLURM_CPUS_PER_TASK
+chrM=$HOME/hg38/chrM_hg38
+genome_index=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome
+tallymer=$HOME/seqOutBias/genome.tal_${read_size}.gtTxt.gz
+table=$HOME/seqOutBias/genome_${read_size}.4.2.2.tbl
+
+PATH=$HOME/bin:$PATH
+
+cd $directory
+
+module load cutadapt/3.4
+module load gcc/9.2.0 pigz/2.4
+module load bowtie2/2.2.9 
+module load samtools/1.12
+module load wigtobigwig/2.8
+module load bedtools/2.29.2
+module load deeptools/3.5.1
+
+filename=$1
+name=$(echo $filename | awk -F"_PE1.fastq.gz" '{print $1}')
+echo $name
+gunzip ${name}_PE1.fastq.gz
+gunzip ${name}_PE2.fastq.gz
+#Remove adapters (also trim PE1 reads to the same length as PE2 (that was unnecessary))
+cutadapt -j $cores -l $read_size -m 10 -O 1 -a CTGTCTCTTATACACATCT ${name}_PE1.fastq -o ${name}_PE1_no_adapt.fastq
+cutadapt -j $cores -m 10 -O 1 -a CTGTCTCTTATACACATCT ${name}_PE2.fastq -o ${name}_PE2_no_adapt.fastq
+#Align to chrM first and remove aligned reads    
+bowtie2 -p $((cores-2)) -x $chrM -U ${name}_PE1_no_adapt.fastq | \
+    samtools sort -n - | samtools fastq -f 0x4 - > ${name}_PE1.chrM.fastq
+#Pair reads
+reads=$(wc -l ${name}_PE1.chrM.fastq | awk '{print $1/4}')
+fastq_pair -t $reads ${name}_PE1.chrM.fastq ${name}_PE2_no_adapt.fastq
+#Align to the hg38 genome and remove duplicates
+bowtie2 -p $((cores-5)) --maxins 800 -x $genome_index \
+  -1 ${name}_PE1.chrM.fastq.paired.fq -2 ${name}_PE2_no_adapt.fastq.paired.fq | \
+  samtools view -bS - | samtools sort -n - | samtools fixmate -m - - | samtools sort - | \
+  samtools markdup -s -r - ${name}.hg38.bam
+#Convert BAM to bed for counting (previously created the tallymer with `seqOutBias seqtable`)
+seqOutBias scale $table ${name}.hg38.bam --no-scale --shift-counts --skip-bw \
+  --read-size=$read_size --tallymer=$tallymer --bed=$name.bed
+#Remove noncanonical chromosomes and sort for use with mapBed
+grep -v "random" ${name}_not_scaled.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "alt" | \
+  sort -k1,1 -k2,2n > ${name}_tmp.txt && mv ${name}_tmp.txt ${name}_not_scaled.bed 
+#Convert BAM to bigWig for visualization; extends the reads from PE1 to PE2; 
+#uses a bin size of 10 for a smoother output; normalizes as bins per million, analagous to TPM for transcripts
+bamCoverage --bam ${name}.hg38.bam -bs 10 -p 10 -e --normalizeUsing BPM -bl $HOME/hg38/hg38.blacklist.bed \
+  -o ${name}_scaled.bigWig 
+#Zip fastq's and delete intermediate files
+pigz -p $cores ${name}_PE1.fastq
+pigz -p $cores ${name}_PE2.fastq
+rm ${name}_PE1_no_adapt.fastq
+rm ${name}_PE2_no_adapt.fastq
+rm ${name}_PE1.chrM.fastq
+rm ${name}_PE1.chrM.fastq.paired.fq
+rm ${name}_PE1.chrM.fastq.single.fq
+rm ${name}_PE2_no_adapt.fastq.paired.fq
+rm ${name}_PE2_no_adapt.fastq.single.fq
+```
+
+Run the above script on each sample in parallel
+
+```{r engine='bash', eval=F, echo=TRUE}
+chmod +x /scratch/ts2hx/scripts/230417_*.sh
+for filename in *_PE1.fastq.gz
+do
+name=`basename $filename _PE1.fastq.gz`
+sbatch -p standard -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name ${name}_atacseq_analysis \
+  -o ${name}_atacseq.log  --wrap="sh /scratch/ts2hx/scripts/230417_ATACseq_analysis_on_input_file.sh $filename"
+sleep 1	# wait 1 second between each job submission
+done
+```
+
+## Combine scaled bigWigs into one bedGraph and bigWig per condition for visualization on the genome browser
+
+c
+```{r engine='bash', eval=F, echo=TRUE}
+#! /bin/bash
+directory=/scratch/$USER/TRPS1_timecourse_ATAC
+
+PATH=$HOME/bin:$PATH
+
+cd $directory
+
+module load ucsc-tools/3.7.4
+
+name=$(echo $1 | awk -F"T47D_Clone28_" '{print $2}' | awk -F"_rep1" '{print $1}')
+echo $name
+files=$(ls T47D_Clone28_${name}_rep*_scaled.bigWig)
+echo $files
+touch T47D_Clone28_${name}_temp.txt
+echo "track type=bedGraph name=${name} alwaysZero=on visibility=full" >> T47D_Clone28_${name}_temp.txt
+count=$(ls T47D_Clone28_${name}_rep*_scaled.bigWig | wc -l | bc)
+scaleall=$(bc <<< "scale=4 ; 1.0 / $count")
+name=T47D_Clone28_${name}
+echo $count
+echo $scaleall
+bigWigMerge $files ${name}_tmp.bg
+normalize_bedGraph.py -i ${name}_tmp.bg -s $scaleall -o ${name}_scaled.bg
+LC_COLLATE=C sort -k1,1 -k2,2n ${name}_scaled.bg > ${name}_scaled_sorted.bg
+cat ${name}_temp.txt ${name}_scaled_sorted.bg > ${name}_scaled.bedGraph
+rm ${name}_tmp.bg
+rm ${name}_temp.txt
+rm ${name}_scaled.bg
+rm ${name}_scaled_sorted.bg
+head ${name}_scaled.bedGraph
+bedGraphToBigWig ${name}_scaled.bedGraph hg38.chrom.sizes ${name}_combined_normalized.bigWig
+gzip -f ${name}_scaled.bedGraph
+```
+
+Run the above script on each sample in parallel
+
+```{r engine='bash', eval=F, echo=TRUE}
+for i in T47D_Clone28_*_rep1_scaled.bigWig
+do
+  name=$(echo $i | awk -F"_rep1_scaled.bigWig" '{print $1}')
+  sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --job-name to_browser -o ${name}_to_browser.log \
+  --wrap="sh /scratch/ts2hx/scripts/230417_ATAC_to_browser.sh $i"
+  sleep 1
+done
+```
+
+## Call peaks 
+
+This code uses all bam files, calls sub-peak summits, and makes each fragment 200bp centered on the original 5' end of the read. (wait until this job is finished before proceeding).
+
+```{r engine='bash', eval=F, echo=TRUE}
+name=TRPS1_timecourse_ATAC
+sbatch -p largemem -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-name macs2 -o ${name}_macs2.log \
+  --wrap="module load macs2/2.2.7.1; \
+    macs2 callpeak --call-summits -t *.hg38.bam -n TRPS1_timecourse_ATAC -g hs -q 0.01 --keep-dup all \
+    -f BAM --nomodel --shift -100 --extsize 200"
+```
+
+Remove peaks from non-canonical chromosomes or blacklisted regions
+
+```{r engine='bash', eval=F, echo=TRUE}
+blacklist=$HOME/hg38/hg38.blacklist.bed
+module load gcc/9.2.0 bedtools/2.29.2
+grep -v "random" ${name}_peaks.narrowPeak | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+  grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${name}_tmp.txt
+mv ${name}_tmp.txt ${name}_peaks.narrowPeak 
+grep -v "random" ${name}_summits.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+    grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${name}_tmp.txt
+mv ${name}_tmp.txt ${name}_summits.bed 
+```
+
+Make a 200bp window centered on each peak (sub-peak) summit
+
+```{r engine='bash', eval=F, echo=TRUE}
+slopBed -b 100 -i ${name}_summits.bed -g $HOME/hg38/hg38.chrom.sizes > ${name}_summit_window.bed
+```
+
+## Count ATAC reads in peaks
+
+Just count where the cut site is within these windows. (Wait until these jobs are finished before proceeding)
+
+```{r engine='bash', eval=F, echo=TRUE}
+peaks=${name}_summit_window.bed
+for bed in *_not_scaled.bed
+do
+  name=`basename $bed _not_scaled.bed`
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --job-name ${name}_mapBed -o ${name}_mapBed.log \
+    --wrap="module load gcc/9.2.0 bedtools/2.29.2; mapBed -null '0' -a $peaks -b $bed > ${name}_peak_counts.txt;"
+  sleep 1
+done
+```
+
+Just keep the last column (the counts). I couldn't figure out how to get the quotes to work to put this in the wrapped text in the previous for loop
+
+```{r engine='bash', eval=F, echo=TRUE}
+for counts in T47D_Clone28_*_peak_counts.txt
+do
+  name=`basename $counts _peak_counts.txt`
+  awk '{print $NF}' ${name}_peak_counts.txt > ${name}_peak_counts_only.txt
+  echo $name | cat - ${name}_peak_counts_only.txt > ${name}_peak_counts.txt
+  rm ${name}_peak_counts_only.txt
+done
+```
+
+Merge into one counts file for use with DESeq2. The name includes ChIP because I also counted ChIP reads, but you can rename this.
+
+```{r engine='bash', eval=F, echo=TRUE}
+echo -e "chr\tstart\tend\tname\tqvalue" | cat - $peaks | \
+  paste -d'\t' - T47D_Clone28_*_peak_counts.txt > Combined_ATAC_peak_counts_with_ChIP.txt
+rm T47D_Clone28_*_peak_counts.txt
+```
+
+## Make size factors for DESeq2 based on total mapped reads (divide each by the geometric mean of all of them).
+
+```{r engine='bash', eval=F, echo=TRUE}
+module load samtools/1.12
+i=ATAC
+> ${i}_header.txt
+> ${i}_reads.txt
+for j in T47D_Clone28_*.hg38.bam
+do
+  echo $j
+  name=$(echo $j | awk -F".hg38.bam" '{print $1}')
+  echo $name | paste ${i}_header.txt - > ${i}_tmp.txt 
+  mv ${i}_tmp.txt ${i}_header.txt
+  reads=`samtools view -c $j`
+  echo $reads | paste ${i}_reads.txt - > ${i}_tmp.txt 
+  mv ${i}_tmp.txt ${i}_reads.txt
+done  
+cat ${i}_header.txt ${i}_reads.txt > ${i}_tmp.txt
+mv ${i}_tmp.txt ${i}_reads.txt
+rm ${i}_header.txt
+
+module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
+R
+library(DESeq2)
+setwd("/scratch/ts2hx/TRPS1_timecourse_ATAC/")
+samples <- "ATAC_reads.txt"
+x <- read.table(samples, sep = '\t', header = TRUE)[,-1]
+write.table(estimateSizeFactorsForMatrix(x), file = paste0("/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt"), quote =F, col.names=F)
+q()
+```
+
+## Leave the cluster environment, and copy files to your local computer
+
+```{r engine='bash', eval=F, echo=TRUE}
+exit
+exit
+
+#Copy files
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Combined_ATAC_peak_counts_with_ChIP.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt .
+```
+
+# ATAC-seq analysis
+
+#Now run 230417_ATAC_DESeq_to_AME.R (I usually do this interactively locally) to get the peak sets for AME
+
+## Identify differentially accessible peaks with DESeq2 (Figure 3A)
+
+R code chunks will be in light blue, to distinguish from bash code chunks in grey.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
+setwd(direc)
+
+library(DESeq2)
+library(lattice)
+library(viridis)
+library(DEGreport)
+library(lattice)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(data.table)
+library(MatchIt)
+library(EnhancedVolcano)
+
+tighten_summit_window <- function(res.deseq, b = 100) {
+  chr = sapply(strsplit(rownames(res.deseq), ':'), '[', 1)
+  start = as.numeric(sapply(strsplit(sapply(strsplit(rownames(res.deseq), ':'), '[', 2), "-"), "[", 1)) + b
+  end = as.numeric(sapply(strsplit(rownames(res.deseq), '-'), '[', 2)) - b
+  df = cbind.data.frame(chr, start, end)
+  return(df)
+}
+
+`%notin%` <- Negate(`%in%`)
+
+x <- read.table("Combined_ATAC_peak_counts.txt", sep = '\t', header = TRUE)
+rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
+peak_name = x[,4]
+peak_qvalue = x[,5]
+x = x[,-c(1:5)]
+colnames(x) = sapply(strsplit(colnames(x), "Clone28_"), "[", 2)
+
+#Make the DESeq object
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 1), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+factors <- read.table("ATAC_sizeFactor.txt")
+size_factors = factors$V2
+names(size_factors) = factors$V1
+sizeFactors(deseq.df) <- size_factors
+deseq.df = DESeq(deseq.df)
+save(deseq.df, file = "deseq.df.ATAC.Rdata")
+load("deseq.df.ATAC.Rdata")
+
+#For MEME / cutoff-based AME
+#Get differentially accessible peaks and sets matched by baseMean
+for (i in levels(time)[-1]) {
+  res.deseq = results(deseq.df[peak_qvalue > 100,], contrast = c("time", i, "0hour"))
+  sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
+  
+  activated = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
+  write.table(tighten_summit_window(activated, b = 100), file = paste0(i, '_activated_peaks.bed'), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = '\t')
+  
+  unchanged = res.deseq[!is.na(res.deseq$padj) & res.deseq$padj > 0.1 & abs(res.deseq$log2FoldChange) < 0.01,]
+  #unchanged = unchanged[sample(x, size, replace = FALSE, prob = NULL),]
+  unchanged$treatment = 0
+  activated$treatment = 1
+  df.deseq.effects.lattice = rbind(unchanged, activated)
+  out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = "optimal", ratio = 1)
+  unchanged = df.deseq.effects.lattice[rownames(df.deseq.effects.lattice) %in% out$match.matrix,]
+  write.table(tighten_summit_window(unchanged, b = 100), file = paste0(i, '_activated_matched_peaks.bed'), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = '\t')
+  
+  repressed = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0,]
+  write.table(tighten_summit_window(repressed, b = 100), file = paste0(i, '_repressed_peaks.bed'), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = '\t')
+  
+  # unchanged = res.deseq[rownames(res.deseq) %notin% rownames(repressed) & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
+  # unchanged$treatment = 0
+  repressed$treatment = 1
+  df.deseq.effects.lattice = rbind(unchanged, repressed)
+  out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = "optimal", ratio = 1)
+  unchanged = df.deseq.effects.lattice[rownames(df.deseq.effects.lattice) %in% out$match.matrix,]
+  write.table(tighten_summit_window(unchanged, b = 100), file = paste0(i, '_repressed_matched_peaks.bed'), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = '\t')
+}
+```
+
+## de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
+genome=~/Library/CloudStorage/Box-Box/GuertinLab/hg38/hg38.fa
+
+for bed in *_activated_peaks.bed *_repressed_peaks.bed
+do
+  name=`basename $bed .bed`
+  fastaFromBed -fi $genome -bed ${name}.bed -fo ${name}.fasta
+  sites=`wc -l ${name}.fasta | awk '{print $1/2}'`
+  if [ $sites -lt 100 ] 
+  then
+    minsites=2
+  else
+    minsites=`echo $sites | awk '{print $1/50}'`
+  fi
+  meme -oc ${name}_meme_output -nmotifs 1000 -objfun classic -csites 20000 -evt 0.01 \
+    -searchsize 0 -minw 6 -maxw 18 -revcomp -dna -markov_order 3 -maxsize 100000000 -minsites $minsites \
+    ${name}.fasta
+  meme -oc ${name}_meme_short_output -nmotifs 1000 -objfun classic -csites 20000 -evt 0.01 \
+    -searchsize 0 -minw 6 -maxw 8 -revcomp -dna -markov_order 3 -maxsize 100000000 -minsites $minsites \
+    ${name}.fasta
+done
+```
+
+## Idenitify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/
+motifs=~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/tomtom_db/homer_uniprobe_jaspar_edited.txt
+#Report results at FDR 0.1 (1401 total in the above database)
+n_motifs=140
+
+genome=~/Library/CloudStorage/Box-Box/GuertinLab/hg38/hg38.fa
+for bed in *hour_activated*_peaks.bed *hour_repressed*_peaks.bed
+do
+  name=`basename $bed .bed`
+  echo $name
+  fastaFromBed -fi $genome -bed ${name}.bed -fo ${name}.fasta
+done
+
+for fasta in *hour_activated_peaks.fasta *hour_repressed_peaks.fasta
+do
+  name=`basename $fasta _peaks.fasta`
+  echo $name
+  ame --verbose 1 --oc ${name}_ame --scoring avg --method fisher --hit-lo-fraction 0.25 \
+    --evalue-report-threshold $n_motifs --control ${name}_matched_peaks.fasta ${name}_peaks.fasta $motifs
+done
+
+#24 hour repressed couldn't get a matched list 
+#(ran out of memory in R, so just look for enrichment relative to activated)
+fasta=24hour_repressed_peaks.fasta
+name=`basename $fasta _peaks.fasta`
+echo $name
+ame --verbose 1 --oc ${name}_ame --scoring avg --method fisher --hit-lo-fraction 0.25 \
+  --evalue-report-threshold $n_motifs --control 24hour_activated_peaks.fasta ${name}_peaks.fasta $motifs
+```
+
+Configure the AME output for use in LaTex
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ~/Library/CloudStorage/Box-Box/guertinlab/TRPS1_timecourse_ATAC/0.5hour_repressed_ame
+
+cat ame.tsv | \
+  awk 'BEGIN {FS="\t"} {print $1, $3, $5, $15, $17, $7}' | \
+  awk '{sub(/_homer.*/,"-Homer",$2)} 1' | \
+  awk '{sub(/_jaspar.*/,"-Jaspar",$2)} 1' | \
+  awk '{sub(/_secondary_uniprobe.*/,"-Secondary-Uniprobe",$2)} 1' | \
+  awk '{sub(/_primary_uniprobe.*/,"-Secondary-Uniprobe",$2)} 1' | \
+  awk '{sub(/_uniprobe.*/,"-Uniprobe",$2)} 1' | \
+  awk 'BEGIN { OFS="," } {$1=$1; print}' |
+  awk '/^$/{exit}1' | sed 's/%/\percent/g' > \
+  decreased_ame.csv  
+  
+cd ~/Library/CloudStorage/Box-Box/guertinlab/TRPS1_timecourse_ATAC/0.5hour_activated_ame
+
+cat ame.tsv | \
+  awk 'BEGIN {FS="\t"} {print $1, $3, $5, $15, $17, $7}' | \
+  awk '{sub(/_homer.*/,"-Homer",$2)} 1' | \
+  awk '{sub(/_jaspar.*/,"-Jaspar",$2)} 1' | \
+  awk '{sub(/_secondary_uniprobe.*/,"-Secondary-Uniprobe",$2)} 1' | \
+  awk '{sub(/_primary_uniprobe.*/,"-Secondary-Uniprobe",$2)} 1' | \
+  awk '{sub(/_uniprobe.*/,"-Uniprobe",$2)} 1' | \
+  awk 'BEGIN { OFS="," } {$1=$1; print}' |
+  awk '/^$/{exit}1' | sed 's/%/\percent/g' |
+  head -n 50 > \
+  increased_ame.csv  
+```
+
+## Count individual motif instances in dynamic peaks at 30 minutes (Figure 3C,D)
+
+The script used in the next code chunk (220914_FIMO.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#! /bin/bash
+directory=/scratch/$USER/TRPS1_timecourse_ATAC
+genome=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome.fa
+
+cd $directory
+module load gcc/9.2.0 openmpi/3.1.6 meme/5.3.3 bedtools/2.29.2
+
+fimo --thresh 0.001 --text $i $genome > ${name}_fimo.txt
+wc -l ${name}_fimo.txt
+score=$(tail -n +2 ${name}_fimo.txt | sort -nrk6,6 | awk 'FNR == 2000000 {print $6}')
+echo $score
+tail -n +2 ${name}_fimo.txt | awk -v sco="$score" '{ if ($6 >= sco) { print } }' | \
+    awk '{OFS="\t";} {print $2,$3,$4,$7,$6,$5,$8}' > ${name}_2M.txt
+Activated=`wc -l 24hour_activated_peaks.bed | awk '{print $1}'`
+Activated_with=`intersectBed -u -a 24hour_activated_peaks.bed -b ${name}_2M.txt | wc -l | awk '{print $1}'`
+Activated_without=$(echo "$Activated - $Activated_with" | bc)
+Unchanged=`wc -l 24hour_unchanged_peaks.bed | awk '{print $1}'`
+Unchanged_with=`intersectBed -u -a 24hour_unchanged_peaks.bed -b ${name}_2M.txt | wc -l | awk '{print $1}'`
+Unchanged_without=$(echo "$Unchanged - $Unchanged_with" | bc)
+Repressed=`wc -l 24hour_repressed_peaks.bed | awk '{print $1}'`
+Repressed_with=`intersectBed -u -a 24hour_repressed_peaks.bed -b ${name}_2M.txt | wc -l | awk '{print $1}'`
+Repressed_without=$(echo "$Repressed - $Repressed_with" | bc)
+echo -e \
+  "$name\t$Activated_with\t$Activated_without\t$Unchanged_with\t$Unchanged_without\t$Repressed_with\t$Repressed_without" > \
+  ${name}_Motif_overlaps.txt
+```
+
+Find individual motif instances in the genome with FIMO and overlap with peak sets. I need to provide the motif files or indicate how to generate them.
+
+```{r engine='bash', eval=F, echo=TRUE}
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+cd /scratch/ts2hx
+mkdir -p TRPS1_timecourse_ATAC
+exit
+
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
+
+scp ~/Library/CloudStorage/Box-Box/GuertinLab/Code/220914_FIMO.sh \
+    ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
+scp -r ~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/individual_memes \
+    ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC
+scp *.bed ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC
+
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
+
+cd /scratch/ts2hx/TRPS1_timecourse_ATAC/
+
+chmod +x /scratch/ts2hx/scripts/220914_FIMO.sh
+for i in individual_memes/*_meme.txt
+do
+  name=`basename $i _meme.txt`
+  sbatch -p standard --export=ALL,i=$i,name=$name --output=${name}_FIMO.out /scratch/ts2hx/scripts/220914_FIMO.sh
+  sleep 1
+done
+
+echo -e \
+  "Motif\tActivated_with\tActivated_without\tUnchanged_with\tUnchanged_without\tRepressed_with\tRepressed_without" \
+  > Motif_overlaps.txt
+cat *_Motif_overlaps.txt >> Motif_overlaps.txt
+
+exit
+exit
+
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Motif_overlaps.txt .
+```
+
+Plot barcharts
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
+setwd(direc)
+
+library(tidyverse)
+library(tidyr)
+library(lattice)
+library(tidyr)
+
+ImmediatePeaksWithMotif <- function(motif_overlaps, motif)
+{
+  result = motif_overlaps[rownames(motif_overlaps) == motif,]
+  result = cbind(rbind(result[,3], result[,4]), rbind(result[,1], result[,2]), rbind(result[,7], result[,8]))
+  colnames(result) <- c("Increased", "Unchanged", "Decreased")
+  rownames(result) <- c("With motif", "Without motif")
+  print(chisq.test(result))
+  #Can remove this line if you want the actual counts
+  result = 100*sweep(result, 2, colSums(result), "/")
+  barplot(result, col = c("#F84C1E", "#232D4B"), main = motif, legend.text = TRUE, args.legend = list(x = "topright", bg = "white", cex = 1.5), cex.axis=1.5, cex.names=1.5)
+  return(result)
+}
+
+motif_overlaps = read.table("Overlaps.txt", header = T, row.names = 1)
+
+pdf("ATAC_GATA5_motif_heatmap_immediate.pdf")
+ImmediatePeaksWithMotif(motif_overlaps, motif = "GATA5_jaspar")
+dev.off()
+
+pdf("ATAC_NR2F2_motif_heatmap_immediate.pdf")
+ImmediatePeaksWithMotif(motif_overlaps, motif = "NR2F2_jaspar")
+dev.off()
+```
+
+## Cluster dynamic peaks (Figure 3E)
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
+setwd(direc)
+
+library(DESeq2)
+library(lattice)
+library(viridis)
+library(DEGreport)
+library(lattice)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(data.table)
+library(MatchIt)
+library(EnhancedVolcano)
+library(pheatmap)
+library(dendsort)
+library(RColorBrewer)
+
+sort_hclust <- function(...) as.hclust(dendsort(as.dendrogram(...)))
+
+x <- read.table("Combined_ATAC_peak_counts.txt", sep = '\t', header = TRUE)
+rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
+peak_name = x[,4]
+peak_qvalue = x[,5]
+x = x[,-c(1:5)]
+colnames(x) = sapply(strsplit(colnames(x), "Clone28_"), "[", 2)
+x = x[,!grepl("24hour", colnames(x))]
+
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 1), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+load("deseq.df.ATAC.no24.Rdata")
+
+load("dds.lrt.ATAC.no24.Rdata")
+res.lrt = results(dds.lrt[peak_qvalue > 100,])
+sum(res.lrt$padj < 0.1 & !is.na(res.lrt$padj))
+
+#Heatmap
+wide_counts = counts(deseq.df[rownames(deseq.df) %in% rownames(res.lrt)[res.lrt$padj < .01 & !is.na(res.lrt$padj)],], normalized = TRUE)
+anno <- data.frame(Time = as.factor(time))
+rownames(anno) = colnames(wide_counts)
+ann_colors = list(
+  Time = c(`0hour` = viridis(5)[1], 
+           `0.5hour` = viridis(5)[2],
+           `1hour` = viridis(5)[3],
+           `2hour` = viridis(5)[4],
+           `4hour` = viridis(5)[5]))
+
+#Move the order of columns to be in time order (legal rotating of the dendrogram)
+cluster_cols = hclust(dist(scale(t(wide_counts))))
+cluster_cols$order = cluster_cols$order[c(1:12, 17:20, 13:16)]
+
+#Change color scale 
+paletteLength <- 50
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+myBreaks <- c(seq(min(scale(t(wide_counts))), 0, length.out=ceiling(paletteLength/2) + 1), 
+              seq(max(scale(t(wide_counts)))/paletteLength, max(scale(t(wide_counts))), length.out=floor(paletteLength/2)))
+
+pdf("ATAC_counts_heatmap_FDR_0.01.pdf", width = 8, height = 5)
+pheatmap(wide_counts, scale = "row", show_rownames = F, show_colnames = F, 
+         color = myColor, breaks=myBreaks,
+         annotation_col = anno, annotation_colors = ann_colors,
+         cluster_cols = cluster_cols)
+dev.off()
+```
+
+## Count GATA motif instances in dynamic peaks across time points (Figure 3F)
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
+setwd(direc)
+
+library(tidyverse)
+library(tidyr)
+library(lattice)
+library(tidyr)
+
+PeaksWithMotif <- function(motif_overlaps, motif)
+{
+  result = motif_overlaps[rownames(motif_overlaps) == motif,]
+  times = c("0.5hour", "1hour", "2hour", "4hour")
+  conditions = c("activated", "activated_matched", "repressed_matched", "repressed")
+  df = as.data.frame(matrix(nrow = length(conditions), ncol = length(times)))
+  colnames(df) = times
+  rownames(df) = conditions
+  for (i in 1:length(times)) {
+    for (j in 1:length(conditions)) {
+      df[j,i] = result[,paste0("X", times[i], "_", conditions[j], "_with")] / 
+        (result[,paste0("X", times[i], "_", conditions[j], "_without")] +
+           result[,paste0("X", times[i], "_", conditions[j], "_with")])
+    }
+  }
+  df = df[-3,]
+  rownames(df) = c("Increased", "Unchanged", "Decreased")
+  colnames(df) = sapply(strsplit(colnames(df), "hour"), "[", 1)
+  df$class = factor(rownames(df), levels = c("Increased", "Unchanged", "Decreased"))
+  df_long <- gather(df, time, Proportion, -class, factor_key=TRUE)
+  print(ggplot(df_long, aes(y = time, x = class, fill = Proportion)) + 
+    geom_tile() +
+    geom_text(aes(label = round(Proportion, 2))) +
+    scale_fill_gradient(low="white", high="black", limits=c(0, 1)) +
+    xlab(NULL) +
+    ylab("Time (hours)")) +
+    theme_bw() +
+    theme(text = element_text(size = 20))
+}
+
+motif_overlaps = read.table("Overlaps.txt", header = T, row.names = 1)
+head(motif_overlaps)
+pdf("ATAC_TRPS1_motif_heatmap_timecourse.pdf", height = 3.5)
+PeaksWithMotif(motif_overlaps, motif = "TRPS1_homer_uniprobe_jaspar_edited.txt")
+dev.off()
+```
+# PRO-seq data pre-processing
+
+## Figure S1
+
+# PRO-seq analysis
+
+## Figure 4A,B
+
+## Figure 4C,D
+
+# Integrative analysis
+
+## Figure 4E,F
+
+## Figure S2
+
+## Figure 5A
+
+## Figure 5B
+
+## Figure 5C
+
+# Outcomes associations
+
+## Figure 6A
+
+## Figure 6B
+
+## Figure 6C
+
+## Figure 6D
+
+## Figure 6E
+
+## Figure 6F
