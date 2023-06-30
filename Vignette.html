@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 29 June 2023</h4>
+<h4 class="date">Last compiled on 30 June 2023</h4>
 
 </div>
 
@@ -726,7 +726,8 @@ function toggle_visibility(id1) {
 <li><a href="#call-peaks" id="toc-call-peaks"><span class="toc-section-number">4.5</span> Call peaks</a></li>
 <li><a href="#count-reads-in-peaks" id="toc-count-reads-in-peaks"><span class="toc-section-number">4.6</span> Count reads in peaks</a></li>
 <li><a href="#call-trps1-peaks-with-the-dtag-samples-as-a-control" id="toc-call-trps1-peaks-with-the-dtag-samples-as-a-control"><span class="toc-section-number">4.7</span> Call TRPS1 peaks with the dTAG samples as a control</a></li>
-<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer"><span class="toc-section-number">4.8</span> Leave the cluster environment, and copy files to your local computer</a></li>
+<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser"><span class="toc-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</a></li>
+<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer"><span class="toc-section-number">4.9</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
 <li><a href="#trps1-chip-seq-analysis" id="toc-trps1-chip-seq-analysis"><span class="toc-section-number">5</span> TRPS1 ChIP-seq analysis</a>
 <ul>
@@ -756,12 +757,17 @@ function toggle_visibility(id1) {
 </ul></li>
 <li><a href="#pro-seq-data-pre-processing" id="toc-pro-seq-data-pre-processing"><span class="toc-section-number">8</span> PRO-seq data pre-processing</a>
 <ul>
-<li><a href="#figure-s1" id="toc-figure-s1"><span class="toc-section-number">8.1</span> Figure S1</a></li>
+<li><a href="#download-and-combined-the-raw-data" id="toc-download-and-combined-the-raw-data"><span class="toc-section-number">8.1</span> Download and combined the raw data</a></li>
+<li><a href="#generate-a-plot-of-quality-control-metrics-figure-s1" id="toc-generate-a-plot-of-quality-control-metrics-figure-s1"><span class="toc-section-number">8.2</span> Generate a plot of quality control metrics (Figure S1)</a></li>
+<li><a href="#process-the-combined-reads" id="toc-process-the-combined-reads"><span class="toc-section-number">8.3</span> Process the combined reads</a></li>
+<li><a href="#generate-combined-scaled-bigwigs-for-visualization-in-the-genome-browser" id="toc-generate-combined-scaled-bigwigs-for-visualization-in-the-genome-browser"><span class="toc-section-number">8.4</span> Generate combined scaled bigWigs for visualization in the genome browser</a></li>
+<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-2"><span class="toc-section-number">8.5</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
 <li><a href="#pro-seq-analysis" id="toc-pro-seq-analysis"><span class="toc-section-number">9</span> PRO-seq analysis</a>
 <ul>
-<li><a href="#clustering-of-dynamic-genes-figure-4ab" id="toc-clustering-of-dynamic-genes-figure-4ab"><span class="toc-section-number">9.1</span> Clustering of dynamic genes (Figure 4A,B)</a></li>
-<li><a href="#over-representation-analysis-figure-4cd" id="toc-over-representation-analysis-figure-4cd"><span class="toc-section-number">9.2</span> Over-representation analysis (Figure 4C,D)</a></li>
+<li><a href="#composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" id="toc-composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g"><span class="toc-section-number">9.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</a></li>
+<li><a href="#clustering-of-dynamic-genes-figure-4ab" id="toc-clustering-of-dynamic-genes-figure-4ab"><span class="toc-section-number">9.2</span> Clustering of dynamic genes (Figure 4A,B)</a></li>
+<li><a href="#over-representation-analysis-figure-4cd" id="toc-over-representation-analysis-figure-4cd"><span class="toc-section-number">9.3</span> Over-representation analysis (Figure 4C,D)</a></li>
 </ul></li>
 <li><a href="#integrative-analysis" id="toc-integrative-analysis"><span class="toc-section-number">10</span> Integrative analysis</a>
 <ul>
@@ -1231,8 +1237,142 @@ echo -e &quot;chr\tstart\tend\tname\tqvalue&quot; | cat - $peaks | \
   paste -d&#39;\t&#39; - *${factor}_peak_counts.txt &gt; Combined_${factor}_peak_counts.txt
 rm T47D_Clone28_*${factor}_peak_counts.txt</code></pre>
 </div>
-<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer" class="section level2" number="4.8">
-<h2><span class="header-section-number">4.8</span> Leave the cluster environment, and copy files to your local computer</h2>
+<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser" class="section level2" number="4.8">
+<h2><span class="header-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</h2>
+<p>First make size factors based on total mapped reads (divide each by the geometric mean of all of them)</p>
+<pre class="bash"><code>cd ${main}/bowtie2
+module load samtools/1.12
+for i in HA ER
+do
+  echo $i
+  &gt; ${i}_header.txt
+  &gt; ${i}_reads.txt
+  for j in T47D_Clone28_${i}_*.bam
+  do
+    echo $j
+    name=$(echo $j | awk -F&quot;.bam&quot; &#39;{print $1}&#39;)
+    echo $name | paste ${i}_header.txt - &gt; ${i}_tmp.txt 
+    mv ${i}_tmp.txt ${i}_header.txt
+    reads=`samtools view -c $j`
+    echo $reads | paste ${i}_reads.txt - &gt; ${i}_tmp.txt 
+    mv ${i}_tmp.txt ${i}_reads.txt
+  done  
+  cat ${i}_header.txt ${i}_reads.txt &gt; ${i}_tmp.txt
+  mv ${i}_tmp.txt ${i}_reads.txt
+  rm ${i}_header.txt
+done </code></pre>
+<p>Combine these into one file</p>
+<pre class="bash"><code>module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
+R
+library(DESeq2)
+setwd(&quot;/scratch/ts2hx/ChIP/results/bowtie2/&quot;)
+samples &lt;- dir(&quot;/scratch/ts2hx/ChIP/results/bowtie2/&quot;, pattern = &quot;_reads.txt&quot;)
+for (i in samples) {
+  x &lt;- read.table(i, sep = &#39;\t&#39;, header = TRUE)[,-1]
+  factor = sapply(strsplit(colnames(x)[1], &quot;_&quot;), &quot;[&quot;, 3)
+  write.table(estimateSizeFactorsForMatrix(x), file = paste0(&quot;/scratch/ts2hx/ChIP/results/bigWigs/&quot;, factor, &#39;_sizeFactor.txt&#39;), quote =F, col.names=F)
+}
+q()</code></pre>
+<p>Generate the binned bigWigs</p>
+<pre class="bash"><code>for i in *.bam
+do
+  name=$(echo $i | awk -F&quot;.bam&quot; &#39;{print $1}&#39;)
+  sbatch -p standard -A gioeli_lab -t 1:00:00 --cpus-per-task=10 --job-name bamCoverage -o ${name}_bamCoverage.log \
+    --export=ALL,name=$name,main=$main --wrap=&quot;module load deeptools/3.5.1 samtools/1.12; samtools index ${name}.bam; \
+    bamCoverage --bam ${name}.bam -o ${main}/bigWigs/${name}_binned_not_scaled.bw -p 10 --extendReads --centerReads;&quot;
+  sleep 1
+done</code></pre>
+<p>The script used in the next code chunk (230329_ChIP_scale_bigWig_binned.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+factor=$2
+directory=$3
+
+PATH=$HOME/bin:$PATH
+
+cd $directory
+
+module load ucsc-tools/3.7.4
+
+name=$(echo $1 | awk -F&quot;_binned_not_scaled.bw&quot; &#39;{print $1}&#39;)
+invscale1=$(grep ${name} ${factor}_sizeFactor.txt | awk -F&quot; &quot; &#39;{print $2}&#39;)
+invscale=$(echo $invscale1 | bc)
+scaletrue=$(bc &lt;&lt;&lt; &quot;scale=4 ; 1.0 / $invscale&quot;)
+name=${name}_binned
+echo $name
+echo $scaletrue
+echo file_to_scale
+echo ${name}_not_scaled.bw
+bigWigToBedGraph ${name}_not_scaled.bw ${name}.bg
+echo normalizing
+normalize_bedGraph.py -i ${name}.bg -s $scaletrue -o ${name}_scaled.bg
+LC_COLLATE=C sort -k1,1 -k2,2n ${name}_scaled.bg &gt; ${name}_scaled_sorted.bg
+cat ${name}_scaled_sorted.bg | grep -v &quot;random&quot; | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | grep -v &quot;chrM&quot;&gt; \
+  ${name}_scaled.bg
+bedGraphToBigWig ${name}_scaled.bg $HOME/hg38/hg38.chrom.sizes ${name}_scaled.bigWig
+rm ${name}_scaled.bg
+rm ${name}_scaled_sorted.bg
+rm ${name}.bg</code></pre>
+<p>Scale the bigWigs based on read depth</p>
+<pre class="bash"><code>#First get the required script and move to a directory that will end up in the $PATH
+wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
+chmod +x normalize_bedGraph.py
+mv normalize_bedGraph.py $HOME/bin/
+
+cd ${main}/bigWigs
+for i in *_binned_not_scaled.bw
+do
+  name=$(echo $i | awk -F&quot;_binned_not_scaled.bw&quot; &#39;{print $1}&#39;)
+  factor=$(echo $name | awk -F&quot;_&quot; &#39;{print $3}&#39;)
+  sbatch -p standard -A gioeli_lab -t 1:00:00 --cpus-per-task=10 --job-name scale_bigWig \
+    -o ../../logs/${name}_bamCoverage.log --wrap=&quot;sh ${scripts}/230329_ChIP_scale_bigWig_binned.sh \
+      ${name}_binned_not_scaled.bw $factor ${main}/bigWigs&quot;
+  sleep 1
+done</code></pre>
+<p>The script used in the next code chunk (230329_ChIP_to_browser_binned.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+directory=$2
+
+PATH=$HOME/bin:$PATH
+
+cd $directory
+
+module load ucsc-tools/3.7.4
+
+name=$(echo $1 | awk -F&quot;T47D_Clone28_&quot; &#39;{print $2}&#39; | awk -F&quot;_rep1&quot; &#39;{print $1}&#39;)
+echo $name
+files=$(ls T47D_Clone28_${name}_rep*_binned_scaled.bigWig)
+echo $files
+echo &quot;track type=bedGraph name=${name} alwaysZero=on visibility=full&quot; &gt; T47D_Clone28_${name}_binned_temp.txt
+count=$(ls T47D_Clone28_${name}_rep*_binned_scaled.bigWig | wc -l | bc)
+scaleall=$(bc &lt;&lt;&lt; &quot;scale=4 ; 1.0 / $count&quot;)
+name=T47D_Clone28_${name}_binned
+echo $count
+echo $scaleall
+bigWigMerge $files ${name}_tmp.bg
+normalize_bedGraph.py -i ${name}_tmp.bg -s $scaleall -o ${name}_scaled.bg
+LC_COLLATE=C sort -k1,1 -k2,2n ${name}_scaled.bg &gt; ${name}_scaled_sorted.bg
+cat ${name}_temp.txt ${name}_scaled_sorted.bg | \
+  grep -v &quot;random&quot; | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | grep -v &quot;chrM&quot; | grep -v &quot;alt&quot; &gt; \
+  ${name}_scaled.bedGraph
+rm ${name}_tmp.bg
+rm ${name}_temp.txt
+rm ${name}_scaled.bg
+rm ${name}_scaled_sorted.bg
+head ${name}_scaled.bedGraph
+bedGraphToBigWig ${name}_scaled.bedGraph $HOME/hg38/hg38.chrom.sizes \
+  ${name}_combined_normalized.bigWig
+gzip ${name}_scaled.bedGraph</code></pre>
+<p>Merge the bigWigs</p>
+<pre class="bash"><code>for i in T47D_Clone28_*_rep1_binned_scaled.bigWig
+do
+  name=$(echo $i | awk -F&quot;_rep1_scaled.bigWig&quot; &#39;{print $1}&#39;)
+  sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --job-name to_browser -o ../../logs/${name}_to_browser.log \
+  --wrap=&quot;sh ${scripts}/230329_ChIP_to_browser_binned.sh $i ${main}/bigWigs&quot;
+  sleep 1
+done</code></pre>
+</div>
+<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer" class="section level2" number="4.9">
+<h2><span class="header-section-number">4.9</span> Leave the cluster environment, and copy files to your local computer</h2>
 <pre class="bash"><code>exit
 exit
 
@@ -1243,9 +1383,10 @@ scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/fastqc/ .
 scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/macs2/*_summit* macs2/
 scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/macs2/*peaks.narrowPeak macs2/
 scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/counts/Combined* counts/
-scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*HA_*_not_scaled.bw bigWigs/
-scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*ER_*_not_scaled.bw bigWigs/
-scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*IgG_*_not_scaled.bw bigWigs/</code></pre>
+scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*_not_scaled.bw bigWigs/
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_binned_scaled.bedGraph.gz bigWigs/
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_binned_combined_normalized.bigWig bigWigs/
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_sizeFactor.txt counts/</code></pre>
 </div>
 </div>
 <div id="trps1-chip-seq-analysis" class="section level1" number="5">
@@ -2018,14 +2159,487 @@ dev.off()</code></pre>
 </div>
 <div id="pro-seq-data-pre-processing" class="section level1" number="8">
 <h1><span class="header-section-number">8</span> PRO-seq data pre-processing</h1>
-<div id="figure-s1" class="section level2" number="8.1">
-<h2><span class="header-section-number">8.1</span> Figure S1</h2>
+<p>For the initial basic processing steps, we used a pipeline we have thoroughly described elsewhere (<a href="https://github.com/guertinlab/Nascent_RNA_Methods" class="uri">https://github.com/guertinlab/Nascent_RNA_Methods</a>). Please see the above GitHub repository for detailed explanations of the steps, as well as software dependencies and preprocessing steps (e.g., gene annotation file downloads).</p>
+<div id="download-and-combined-the-raw-data" class="section level2" number="8.1">
+<h2><span class="header-section-number">8.1</span> Download and combined the raw data</h2>
+<p>We sequenced the libraries 3 times, first on a NextSeq2000, and the next 2 on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first put each sequencing run into its own folder.</p>
+<pre class="bash"><code>cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO/
+scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO/
+
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
+
+cd /scratch/ts2hx/TRPS1_timecourse_PRO/
+
+#Move everything out of subfolders and remove the folders
+mv */* .
+rm -r *_L1-ds.*
+
+#Rename
+for i in *_R1_001.fastq.gz
+do
+name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
+echo $name
+hyphenless=${name//-/_}
+echo $hyphenless
+newname=${hyphenless//05hour/0.5hour}
+echo $newname
+mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
+mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
+done</code></pre>
+<p>Run 2:</p>
+<pre class="bash"><code>cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_2/
+scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_2</code></pre>
+<p>Run 3:</p>
+<pre class="bash"><code>scp /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_3.zip ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
+
+cd /scratch/ts2hx/
+unzip TRPS1_timecourse_PRO_3.zip
+mkdir -p TRPS1_timecourse_PRO_3
+mv *.fastq.gz TRPS1_timecourse_PRO_3/
+rm TRPS1_timecourse_PRO_3.zip
+
+cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
+
+#Rename
+for i in *05hour*
+do
+  prefix=$(echo $i | awk -F&quot;_05hour_&quot; &#39;{print $1}&#39;)
+  suffix=$(echo $i | awk -F&quot;_05hour_&quot; &#39;{print $2}&#39;)
+  mv $i ${prefix}_0.5hour_${suffix}
+done</code></pre>
+<p>The script used in the next code chunk (220927_tallymer_generation.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+
+module load genometools/1.5.10
+read_size=40
+genome=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa
+
+mkdir -p $HOME/seqOutBias
+cd $HOME/seqOutBias
+$HOME/bin/seqOutBias seqtable $genome --read-size=$read_size</code></pre>
+<p>Make the required intermediate files for use with seqOutBias later</p>
+<pre class="bash"><code>sbatch -p largemem -A gioeli_lab -t 1-00:00:00 --job-name tallymer -o tallymer.log \
+    /scratch/ts2hx/scripts/220927_tallymer_generation.sh</code></pre>
+<p>Combine the NextSeq550 reads to generate representative quality control metrics</p>
+<pre class="bash"><code>for i in *_R1_001.fastq.gz
+do
+  name=$(echo $i | awk -F&quot;_S&quot; &#39;{print $1}&#39;)
+  cat ../TRPS1_timecourse_PRO_2/${name}_PE1.fastq.gz $i &gt; ${name}_NextSeq550_PE1.fastq.gz
+  cat ../TRPS1_timecourse_PRO_2/${name}_PE2.fastq.gz ${name}_*_R2_001.fastq.gz &gt; ${name}_NextSeq550_PE2.fastq.gz
+done</code></pre>
+<p>Combine all reads for use in downstream analysis</p>
+<pre class="bash"><code>for i in *_R1_001.fastq.gz
+do
+  name=$(echo $i | awk -F&quot;_S&quot; &#39;{print $1}&#39;)
+  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE1.fastq.gz $i &gt; ${name}_combined_PE1.fastq.gz
+  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE2.fastq.gz ${name}_*_R2_001.fastq.gz &gt; ${name}_combined_PE2.fastq.gz
+done</code></pre>
+</div>
+<div id="generate-a-plot-of-quality-control-metrics-figure-s1" class="section level2" number="8.2">
+<h2><span class="header-section-number">8.2</span> Generate a plot of quality control metrics (Figure S1)</h2>
+<p>The script used in the next code chunk (220927_PROseq_analysis_on_input_file.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+UMI_length=8
+read_size=40
+cores=$SLURM_CPUS_PER_TASK
+annotation_prefix=$HOME/gene_annotations/Homo_sapiens.GRCh38.104 
+genome_index=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome
+prealign_rdna_index=$HOME/human_rDNA/human_rDNA
+tallymer=$HOME/seqOutBias/genome.tal_${read_size}.gtTxt.gz
+table=$HOME/seqOutBias/genome_${read_size}.4.2.2.tbl
+
+module load cutadapt/3.4
+module load intel/18.0 intelmpi/18.0 R/4.1.1
+module load gcc/9.2.0 bowtie2/2.2.9 
+module load samtools/1.12
+module load wigtobigwig/2.8
+module load bedtools/2.29.2
+module load pigz/2.4
+
+PATH=$HOME/bin:$PATH
+
+echo $name
+gunzip ${name}_PE1.fastq.gz
+gunzip ${name}_PE2.fastq.gz
+echo &#39;removing dual adapter ligations and calculating the fraction of adapter/adapters in&#39; $name
+cutadapt --cores=$cores -m $((UMI_length+2)) -O 1 -a TGGAATTCTCGGGTGCCAAGG ${name}_PE1.fastq \
+    -o ${name}_PE1_noadap.fastq --too-short-output ${name}_PE1_short.fastq &gt; ${name}_PE1_cutadapt.txt
+cutadapt --cores=$cores -m $((UMI_length+10)) -O 1 -a GATCGTCGGACTGTAGAACTCTGAAC ${name}_PE2.fastq \
+    -o ${name}_PE2_noadap.fastq --too-short-output ${name}_PE2_short.fastq &gt; ${name}_PE2_cutadapt.txt
+PE1_total=$(wc -l ${name}_PE1.fastq | awk &#39;{print $1/4}&#39;)
+PE1_w_Adapter=$(wc -l ${name}_PE1_short.fastq | awk &#39;{print $1/4}&#39;)
+AAligation=$(echo &quot;scale=2 ; $PE1_w_Adapter / $PE1_total&quot; | bc)
+echo -e  &quot;value\texperiment\tthreshold\tmetric&quot; &gt; ${name}_QC_metrics.txt
+echo -e &quot;$AAligation\t$name\t0.80\tAdapter/Adapter&quot; &gt;&gt; ${name}_QC_metrics.txt
+echo &#39;removing short RNA insertions in&#39; $name
+seqtk seq -L $((UMI_length+10)) ${name}_PE1_noadap.fastq &gt; ${name}_PE1_noadap_trimmed.fastq
+echo &#39;removing PCR duplicates from&#39; $name
+fqdedup -i ${name}_PE1_noadap_trimmed.fastq -o ${name}_PE1_dedup.fastq
+PE1_noAdapter=$(wc -l ${name}_PE1_dedup.fastq | awk &#39;{print $1/4}&#39;)
+fastq_pair -t $PE1_noAdapter ${name}_PE1_dedup.fastq ${name}_PE2_noadap.fastq
+echo &#39;calculating and plotting RNA insert sizes from&#39; $name
+flash -q --compress-prog=gzip --suffix=gz ${name}_PE1_dedup.fastq.paired.fq \
+    ${name}_PE2_noadap.fastq.paired.fq -o ${name}
+insert_size.R ${name}.hist ${UMI_length}
+echo &#39;trimming off the UMI from&#39; $name
+seqtk trimfq -b ${UMI_length} ${name}_PE1_dedup.fastq | seqtk seq -r - &gt; ${name}_PE1_processed.fastq
+seqtk trimfq -e ${UMI_length} ${name}_PE2_noadap.fastq | seqtk seq -r - &gt; ${name}_PE2_processed.fastq
+echo &#39;aligning&#39; $name &#39;to rDNA and removing aligned reads&#39;
+bowtie2 -p $((cores-2)) -x $prealign_rdna_index -U ${name}_PE1_processed.fastq 2&gt;${name}_bowtie2_rDNA.log | \
+    samtools sort -n - | samtools fastq -f 0x4 - &gt; ${name}_PE1.rDNA.fastq
+reads=$(wc -l ${name}_PE1.rDNA.fastq | awk &#39;{print $1/4}&#39;)
+fastq_pair -t $reads ${name}_PE1.rDNA.fastq ${name}_PE2_processed.fastq
+echo &#39;aligning&#39; $name &#39;to the genome&#39;
+bowtie2 -p $((cores-2)) --maxins 1000 -x $genome_index --rf -1 ${name}_PE1.rDNA.fastq.paired.fq \
+    -2 ${name}_PE2_processed.fastq.paired.fq 2&gt;${name}_bowtie2.log | \
+    samtools view -b - | samtools sort - -o ${name}.bam
+PE1_prior_rDNA=$(wc -l ${name}_PE1_processed.fastq | awk &#39;{print $1/4}&#39;)
+PE1_post_rDNA=$(wc -l ${name}_PE1.rDNA.fastq | awk &#39;{print $1/4}&#39;)
+total_rDNA=$(echo &quot;$(($PE1_prior_rDNA-$PE1_post_rDNA))&quot;)
+concordant_pe1=$(samtools view -c -f 0x42 ${name}.bam)
+total=$(echo &quot;$(($concordant_pe1+$total_rDNA))&quot;)
+rDNA_alignment=$(echo &quot;scale=2 ; $total_rDNA / $total&quot; | bc)
+echo -e &quot;$rDNA_alignment\t$name\t0.10\trDNA Alignment Rate&quot; &gt;&gt; ${name}_QC_metrics.txt
+map_pe1=$(samtools view -c -f 0x42 ${name}.bam)
+pre_alignment=$(wc -l ${name}_PE1.rDNA.fastq.paired.fq | awk &#39;{print $1/4}&#39;)
+alignment_rate=$(echo &quot;scale=2 ; $map_pe1 / $pre_alignment&quot; | bc)
+echo -e &quot;$alignment_rate\t$name\t0.80\tAlignment Rate&quot; &gt;&gt; ${name}_QC_metrics.txt
+echo &#39;plotting and calculating complexity for&#39; $name
+fqComplexity -i ${name}_PE1_noadap_trimmed.fastq
+echo &#39;calculating and plotting theoretical sequencing depth&#39;
+echo &#39;to achieve a defined number of concordantly aligned reads for&#39; $name
+PE1_total=$(wc -l ${name}_PE1.fastq | awk &#39;{print $1/4}&#39;)
+PE1_noadap_trimmed=$(wc -l ${name}_PE1_noadap_trimmed.fastq | awk &#39;{print $1/4}&#39;)
+factorX=$(echo &quot;scale=2 ; $PE1_noadap_trimmed / $PE1_total&quot; | bc)
+echo fraction of reads that are not adapter/adapter ligation products or below 10 base inserts
+echo $factorX
+PE1_dedup=$(wc -l ${name}_PE1_dedup.fastq | awk &#39;{print $1/4}&#39;)
+factorY=$(echo &quot;scale=2 ; $concordant_pe1 / $PE1_dedup&quot; | bc)
+fqComplexity -i ${name}_PE1_noadap_trimmed.fastq -x $factorX -y $factorY
+echo &#39;Separating paired end reads and creating genomic BED and bigWig intensity files for&#39; $name
+mkdir ${name}_seqOutBias
+cd ${name}_seqOutBias
+seqOutBias scale $table ../${name}.bam --no-scale --stranded --bed-stranded-positive --only-paired --tail-edge \
+    --bw=$name.bigWig --bed=$name.bed --out-split-pairends --read-size=$read_size --tallymer=$tallymer
+cd ..
+mv ${name}_seqOutBias/${name}* .
+rm -r ${name}_seqOutBias
+grep -v &quot;random&quot; ${name}_not_scaled_PE1.bed | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | sort -k1,1 -k2,2n &gt; \
+    ${name}_tmp.txt &amp;&amp; mv ${name}_tmp.txt ${name}_not_scaled_PE1.bed 
+mapBed -null &quot;0&quot; -s -a $annotation_prefix.pause.bed -b ${name}_not_scaled_PE1.bed | \
+    awk &#39;$7&gt;0&#39; | sort -k5,5 -k7,7nr | sort -k5,5 -u &gt; ${name}_pause.bed
+join -1 5 -2 5 ${name}_pause.bed $annotation_prefix.bed | \
+    awk &#39;{OFS=&quot;\t&quot;;} $2==$8 &amp;&amp; $6==$12 {print $2, $3, $4, $1, $6, $7, $9, $10}&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} $5 == &quot;+&quot; {print $1,$2+480,$8,$4,$6,$5} $5 == &quot;-&quot; {print $1,$7,$2 - 380,$4,$6,$5}&#39; | \
+    awk  &#39;{OFS=&quot;\t&quot;;} $3&gt;$2 {print $1,$2,$3,$4,$5,$6}&#39; | \
+    sort -k1,1 -k2,2n &gt; ${name}_pause_counts_body_coordinates.bed
+mapBed -null &quot;0&quot; -s -a ${name}_pause_counts_body_coordinates.bed -b ${name}_not_scaled_PE1.bed | \
+    awk &#39;$7&gt;0&#39; | awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$4,$5,$6,$7,$5/100,$7/($3 - $2)}&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$4,$5,$6,$7,$8,$9,$8/$9}&#39; &gt; ${name}_pause_body.bed
+pause_index.R ${name}_pause_body.bed
+echo &#39;Calculating exon density / intron density as a metric for nascent RNA purity for&#39; $name
+mapBed -null &quot;0&quot; -s -a $annotation_prefix.introns.bed -b ${name}_not_scaled_PE1.bed | awk &#39;$7&gt;0&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$5,$5,$6,$7,($3 - $2)}&#39; &gt; ${name}_intron_counts.bed
+mapBed -null &quot;0&quot; -s -a $annotation_prefix.no.first.exons.named.bed -b ${name}_not_scaled_PE1.bed | awk &#39;$7&gt;0&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$4,$4,$6,$7,($3 - $2)}&#39; &gt; ${name}_exon_counts.bed
+exon_intron_ratio.R ${name}_exon_counts.bed ${name}_intron_counts.bed
+echo &#39;Counting reads in genes for&#39; $name
+echo -e &quot;\t${name}&quot; &gt; ${name}_gene_counts.txt
+mapBed -null &quot;0&quot; -s -a ${annotation_prefix}_sorted.bed -b ${name}_not_scaled_PE1.bed | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $4,$7}&#39; &gt;&gt; ${name}_gene_counts.txt
+rm ${name}_PE1_short.fastq
+rm ${name}_PE2_short.fastq
+rm ${name}_PE1_noadap.fastq
+rm ${name}_PE2_noadap.fastq
+rm ${name}_PE1_noadap_trimmed.fastq
+rm ${name}_PE1_dedup.fastq
+rm ${name}_PE1_processed.fastq
+rm ${name}_PE2_processed.fastq
+rm ${name}_PE1_dedup.fastq.paired.fq
+rm ${name}_PE2_noadap.fastq.paired.fq
+rm ${name}_PE1_dedup.fastq.single.fq
+rm ${name}_PE2_noadap.fastq.single.fq
+rm ${name}_PE1.rDNA.fastq.paired.fq
+rm ${name}_PE1.rDNA.fastq.single.fq
+rm ${name}_PE2_processed.fastq.paired.fq
+rm ${name}_PE2_processed.fastq.single.fq
+rm ${name}.extendedFrags.fastq.gz
+rm ${name}.notCombined_1.fastq.gz
+rm ${name}.notCombined_2.fastq.gz
+pigz ${name}_PE1.fastq
+pigz ${name}_PE2.fastq</code></pre>
+<p>Wait for these jobs to finish before proceeding</p>
+<pre class="bash"><code>for i in *_NextSeq550_PE1.fastq.gz
+do
+  name=`basename $i _PE1.fastq.gz`
+  sbatch -p standard -A gioeli_lab -t 4:00:00 -N 1 -n 1 --cpus-per-task=20 \
+    --job-name proseq-analysis -o ${name}_proseq.log --export=ALL,i=$i,name=$name \
+    /scratch/ts2hx/scripts/220927_PROseq_analysis_on_input_file.sh
+  sleep 1
+done</code></pre>
+<p>Plot</p>
+<pre class="bash"><code>module load intel/18.0 intelmpi/18.0 R/4.1.1
+PATH=$HOME/bin:$PATH
+rm TRPS1_timecourse_PRO_NextSeq550_QC_metrics.txt
+cat *QC_metrics.txt | awk &#39;!x[$0]++&#39; &gt; TRPS1_timecourse_PRO_NextSeq550_QC_metrics.txt 
+plot_all_metrics.R TRPS1_timecourse_PRO_NextSeq550_QC_metrics.txt TRPS1_timecourse_PRO_NextSeq550
+paste -d&#39;\t&#39; *NextSeq550_gene_counts.txt &gt; TRPS1_timecourse_PRO_gene_counts_NextSeq550.txt</code></pre>
+</div>
+<div id="process-the-combined-reads" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> Process the combined reads</h2>
+<p>The script used in the next code chunk (220928_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+UMI_length=8
+read_size=40
+cores=$SLURM_CPUS_PER_TASK
+annotation_prefix=$HOME/gene_annotations/Homo_sapiens.GRCh38.104 
+genome_index=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome
+prealign_rdna_index=$HOME/human_rDNA/human_rDNA
+tallymer=$HOME/seqOutBias/genome.tal_${read_size}.gtTxt.gz
+table=$HOME/seqOutBias/genome_${read_size}.4.2.2.tbl
+
+module load cutadapt/3.4
+module load intel/18.0 intelmpi/18.0 R/4.1.1
+module load gcc/9.2.0 bowtie2/2.2.9
+module load samtools/1.12
+module load wigtobigwig/2.8
+module load bedtools/2.29.2
+module load pigz/2.4
+
+PATH=$HOME/bin:$PATH
+
+echo $name
+gunzip ${name}_PE1.fastq.gz
+gunzip ${name}_PE2.fastq.gz
+echo &#39;removing dual adapter ligations and calculating the fraction of adapter/adapters in&#39; $name
+cutadapt --cores=$cores -m $((UMI_length+10)) -l 48 -O 1 -a TGGAATTCTCGGGTGCCAAGG ${name}_PE1.fastq \
+    -o ${name}_PE1_noadap_trimmed.fastq
+cutadapt --cores=$cores -m $((UMI_length+10)) -O 1 -a GATCGTCGGACTGTAGAACTCTGAAC ${name}_PE2.fastq \
+    -o ${name}_PE2_noadap.fastq
+pigz ${name}_PE1.fastq
+pigz ${name}_PE2.fastq
+echo &#39;removing PCR duplicates from&#39; $name
+fqdedup -i ${name}_PE1_noadap_trimmed.fastq -o ${name}_PE1_dedup.fastq
+rm ${name}_PE1_noadap_trimmed.fastq
+echo &#39;trimming off the UMI from&#39; $name
+seqtk trimfq -b ${UMI_length} ${name}_PE1_dedup.fastq | seqtk seq -r - &gt; ${name}_PE1_processed.fastq
+seqtk trimfq -e ${UMI_length} ${name}_PE2_noadap.fastq | seqtk seq -r - &gt; ${name}_PE2_processed.fastq
+rm ${name}_PE2_noadap.fastq
+rm ${name}_PE1_dedup.fastq
+echo &#39;aligning&#39; $name &#39;to rDNA and removing aligned reads&#39;
+bowtie2 -p $((cores-2)) -x $prealign_rdna_index -U ${name}_PE1_processed.fastq 2&gt;${name}_bowtie2_rDNA.log | \
+    samtools sort -n - | samtools fastq -f 0x4 - &gt; ${name}_PE1.rDNA.fastq
+rm ${name}_PE1_processed.fastq
+reads=$(wc -l ${name}_PE1.rDNA.fastq | awk &#39;{print $1/4}&#39;)
+fastq_pair -t $reads ${name}_PE1.rDNA.fastq ${name}_PE2_processed.fastq
+rm ${name}_PE1.rDNA.fastq
+rm ${name}_PE2_processed.fastq
+rm ${name}_PE1.rDNA.fastq.single.fq
+rm ${name}_PE2_processed.fastq.single.fq
+echo &#39;aligning&#39; $name &#39;to the genome&#39;
+bowtie2 -p $((cores-2)) --maxins 1000 -x $genome_index --rf -1 ${name}_PE1.rDNA.fastq.paired.fq \
+    -2 ${name}_PE2_processed.fastq.paired.fq 2&gt;${name}_bowtie2.log | \
+    samtools view -b - | samtools sort - -o ${name}.bam
+rm ${name}_PE1.rDNA.fastq.paired.fq
+rm ${name}_PE2_processed.fastq.paired.fq
+echo &#39;Separating paired end reads and creating genomic BED and bigWig intensity files for&#39; $name
+mkdir ${name}_seqOutBias
+cd ${name}_seqOutBias
+seqOutBias scale $table ../${name}.bam --no-scale --stranded --bed-stranded-positive --only-paired --tail-edge \
+    --bw=$name.bigWig --bed=$name.bed --out-split-pairends --read-size=$read_size --tallymer=$tallymer
+cd ..
+mv ${name}_seqOutBias/${name}* .
+rm -r ${name}_seqOutBias
+grep -v &quot;random&quot; ${name}_not_scaled_PE1.bed | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | sort -k1,1 -k2,2n &gt; \
+    ${name}_tmp.txt &amp;&amp; mv ${name}_tmp.txt ${name}_not_scaled_PE1.bed 
+echo &#39;Counting reads in genes for&#39; $name
+echo -e &quot;\t${name}&quot; &gt; ${name}_gene_counts.txt
+mapBed -null &quot;0&quot; -s -a ${annotation_prefix}_sorted.bed -b ${name}_not_scaled_PE1.bed | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $4,$7}&#39; &gt;&gt; ${name}_gene_counts.txt</code></pre>
+<p>Wait for these jobs to finish before proceeding</p>
+<pre class="bash"><code>for i in *_combined_PE1.fastq.gz
+do
+  name=`basename $i _PE1.fastq.gz`
+  sbatch -p standard -A gioeli_lab -t 4:00:00 -N 1 -n 1 --cpus-per-task=20 \
+    --job-name proseq-analysis -o ${name}_proseq.log --export=ALL,i=$i,name=$name \
+    /scratch/ts2hx/scripts/220928_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh
+  sleep 1
+done
+
+Combine the reads into one file
+</code></pre>
+<pre class="bash"><code>paste -d&#39;\t&#39; *combined_gene_counts.txt &gt; TRPS1_timecourse_PRO_gene_counts_combined.txt</code></pre>
+</div>
+<div id="generate-combined-scaled-bigwigs-for-visualization-in-the-genome-browser" class="section level2" number="8.4">
+<h2><span class="header-section-number">8.4</span> Generate combined scaled bigWigs for visualization in the genome browser</h2>
+<p>The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+module load samtools/1.12 deeptools/3.5.1 
+
+name=$(echo $1 | awk -F&quot;.bam&quot; &#39;{print $1}&#39;)
+
+# include reads that are 1st in a pair (64) and properly paired (2);
+# exclude reads that are mapped to the reverse strand (16)
+samtools view -b -f 66 -F 16 ${name}.bam &gt; ${name}.fwd1.bam
+
+# include reads that are mapped to the reverse strand (16),
+# second in a pair (128), and properly paired (2)
+samtools view -b -f 146 ${name}.bam &gt; ${name}.fwd2.bam
+
+# combine the temporary files
+samtools merge -f ${name}.fwd.bam ${name}.fwd1.bam ${name}.fwd2.bam
+
+# index the filtered BAM file
+samtools index ${name}.fwd.bam
+
+# run bamCoverage
+bamCoverage --bam ${name}.fwd.bam -bs 10 -p 10 -e --normalizeUsing BPM -o ${name}_whole_fragment_plus_scaled.bigWig
+
+# remove the temporary files
+rm ${name}.fwd*
+
+
+# include reads that are 2nd in a pair (128) and properly paired (2);
+# exclude reads that are mapped to the reverse strand (16)
+samtools view -b -f 130 -F 16 ${name}.bam &gt; ${name}.rev1.bam
+
+# include reads that are mapped to the reverse strand (16),
+# first in a pair (64), and properly paired (2)
+samtools view -b -f 82 ${name}.bam &gt; ${name}.rev2.bam
+
+# combine the temporary files
+samtools merge -f ${name}.rev.bam ${name}.rev1.bam ${name}.rev2.bam
+
+# index the filtered BAM file
+samtools index ${name}.rev.bam
+
+# run bamCoverage
+bamCoverage --bam ${name}.rev.bam -bs 10 -p 10 -e --normalizeUsing BPM -o ${name}_whole_fragment_minus_scaled.bigWig  
+
+# remove the temporary files
+rm ${name}.rev*</code></pre>
+<p>Generate individual bigWigs normalized by read depth (have to break it up by strand)</p>
+<pre class="bash"><code>for i in *_combined.bam
+do
+  name=$(echo $i | awk -F&quot;.bam&quot; &#39;{print $1}&#39;)
+  sbatch -p standard -A gioeli_lab -t 1:00:00 --cpus-per-task=10 --job-name bamCoverage -o ${name}_bamCoverage.log \
+    --wrap=&quot;sh /scratch/ts2hx/scripts/230403_PRO_scale_bigWig_whole_fragment.sh $i&quot;
+  sleep 1
+done</code></pre>
+<p>The script used in the next code chunk (230403_PRO_to_browser_whole_fragment.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+directory=/scratch/$USER/TRPS1_timecourse_PRO_3
+
+PATH=$HOME/bin:$PATH
+
+cd $directory
+
+module load ucsc-tools/3.7.4
+
+name=$(echo $1 | awk -F&quot;T47D_Clone28_&quot; &#39;{print $2}&#39; | awk -F&quot;_rep2&quot; &#39;{print $1}&#39;)
+strand=$(echo $1 | awk -F&quot;rep2_combined_whole_fragment_&quot; &#39;{print $2}&#39; | awk -F&quot;_scaled.bigWig&quot; &#39;{print $1}&#39;)
+echo $name
+echo $strand
+files=$(ls T47D_Clone28_${name}_rep*_combined_whole_fragment_${strand}_scaled.bigWig)
+echo $files
+if [ &quot;$strand&quot; == &quot;plus&quot; ]
+then
+echo &quot;track type=bedGraph name=T47D_PRO_${name}_plus color=255,0,0 alwaysZero=on visibility=full&quot; &gt; T47D_${name}_${strand}_temp.txt
+fi
+if [ &quot;$strand&quot; == &quot;minus&quot; ]
+then
+echo &quot;track type=bedGraph name=T47D_PRO_${name}_minus color=0,0,255 alwaysZero=on visibility=full&quot; &gt; T47D_${name}_${strand}_temp.txt
+fi
+count=$(ls T47D_Clone28_${name}_rep*_combined_whole_fragment_${strand}_scaled.bigWig | wc -l | bc)
+scaleall=$(bc &lt;&lt;&lt; &quot;scale=4 ; 1.0 / $count&quot;)
+echo $count
+echo $scaleall
+name=T47D_${name}
+bigWigMerge $files ${name}_${strand}_tmp.bg
+normalize_bedGraph.py -i ${name}_${strand}_tmp.bg -s $scaleall -o ${name}_${strand}_scaled.bg
+LC_COLLATE=C sort -k1,1 -k2,2n ${name}_${strand}_scaled.bg &gt; ${name}_${strand}_scaled_sorted.bg
+cat ${name}_${strand}_temp.txt ${name}_${strand}_scaled_sorted.bg | \
+  grep -v &quot;random&quot; | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | grep -v &quot;chrM&quot; | grep -v &quot;alt&quot; &gt; \
+  ${name}_${strand}_scaled.bedGraph
+rm ${name}_${strand}_tmp.bg
+rm ${name}_${strand}_temp.txt
+rm ${name}_${strand}_scaled.bg
+rm ${name}_${strand}_scaled_sorted.bg
+head ${name}_${strand}_scaled.bedGraph
+bedGraphToBigWig ${name}_${strand}_scaled.bedGraph hg38.chrom.sizes ${name}_${strand}_combined_normalized.bigWig
+gzip -f ${name}_${strand}_scaled.bedGraph</code></pre>
+<p>Merge the bigWigs into one composite per condition</p>
+<pre class="bash"><code>for i in T47D_Clone28_*_rep2_combined_whole_fragment_*_scaled.bigWig
+do
+  name=$(echo $i | awk -F&quot;_scaled.bigWig&quot; &#39;{print $1}&#39;)
+  sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --job-name to_browser -o ${name}_to_browser.log \
+  --wrap=&quot;sh /scratch/ts2hx/scripts/230403_PRO_to_browser_whole_fragment.sh $i&quot;
+  sleep 1
+done</code></pre>
+</div>
+<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" class="section level2" number="8.5">
+<h2><span class="header-section-number">8.5</span> Leave the cluster environment, and copy files to your local computer</h2>
+<pre class="bash"><code>exit
+exit
+
+mkdir -p ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/
+
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*.pdf .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_NextSeq550_QC_metrics.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_NextSeq550.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_combined.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_scaled.bedGraph.gz .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_combined_normalized.bigWig .</code></pre>
 </div>
 </div>
 <div id="pro-seq-analysis" class="section level1" number="9">
 <h1><span class="header-section-number">9</span> PRO-seq analysis</h1>
-<div id="clustering-of-dynamic-genes-figure-4ab" class="section level2" number="9.1">
-<h2><span class="header-section-number">9.1</span> Clustering of dynamic genes (Figure 4A,B)</h2>
+<div id="composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</h2>
+<pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=20 --time=12:00:00
+main=/scratch/ts2hx/ChIP/results
+cd $main
+mkdir -p heatmaps
+cd heatmaps
+
+module load deeptools/3.5.1
+
+awk &#39;$5 &gt; 30&#39; /scratch/ts2hx/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed &gt; \
+  Functional_TRPS1_summits.bed
+
+computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
+  -R Functional_TRPS1_summits.bed \
+  -S /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_DMSO_combined_normalized.bigWig \
+  /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_dTAG_combined_normalized.bigWig \
+  -o matrix_HA_ChIP_TRPS1_peaks.gz --outFileSortedRegions TRPS1_peaks_sorted_for_heatmap.bed
+  
+computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
+  -R TRPS1_peaks_sorted_for_heatmap.bed \
+  -S /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0hour_plus_combined_normalized.bigWig \
+  /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0hour_minus_combined_normalized.bigWig \
+  /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0.5hour_plus_combined_normalized.bigWig \
+  /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0.5hour_minus_combined_normalized.bigWig \
+  -o matrix_PRO_TRPS1_peaks.gz
+
+plotProfile -m matrix_PRO_TRPS1_peaks.gz -out profile_PRO_TRPS1_peaks.pdf \
+    --regionsLabel &quot;Functional TRPS1 peaks&quot; --perGroup --colors &quot;#8B0000&quot; &quot;#00008B&quot; &quot;#FF7F7F&quot; &quot;#7F7FFF&quot; \
+    --samplesLabel &quot;DMSO plus strand&quot; &quot;DMSO minus strand&quot; &quot;dTAG plus strand&quot; &quot;dTAG minus strand&quot; 
+      
+exit
+exit
+
+#Copy files
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
+scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .</code></pre>
+</div>
+<div id="clustering-of-dynamic-genes-figure-4ab" class="section level2" number="9.2">
+<h2><span class="header-section-number">9.2</span> Clustering of dynamic genes (Figure 4A,B)</h2>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
 
@@ -2260,8 +2874,8 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 )
 dev.off()</code></pre>
 </div>
-<div id="over-representation-analysis-figure-4cd" class="section level2" number="9.2">
-<h2><span class="header-section-number">9.2</span> Over-representation analysis (Figure 4C,D)</h2>
+<div id="over-representation-analysis-figure-4cd" class="section level2" number="9.3">
+<h2><span class="header-section-number">9.3</span> Over-representation analysis (Figure 4C,D)</h2>
 <pre class="r bg-info"><code>genes = plot.df.pro$genes[(plot.df.pro$supercluster == &quot;Gradual Decrease&quot; | plot.df.pro$supercluster == &quot;Transient Decrease&quot;) &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
 m_t2g &lt;- msigdbr(species = &quot;Homo sapiens&quot;, category = &quot;H&quot;) %&gt;% 
   dplyr::select(gs_name, ensembl_gene)
@@ -2401,6 +3015,7 @@ dev.off()</code></pre>
 </div>
 <div id="identification-of-er-target-genes-figure-s2" class="section level2" number="10.2">
 <h2><span class="header-section-number">10.2</span> Identification of ER target genes (Figure S2)</h2>
+<p>I used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: <a href="https://github.com/guertinlab/Nascent_RNA_Methods" class="uri">https://github.com/guertinlab/Nascent_RNA_Methods</a>.</p>
 <pre class="r bg-info"><code>setwd(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R&quot;)
 
 library(lattice)
