@@ -1133,8 +1133,6 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_siz
 
 # ATAC-seq analysis
 
-#Now run 230417_ATAC_DESeq_to_AME.R (I usually do this interactively locally) to get the peak sets for AME
-
 ## Identify differentially accessible peaks with DESeq2 (Figure 3A)
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
@@ -1239,7 +1237,7 @@ do
 done
 ```
 
-## Idenitify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)
+## Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/
