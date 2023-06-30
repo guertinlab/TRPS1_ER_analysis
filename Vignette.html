@@ -750,7 +750,7 @@ function toggle_visibility(id1) {
 <ul>
 <li><a href="#identify-differentially-accessible-peaks-with-deseq2-figure-3a" id="toc-identify-differentially-accessible-peaks-with-deseq2-figure-3a"><span class="toc-section-number">7.1</span> Identify differentially accessible peaks with DESeq2 (Figure 3A)</a></li>
 <li><a href="#de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b" id="toc-de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b"><span class="toc-section-number">7.2</span> de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)</a></li>
-<li><a href="#idenitify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" id="toc-idenitify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2"><span class="toc-section-number">7.3</span> Idenitify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</a></li>
+<li><a href="#identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" id="toc-identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2"><span class="toc-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</a></li>
 <li><a href="#count-individual-motif-instances-in-dynamic-peaks-at-30-minutes-figure-3cd" id="toc-count-individual-motif-instances-in-dynamic-peaks-at-30-minutes-figure-3cd"><span class="toc-section-number">7.4</span> Count individual motif instances in dynamic peaks at 30 minutes (Figure 3C,D)</a></li>
 <li><a href="#cluster-dynamic-peaks-figure-3e" id="toc-cluster-dynamic-peaks-figure-3e"><span class="toc-section-number">7.5</span> Cluster dynamic peaks (Figure 3E)</a></li>
 <li><a href="#count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f" id="toc-count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f"><span class="toc-section-number">7.6</span> Count GATA motif instances in dynamic peaks across time points (Figure 3F)</a></li>
@@ -1787,7 +1787,6 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_siz
 </div>
 <div id="atac-seq-analysis" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> ATAC-seq analysis</h1>
-<p>#Now run 230417_ATAC_DESeq_to_AME.R (I usually do this interactively locally) to get the peak sets for AME</p>
 <div id="identify-differentially-accessible-peaks-with-deseq2-figure-3a" class="section level2" number="7.1">
 <h2><span class="header-section-number">7.1</span> Identify differentially accessible peaks with DESeq2 (Figure 3A)</h2>
 <pre class="r bg-info"><code>direc = &#39;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/&#39;
@@ -1888,8 +1887,8 @@ do
     ${name}.fasta
 done</code></pre>
 </div>
-<div id="idenitify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" class="section level2" number="7.3">
-<h2><span class="header-section-number">7.3</span> Idenitify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</h2>
+<div id="identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</h2>
 <pre class="bash"><code>cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/
 motifs=~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/tomtom_db/homer_uniprobe_jaspar_edited.txt
 #Report results at FDR 0.1 (1401 total in the above database)
