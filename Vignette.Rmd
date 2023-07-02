@@ -33,7 +33,7 @@ pre[class] {
 
 # Introduction
 
-This is a work in progress.
+This is a work in progress. 
 
 # GWAS summary statistics processing
 
@@ -54,12 +54,11 @@ awk '{OFS = "\t"; print $9, $10, $41, $40, $46}' Breast_cancer_GWAS_PMID_3242435
 
 ## Download the data
 
-I downloaded the 22Q1 data release from the DepMap portal, with the TRPS1 and ESR1 CRISPR gene effect (Chronos) scores for all cell lines.
-I also downloaded the list of annotated luminal breast cancer cell lines from the DepMap portal as of March 13, 2022.
+I downloaded the 22Q1 data release from the DepMap portal, with the TRPS1 and ESR1 CRISPR gene effect (Chronos) scores for all cell lines. I also downloaded the list of annotated luminal breast cancer cell lines from the DepMap portal as of March 13, 2022.
 
 ## Plot the data (Figure 1B,C)
 
-R code chunks will be in light blue, to distinguish from bash code chunks in grey.
+Set up in R. R code chunks will be in light blue, to distinguish from bash code chunks in grey.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 setwd("~/Library/CloudStorage/Box-Box/GuertinLab/DepMap/")
@@ -68,13 +67,22 @@ library(dplyr)
 library(ggrepel)
 library(ggsignif)
 `%notin%` <- Negate(`%in%`)
+```
 
+Read in the data.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Chronos <- read_csv("Chronos.csv")
 colnames(Chronos)[c(2,3)] <- c("ESR1", "TRPS1")
 Luminal <- read_csv("cell lines in luminal.csv")
 Chronos_luminal_last <- rbind.data.frame(Chronos[Chronos$`DepMap ID` %notin% Luminal$`Depmap Id`,],
                                          Chronos[Chronos$`DepMap ID` %in% Luminal$`Depmap Id`,])
 cols = ifelse(Chronos_luminal_last$`DepMap ID` %in% Luminal$`Depmap Id`, "red", "black")
+```
+
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("Chronos_ESR1_vs_TRPS1_Luminal.pdf")
 ggplot(Chronos_luminal_last, aes(x = ESR1, y = TRPS1, color = cols)) +
   geom_point() +
@@ -102,7 +110,11 @@ ggplot(Chronos_luminal_last, aes(x = cols, y = TRPS1, color = cols)) +
   theme_bw() +
   theme(legend.position="none")
 dev.off()
+```
 
+T-tests.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #0.002235
 t.test(Chronos_luminal_last$TRPS1[cols == "red"],
        Chronos_luminal_last$TRPS1[cols == "black"])
@@ -124,7 +136,7 @@ module load sratoolkit/2.10.5
 vdb-config -i #press x to exit
 ```
 
-Make directories for the later scripts to write files 
+Make directories for the later scripts to write files.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 title=ChIP
@@ -143,7 +155,7 @@ mkdir -p ${main}/counts
 mkdir -p ${main}/bigWigs
 ```
 
-Get the required script for bigWig merging and move to a directory that will end up in the $PATH
+Get the required script for bigWig merging and move to a directory that will end up in the $PATH.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
@@ -151,7 +163,7 @@ chmod +x normalize_bedGraph.py
 mv normalize_bedGraph.py $HOME/bin/
 ```
 
-Get the ENCODE blacklist
+Get the ENCODE blacklist.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 wget https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/hg38-blacklist.v2.bed.gz -P $HOME/hg38/
@@ -363,7 +375,7 @@ do
 done
 ```
 
-Move IgG samples to subdirectory
+Move IgG samples to subdirectory.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ${main}/bowtie2/
@@ -461,7 +473,7 @@ do
 done
 ```
 
-Combine into 1 file per factor
+Combine into 1 file per factor.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for peaks in ../macs2/*_peaks.narrowPeak
@@ -514,7 +526,7 @@ sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-
   --wrap="sh ${scripts}/230322_macs2.sh $samples $control $factor $main"
 ```
 
-Count reads in HA peaks
+Count reads in HA peaks.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ${main}/counts/
@@ -538,7 +550,7 @@ rm T47D_Clone28_*${factor}_peak_counts.txt
 
 ## Scale and merge bigWigs for use in the genome browser
 
-First make size factors based on total mapped reads (divide each by the geometric mean of all of them like in DESeq2)
+First make size factors based on total mapped reads (divide each by the geometric mean of all of them like in DESeq2).
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ${main}/bowtie2
@@ -564,7 +576,7 @@ do
 done 
 ```
 
-Combine these into one file
+Combine these into one file.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
@@ -715,7 +727,7 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_sizeFac
 
 ## Heatmap of TRPS1 peak intensity in dTAG vs. DMSO (Figure 2C)
 
-Set up
+Set up.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
@@ -745,7 +757,7 @@ computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --miss
   -o matrix_HA_ChIP_TRPS1_peaks.gz --outFileSortedRegions TRPS1_peaks_sorted_for_heatmap.bed
 ```
 
-Make the heatmap
+Make the heatmap.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 plotHeatmap -m matrix_HA_ChIP_TRPS1_peaks.gz -out heatmap_HA_ChIP_TRPS1_peaks.pdf --heatmapHeight 14 \
@@ -765,7 +777,7 @@ scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .
 
 ## MA plot of TRPS1 peak intensity in dTAG vs. DMSO (Figure 2D)
 
-First get the complexity estimate file for size factors (total aligned reads)
+First get the complexity estimate file for size factors (total aligned reads).
 
 ```{r engine='bash', eval=F, echo=TRUE}
 title=ChIP
@@ -789,7 +801,7 @@ do
 done
 ```
 
-Now use DESeq2 to identify differentially bound peaks (in this case all of them)
+Now use DESeq2 to identify differentially bound peaks (in this case all of them).
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = '~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/'
@@ -806,7 +818,7 @@ library(ggplot2)
 library(data.table)
 ```
 
-Get read depth
+Get read depth.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 complexity_estimate <- read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/logs/230322_complexity_estimate.txt", header = T)
@@ -816,7 +828,7 @@ colnames(complexity_estimate) = name
 complexity_estimate = complexity_estimate[,-grep("ER", colnames(complexity_estimate))]
 ```
 
-Read in the counts table and change the column names
+Read in the counts table and change the column names.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x <- read.table("Combined_HA_DMSO_vs_dTAG_peak_counts.txt", sep = '\t', header = TRUE)
@@ -827,7 +839,7 @@ x = x[,-c(1:6)]
 colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), "Clone28_"), "[", 2), "_HA_DMSO"), "[", 1)
 ```
 
-Subtract the read depth normalized background signal
+Subtract the read depth normalized background signal.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 background <- sweep(x[,grep("IgG", colnames(x))], 2, complexity_estimate[grep("IgG", names(complexity_estimate))], FUN = "/")
@@ -840,7 +852,7 @@ x = x[,grep("HA", colnames(x))] - background
 x[x < 0] = 0
 ```
 
-Run Deseq2
+Run Deseq2.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 treatment = factor(sapply(strsplit(colnames(x), '_'), '[', 2), levels = c("DMSO", "dTAG"))
@@ -853,7 +865,7 @@ sizeFactors(deseq.df) <- size_factors
 deseq.df = DESeq(deseq.df)
 ```
 
-Plot
+Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("MA_HA_DMSO_vs_dTAG_subtract_IgG_qvalue_30.pdf")
@@ -865,33 +877,41 @@ dev.off()
 
 # ATAC-seq data pre-processing
 
-## Download the raw sequencing data
-
-Once these files are public on SRA, we can update the SRR numbers.
-
-```{r engine='bash', eval=F, echo=TRUE}
-fasterq-dump SRRTBD
-```
-
 ## Set up
+
+Log in to the cluster to perform the processing for each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=10 --time=8:00:00
-main=/scratch/ts2hx/TRPS1_timecourse_ATAC
-cd $main
+```
 
-#Get the required script for bigWig merging and move to a directory that will end up in the $PATH
+Make the main directory (should make nice subdirectories like I did for ChIP).
+
+```{r engine='bash', eval=F, echo=TRUE}
+main=/scratch/ts2hx/TRPS1_timecourse_ATAC
+mkdir -p $main
+```
+
+Get the required script for bigWig merging and move to a directory that will end up in the $PATH.
+
+```{r engine='bash', eval=F, echo=TRUE}
 wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
 chmod +x normalize_bedGraph.py
 mv normalize_bedGraph.py $HOME/bin/
+```
 
-#Get the ENCODE blacklist
+Get the ENCODE blacklist.
+
+```{r engine='bash', eval=F, echo=TRUE}
 wget https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/hg38-blacklist.v2.bed.gz -P $HOME/hg38/
 gunzip $HOME/hg38/hg38-blacklist.v2.bed.gz
 mv $HOME/hg38/hg38-blacklist.v2.bed $HOME/hg38/hg38.blacklist.bed
+```
 
-#Get chrM for pre-alignment
+Get chrM for pre-alignment.
+
+```{r engine='bash', eval=F, echo=TRUE}
 module load gcc/9.2.0 bowtie2/2.2.9 
 wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromFa.tar.gz
 tar -xzf hg38.chromFa.tar.gz
@@ -901,23 +921,27 @@ rm -r chroms
 rm hg38.chromFa.tar.gz
 ls $HOME/hg38
 bowtie2-build $HOME/hg38/chrM.fa $HOME/hg38/chrM_hg38
+```
 
-#Make tallymer and table for seqOutBias (this takes a while)
+Make tallymer and table for seqOutBias (this takes a while).
+
+```{r engine='bash', eval=F, echo=TRUE}
 cd $HOME/seqOutBias/
 seqOutBias seqtable /project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome.fa --read-size=62
 ```
 
-## Change the file names
+## Download the raw data and rename the files
+
+Once these files are public on SRA, we can update the SRR numbers.
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd $main
+fasterq-dump SRRTBD
+```
 
 This may be unnecessary if the SRA downloads are already named appropriately. 
 
 ```{r engine='bash', eval=F, echo=TRUE}
-#Move everything out of subfolders and remove the folders
-cd $main
-mv */* .
-rm -r M260TS4219*
-
-#Rename
 for i in *_R1_001.fastq.gz
 do
 name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
@@ -931,7 +955,7 @@ mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
 done
 ```
 
-## Process the samples in parallel (wait until these jobs finish before proceeding)
+## Process each sample
 
 The script used in the next code chunk (230417_ATACseq_analysis_on_input_file.sh) is below:
 
@@ -998,7 +1022,7 @@ rm ${name}_PE2_no_adapt.fastq.paired.fq
 rm ${name}_PE2_no_adapt.fastq.single.fq
 ```
 
-Run the above script on each sample in parallel
+Run the above script on each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 chmod +x /scratch/ts2hx/scripts/230417_*.sh
@@ -1011,9 +1035,112 @@ sleep 1	# wait 1 second between each job submission
 done
 ```
 
-## Combine scaled bigWigs into one bedGraph and bigWig per condition for visualization on the genome browser
+## Call peaks 
 
-The script used in the next code chunk (230417_ATAC_to_browser.sh) is below:
+This code uses all bam files, calls sub-peak summits, and makes each fragment 200bp centered on the original 5' end of the read.
+
+```{r engine='bash', eval=F, echo=TRUE}
+name=TRPS1_timecourse_ATAC
+sbatch -p largemem -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-name macs2 -o ${name}_macs2.log \
+  --wrap="module load macs2/2.2.7.1; \
+    macs2 callpeak --call-summits -t *.hg38.bam -n TRPS1_timecourse_ATAC -g hs -q 0.01 --keep-dup all \
+    -f BAM --nomodel --shift -100 --extsize 200"
+```
+
+Remove noncanonical chromosomes and blacklisted regions.
+
+```{r engine='bash', eval=F, echo=TRUE}
+blacklist=$HOME/hg38/hg38.blacklist.bed
+module load gcc/9.2.0 bedtools/2.29.2
+grep -v "random" ${name}_peaks.narrowPeak | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+  grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${name}_tmp.txt
+mv ${name}_tmp.txt ${name}_peaks.narrowPeak 
+grep -v "random" ${name}_summits.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
+    grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${name}_tmp.txt
+mv ${name}_tmp.txt ${name}_summits.bed 
+```
+
+Make a window of 100bp on either side of the summit.
+
+```{r engine='bash', eval=F, echo=TRUE}
+slopBed -b 100 -i ${name}_summits.bed -g $HOME/hg38/hg38.chrom.sizes > ${name}_summit_window.bed
+```
+
+## Count reads in peaks
+
+Count reads where the cut site is within these windows.
+
+```{r engine='bash', eval=F, echo=TRUE}
+peaks=${name}_summit_window.bed
+for bed in *_not_scaled.bed
+do
+  name=`basename $bed _not_scaled.bed`
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --job-name ${name}_mapBed -o ${name}_mapBed.log \
+    --wrap="module load gcc/9.2.0 bedtools/2.29.2; mapBed -null '0' -a $peaks -b $bed > ${name}_peak_counts.txt;"
+  sleep 1
+done
+```
+
+Just keep the last column (the counts). I should do this in the above jobs.
+
+```{r engine='bash', eval=F, echo=TRUE}
+for counts in T47D_Clone28_*_peak_counts.txt
+do
+  name=`basename $counts _peak_counts.txt`
+  awk '{print $NF}' ${name}_peak_counts.txt > ${name}_peak_counts_only.txt
+  echo $name | cat - ${name}_peak_counts_only.txt > ${name}_peak_counts.txt
+  rm ${name}_peak_counts_only.txt
+done
+```
+
+Combine into 1 file per factor.
+
+```{r engine='bash', eval=F, echo=TRUE}
+echo -e "chr\tstart\tend\tname\tqvalue" | cat - $peaks | \
+  paste -d'\t' - T47D_Clone28_*_peak_counts.txt > Combined_ATAC_peak_counts.txt
+rm T47D_Clone28_*_peak_counts.txt
+```
+
+## Make size factors for DESeq2 based on total mapped reads 
+
+Divide each by the geometric mean of all of them.
+
+```{r engine='bash', eval=F, echo=TRUE}
+module load samtools/1.12
+i=ATAC
+> ${i}_header.txt
+> ${i}_reads.txt
+for j in T47D_Clone28_*.hg38.bam
+do
+  echo $j
+  name=$(echo $j | awk -F".hg38.bam" '{print $1}')
+  echo $name | paste ${i}_header.txt - > ${i}_tmp.txt 
+  mv ${i}_tmp.txt ${i}_header.txt
+  reads=`samtools view -c $j`
+  echo $reads | paste ${i}_reads.txt - > ${i}_tmp.txt 
+  mv ${i}_tmp.txt ${i}_reads.txt
+done  
+cat ${i}_header.txt ${i}_reads.txt > ${i}_tmp.txt
+mv ${i}_tmp.txt ${i}_reads.txt
+rm ${i}_header.txt
+```
+
+Combine these into one file.
+
+```{r engine='bash', eval=F, echo=TRUE}
+module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
+R
+library(DESeq2)
+setwd("/scratch/ts2hx/TRPS1_timecourse_ATAC/")
+samples <- "ATAC_reads.txt"
+x <- read.table(samples, sep = '\t', header = TRUE)[,-1]
+write.table(estimateSizeFactorsForMatrix(x), file = paste0("/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt"), quote =F, col.names=F)
+q()
+```
+
+## Merge scaled bigWigs for use in the genome browser
+
+The script used in the next code chunk (230417_ATAC_to_browser.sh) is below. It merges the scaled bigWigs across replicates into one bigWig and one bedGraph per condition.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 #! /bin/bash
@@ -1049,7 +1176,7 @@ bedGraphToBigWig ${name}_scaled.bedGraph hg38.chrom.sizes ${name}_combined_norma
 gzip -f ${name}_scaled.bedGraph
 ```
 
-Run the above script on each sample in parallel
+Run the above script on each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in T47D_Clone28_*_rep1_scaled.bigWig
@@ -1061,103 +1188,6 @@ do
 done
 ```
 
-## Call peaks 
-
-This code uses all bam files, calls sub-peak summits, and makes each fragment 200bp centered on the original 5' end of the read. (wait until this job is finished before proceeding).
-
-```{r engine='bash', eval=F, echo=TRUE}
-name=TRPS1_timecourse_ATAC
-sbatch -p largemem -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-name macs2 -o ${name}_macs2.log \
-  --wrap="module load macs2/2.2.7.1; \
-    macs2 callpeak --call-summits -t *.hg38.bam -n TRPS1_timecourse_ATAC -g hs -q 0.01 --keep-dup all \
-    -f BAM --nomodel --shift -100 --extsize 200"
-```
-
-Remove peaks from non-canonical chromosomes or blacklisted regions
-
-```{r engine='bash', eval=F, echo=TRUE}
-blacklist=$HOME/hg38/hg38.blacklist.bed
-module load gcc/9.2.0 bedtools/2.29.2
-grep -v "random" ${name}_peaks.narrowPeak | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
-  grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${name}_tmp.txt
-mv ${name}_tmp.txt ${name}_peaks.narrowPeak 
-grep -v "random" ${name}_summits.bed | grep -v "chrUn" | grep -v "chrEBV" | grep -v "chrM" | \
-    grep -v "alt" | intersectBed -v -a stdin -b $blacklist > ${name}_tmp.txt
-mv ${name}_tmp.txt ${name}_summits.bed 
-```
-
-Make a 200bp window centered on each peak (sub-peak) summit
-
-```{r engine='bash', eval=F, echo=TRUE}
-slopBed -b 100 -i ${name}_summits.bed -g $HOME/hg38/hg38.chrom.sizes > ${name}_summit_window.bed
-```
-
-## Count ATAC reads in peaks
-
-Just count where the cut site is within these windows. (Wait until these jobs are finished before proceeding)
-
-```{r engine='bash', eval=F, echo=TRUE}
-peaks=${name}_summit_window.bed
-for bed in *_not_scaled.bed
-do
-  name=`basename $bed _not_scaled.bed`
-  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --job-name ${name}_mapBed -o ${name}_mapBed.log \
-    --wrap="module load gcc/9.2.0 bedtools/2.29.2; mapBed -null '0' -a $peaks -b $bed > ${name}_peak_counts.txt;"
-  sleep 1
-done
-```
-
-Just keep the last column (the counts). I couldn't figure out how to get the quotes to work to put this in the wrapped text in the previous for loop
-
-```{r engine='bash', eval=F, echo=TRUE}
-for counts in T47D_Clone28_*_peak_counts.txt
-do
-  name=`basename $counts _peak_counts.txt`
-  awk '{print $NF}' ${name}_peak_counts.txt > ${name}_peak_counts_only.txt
-  echo $name | cat - ${name}_peak_counts_only.txt > ${name}_peak_counts.txt
-  rm ${name}_peak_counts_only.txt
-done
-```
-
-Merge into one counts file for use with DESeq2. The name includes ChIP because I also counted ChIP reads, but you can rename this.
-
-```{r engine='bash', eval=F, echo=TRUE}
-echo -e "chr\tstart\tend\tname\tqvalue" | cat - $peaks | \
-  paste -d'\t' - T47D_Clone28_*_peak_counts.txt > Combined_ATAC_peak_counts_with_ChIP.txt
-rm T47D_Clone28_*_peak_counts.txt
-```
-
-## Make size factors for DESeq2 based on total mapped reads (divide each by the geometric mean of all of them).
-
-```{r engine='bash', eval=F, echo=TRUE}
-module load samtools/1.12
-i=ATAC
-> ${i}_header.txt
-> ${i}_reads.txt
-for j in T47D_Clone28_*.hg38.bam
-do
-  echo $j
-  name=$(echo $j | awk -F".hg38.bam" '{print $1}')
-  echo $name | paste ${i}_header.txt - > ${i}_tmp.txt 
-  mv ${i}_tmp.txt ${i}_header.txt
-  reads=`samtools view -c $j`
-  echo $reads | paste ${i}_reads.txt - > ${i}_tmp.txt 
-  mv ${i}_tmp.txt ${i}_reads.txt
-done  
-cat ${i}_header.txt ${i}_reads.txt > ${i}_tmp.txt
-mv ${i}_tmp.txt ${i}_reads.txt
-rm ${i}_header.txt
-
-module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
-R
-library(DESeq2)
-setwd("/scratch/ts2hx/TRPS1_timecourse_ATAC/")
-samples <- "ATAC_reads.txt"
-x <- read.table(samples, sep = '\t', header = TRUE)[,-1]
-write.table(estimateSizeFactorsForMatrix(x), file = paste0("/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt"), quote =F, col.names=F)
-q()
-```
-
 ## Leave the cluster environment, and copy files to your local computer
 
 ```{r engine='bash', eval=F, echo=TRUE}
@@ -1166,13 +1196,15 @@ exit
 
 #Copy files
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
-scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Combined_ATAC_peak_counts_with_ChIP.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Combined_ATAC_peak_counts.txt .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt .
 ```
 
 # ATAC-seq analysis
 
-## Identify differentially accessible peaks with DESeq2 (Figure 3A)
+## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)
+
+Set up libraries and functions in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
@@ -1188,7 +1220,6 @@ library(tidyr)
 library(ggplot2)
 library(data.table)
 library(MatchIt)
-library(EnhancedVolcano)
 
 tighten_summit_window <- function(res.deseq, b = 100) {
   chr = sapply(strsplit(rownames(res.deseq), ':'), '[', 1)
@@ -1199,15 +1230,22 @@ tighten_summit_window <- function(res.deseq, b = 100) {
 }
 
 `%notin%` <- Negate(`%in%`)
+```
 
+Read in the counts table and change the column names.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x <- read.table("Combined_ATAC_peak_counts.txt", sep = '\t', header = TRUE)
 rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
 peak_name = x[,4]
 peak_qvalue = x[,5]
 x = x[,-c(1:5)]
 colnames(x) = sapply(strsplit(colnames(x), "Clone28_"), "[", 2)
+```
 
-#Make the DESeq object
+Run DESeq2.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 time = factor(sapply(strsplit(colnames(x), '_'), '[', 1), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
@@ -1218,9 +1256,60 @@ sizeFactors(deseq.df) <- size_factors
 deseq.df = DESeq(deseq.df)
 save(deseq.df, file = "deseq.df.ATAC.Rdata")
 load("deseq.df.ATAC.Rdata")
+```
 
-#For MEME / cutoff-based AME
-#Get differentially accessible peaks and sets matched by baseMean
+Identify differentially accessible peaks.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+i = "0.5hour"
+res.deseq = results(deseq.df[peak_qvalue > 100,], contrast = c("time", i, "0hour"))
+sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
+```
+
+Match the unchanged peaks to activated peaks based on accessibility.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+activated = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
+unchanged = res.deseq[!is.na(res.deseq$padj) & res.deseq$padj > 0.1 & abs(res.deseq$log2FoldChange) < 0.01,]
+unchanged$treatment = 0
+activated$treatment = 1
+df.deseq.effects.lattice = rbind(unchanged, activated)
+out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = "optimal", ratio = 1)
+unchanged = df.deseq.effects.lattice[rownames(df.deseq.effects.lattice) %in% out$match.matrix,]
+repressed = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0,]
+
+df.deseq.effects.lattice = res.deseq
+df.deseq.effects.lattice$status = "Other"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(activated)] = "Increased"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(unchanged)] = "Unchanged"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(repressed)] = "Decreased"
+df.deseq.effects.lattice$status = factor(df.deseq.effects.lattice$status, levels = c("Other", "Increased", "Unchanged", "Decreased"))
+```
+
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+pdf(paste0("MA_ATAC_q100_", i, "_for_figure.pdf"), width = 7, height = 3.5)
+ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(baseMean, 10), y = log2FoldChange, color = status)) +
+  geom_point() +
+  scale_color_manual(values = c("grey90", "red", "grey60", "blue")) +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  ylim(-1.2, 1.2) +
+  xlim(1.5, 3.5) +
+  ylab(expression("log"[2]~"(fold change in ATAC signal)")) +
+  xlab(expression("log"[10]~"(mean of normalized intensity)")) +
+  ggtitle("Change in chromatin accessibility upon TRPS1 depletion") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(color=NULL)
+dev.off()
+```
+
+## de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)
+
+For each time point, identify differentially accessible peaks and match based on accessibility. Should have called these "increased" and "decreased" for consistency.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 for (i in levels(time)[-1]) {
   res.deseq = results(deseq.df[peak_qvalue > 100,], contrast = c("time", i, "0hour"))
   sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
@@ -1229,7 +1318,6 @@ for (i in levels(time)[-1]) {
   write.table(tighten_summit_window(activated, b = 100), file = paste0(i, '_activated_peaks.bed'), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = '\t')
   
   unchanged = res.deseq[!is.na(res.deseq$padj) & res.deseq$padj > 0.1 & abs(res.deseq$log2FoldChange) < 0.01,]
-  #unchanged = unchanged[sample(x, size, replace = FALSE, prob = NULL),]
   unchanged$treatment = 0
   activated$treatment = 1
   df.deseq.effects.lattice = rbind(unchanged, activated)
@@ -1240,8 +1328,8 @@ for (i in levels(time)[-1]) {
   repressed = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0,]
   write.table(tighten_summit_window(repressed, b = 100), file = paste0(i, '_repressed_peaks.bed'), quote = FALSE, row.names = FALSE, col.names = FALSE, sep = '\t')
   
-  # unchanged = res.deseq[rownames(res.deseq) %notin% rownames(repressed) & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
-  # unchanged$treatment = 0
+  unchanged = res.deseq[rownames(res.deseq) %notin% rownames(repressed) & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
+  unchanged$treatment = 0
   repressed$treatment = 1
   df.deseq.effects.lattice = rbind(unchanged, repressed)
   out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = "optimal", ratio = 1)
@@ -1250,7 +1338,7 @@ for (i in levels(time)[-1]) {
 }
 ```
 
-## de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)
+For each time point, run MEME on the increased and decreased peaks.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
@@ -1278,12 +1366,17 @@ done
 
 ## Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)
 
+Report results at FDR 0.1 (1401 total in the above database).
+
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/
 motifs=~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/tomtom_db/homer_uniprobe_jaspar_edited.txt
-#Report results at FDR 0.1 (1401 total in the above database)
 n_motifs=140
+```
 
+Make fasta files for each bed file.
+
+```{r engine='bash', eval=F, echo=TRUE}
 genome=~/Library/CloudStorage/Box-Box/GuertinLab/hg38/hg38.fa
 for bed in *hour_activated*_peaks.bed *hour_repressed*_peaks.bed
 do
@@ -1291,7 +1384,11 @@ do
   echo $name
   fastaFromBed -fi $genome -bed ${name}.bed -fo ${name}.fasta
 done
+```
 
+Run AME.
+
+```{r engine='bash', eval=F, echo=TRUE}
 for fasta in *hour_activated_peaks.fasta *hour_repressed_peaks.fasta
 do
   name=`basename $fasta _peaks.fasta`
@@ -1299,17 +1396,9 @@ do
   ame --verbose 1 --oc ${name}_ame --scoring avg --method fisher --hit-lo-fraction 0.25 \
     --evalue-report-threshold $n_motifs --control ${name}_matched_peaks.fasta ${name}_peaks.fasta $motifs
 done
-
-#24 hour repressed couldn't get a matched list 
-#(ran out of memory in R, so just look for enrichment relative to activated)
-fasta=24hour_repressed_peaks.fasta
-name=`basename $fasta _peaks.fasta`
-echo $name
-ame --verbose 1 --oc ${name}_ame --scoring avg --method fisher --hit-lo-fraction 0.25 \
-  --evalue-report-threshold $n_motifs --control 24hour_activated_peaks.fasta ${name}_peaks.fasta $motifs
 ```
 
-Configure the AME output for use in LaTex
+Configure the AME output for use in LaTex. Remove underscores, keep the columns we need, and convert to CSV.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd ~/Library/CloudStorage/Box-Box/guertinlab/TRPS1_timecourse_ATAC/0.5hour_repressed_ame
@@ -1376,32 +1465,20 @@ Find individual motif instances in the genome with FIMO and overlap with peak se
 
 ```{r engine='bash', eval=F, echo=TRUE}
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-cd /scratch/ts2hx
-mkdir -p TRPS1_timecourse_ATAC
-exit
-
-cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
-
-scp ~/Library/CloudStorage/Box-Box/GuertinLab/Code/220914_FIMO.sh \
-    ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
-scp -r ~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/individual_memes \
-    ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC
-scp *.bed ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC
-
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-
 cd /scratch/ts2hx/TRPS1_timecourse_ATAC/
 
-chmod +x /scratch/ts2hx/scripts/220914_FIMO.sh
 for i in individual_memes/*_meme.txt
 do
   name=`basename $i _meme.txt`
   sbatch -p standard --export=ALL,i=$i,name=$name --output=${name}_FIMO.out /scratch/ts2hx/scripts/220914_FIMO.sh
   sleep 1
 done
+```
 
+Combine into one file.
+
+```{r engine='bash', eval=F, echo=TRUE}
 echo -e \
   "Motif\tActivated_with\tActivated_without\tUnchanged_with\tUnchanged_without\tRepressed_with\tRepressed_without" \
   > Motif_overlaps.txt
@@ -1414,7 +1491,7 @@ cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Motif_overlaps.txt .
 ```
 
-Plot barcharts
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
@@ -1437,7 +1514,11 @@ ImmediatePeaksWithMotif <- function(motif_overlaps, motif)
   barplot(result, col = c("#F84C1E", "#232D4B"), main = motif, legend.text = TRUE, args.legend = list(x = "topright", bg = "white", cex = 1.5), cex.axis=1.5, cex.names=1.5)
   return(result)
 }
+```
 
+Plot barcharts for a representative GATA motif and ER half site.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 motif_overlaps = read.table("Overlaps.txt", header = T, row.names = 1)
 
 pdf("ATAC_GATA5_motif_heatmap_immediate.pdf")
@@ -1449,7 +1530,9 @@ ImmediatePeaksWithMotif(motif_overlaps, motif = "NR2F2_jaspar")
 dev.off()
 ```
 
-## Cluster dynamic peaks (Figure 3E)
+## Cluster dynamic peaks and plot the heatmap (Figure 3E)
+
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
@@ -1471,7 +1554,11 @@ library(dendsort)
 library(RColorBrewer)
 
 sort_hclust <- function(...) as.hclust(dendsort(as.dendrogram(...)))
+```
 
+Read in the counts table and change the column names. Here we focus on the early time points.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x <- read.table("Combined_ATAC_peak_counts.txt", sep = '\t', header = TRUE)
 rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
 peak_name = x[,4]
@@ -1479,17 +1566,43 @@ peak_qvalue = x[,5]
 x = x[,-c(1:5)]
 colnames(x) = sapply(strsplit(colnames(x), "Clone28_"), "[", 2)
 x = x[,!grepl("24hour", colnames(x))]
+```
 
+Run DESeq2.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 time = factor(sapply(strsplit(colnames(x), '_'), '[', 1), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour"))
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+factors <- read.table("ATAC_sizeFactor.txt")
+size_factors = factors$V2
+names(size_factors) = factors$V1
+size_factors = size_factors[,!grepl("24hour", names(size_factors))]
+sizeFactors(deseq.df) <- size_factors
+deseq.df = DESeq(deseq.df)
+save(deseq.df, file = "deseq.df.ATAC.no24.Rdata")
 load("deseq.df.ATAC.no24.Rdata")
+```
 
+Run the likelihood ratio test to identify dynamic peaks over the time course.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+dds.lrt = DESeq(deseq.df, test="LRT", reduced = ~ rep)
+save(dds.lrt, file = "dds.lrt.ATAC.no24.Rdata")
 load("dds.lrt.ATAC.no24.Rdata")
 res.lrt = results(dds.lrt[peak_qvalue > 100,])
 sum(res.lrt$padj < 0.1 & !is.na(res.lrt$padj))
+```
 
-#Heatmap
+Get the normalized counts.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 wide_counts = counts(deseq.df[rownames(deseq.df) %in% rownames(res.lrt)[res.lrt$padj < .01 & !is.na(res.lrt$padj)],], normalized = TRUE)
+```
+
+Assign the colors.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 anno <- data.frame(Time = as.factor(time))
 rownames(anno) = colnames(wide_counts)
 ann_colors = list(
@@ -1499,16 +1612,22 @@ ann_colors = list(
            `2hour` = viridis(5)[4],
            `4hour` = viridis(5)[5]))
 
-#Move the order of columns to be in time order (legal rotating of the dendrogram)
-cluster_cols = hclust(dist(scale(t(wide_counts))))
-cluster_cols$order = cluster_cols$order[c(1:12, 17:20, 13:16)]
-
-#Change color scale 
 paletteLength <- 50
 myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
 myBreaks <- c(seq(min(scale(t(wide_counts))), 0, length.out=ceiling(paletteLength/2) + 1), 
               seq(max(scale(t(wide_counts)))/paletteLength, max(scale(t(wide_counts))), length.out=floor(paletteLength/2)))
+```
 
+Move the order of columns to be in time order (legal rotating of the dendrogram).
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+cluster_cols = hclust(dist(scale(t(wide_counts))))
+cluster_cols$order = cluster_cols$order[c(1:12, 17:20, 13:16)]
+```
+
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("ATAC_counts_heatmap_FDR_0.01.pdf", width = 8, height = 5)
 pheatmap(wide_counts, scale = "row", show_rownames = F, show_colnames = F, 
          color = myColor, breaks=myBreaks,
@@ -1518,6 +1637,8 @@ dev.off()
 ```
 
 ## Count GATA motif instances in dynamic peaks across time points (Figure 3F)
+
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = '~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/'
@@ -1557,7 +1678,11 @@ PeaksWithMotif <- function(motif_overlaps, motif)
     theme_bw() +
     theme(text = element_text(size = 20))
 }
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 motif_overlaps = read.table("Overlaps.txt", header = T, row.names = 1)
 head(motif_overlaps)
 pdf("ATAC_TRPS1_motif_heatmap_timecourse.pdf", height = 3.5)
@@ -1569,66 +1694,21 @@ dev.off()
 
 For the initial basic processing steps, we used a pipeline we have thoroughly described elsewhere (https://github.com/guertinlab/Nascent_RNA_Methods). Please see the above GitHub repository for detailed explanations of the steps, as well as software dependencies and preprocessing steps (e.g., gene annotation file downloads).
 
-## Download and combined the raw data 
+## Set up
 
-We sequenced the libraries 3 times, first on a NextSeq2000, and the next 2 on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first put each sequencing run into its own folder.
+Log in to the cluster to perform the processing for each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO/
-
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-
-cd /scratch/ts2hx/TRPS1_timecourse_PRO/
-
-#Move everything out of subfolders and remove the folders
-mv */* .
-rm -r *_L1-ds.*
-
-#Rename
-for i in *_R1_001.fastq.gz
-do
-name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
-echo $name
-hyphenless=${name//-/_}
-echo $hyphenless
-newname=${hyphenless//05hour/0.5hour}
-echo $newname
-mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
-mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
-done
 ```
 
-Run 2:
+Make a directory for each sequencing run.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_2/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_2
-```
-
-Run 3:
-```{r engine='bash', eval=F, echo=TRUE}
-scp /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_3.zip ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-
-ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-
-cd /scratch/ts2hx/
-unzip TRPS1_timecourse_PRO_3.zip
+mkdir -p TRPS1_timecourse_PRO
+mkdir -p TRPS1_timecourse_PRO_2
 mkdir -p TRPS1_timecourse_PRO_3
-mv *.fastq.gz TRPS1_timecourse_PRO_3/
-rm TRPS1_timecourse_PRO_3.zip
-
-cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
-
-#Rename
-for i in *05hour*
-do
-  prefix=$(echo $i | awk -F"_05hour_" '{print $1}')
-  suffix=$(echo $i | awk -F"_05hour_" '{print $2}')
-  mv $i ${prefix}_0.5hour_${suffix}
-done
 ```
 
 The script used in the next code chunk (220927_tallymer_generation.sh) is below:
@@ -1645,14 +1725,84 @@ cd $HOME/seqOutBias
 $HOME/bin/seqOutBias seqtable $genome --read-size=$read_size
 ```
 
-Make the required intermediate files for use with seqOutBias later
+Make tallymer and table for seqOutBias (this takes a while).
 
 ```{r engine='bash', eval=F, echo=TRUE}
 sbatch -p largemem -A gioeli_lab -t 1-00:00:00 --job-name tallymer -o tallymer.log \
     /scratch/ts2hx/scripts/220927_tallymer_generation.sh
+
+exit
+exit
 ```
 
-Combine the NextSeq550 reads to generate representative quality control metrics
+## Download the raw data from the three sequencing runs, rename the files, and combine the reads
+
+We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first put each sequencing run into its own folder.
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO/
+scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO/
+
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
+```
+
+Rename files to remove the excess.
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd /scratch/ts2hx/TRPS1_timecourse_PRO/
+
+for i in *_R1_001.fastq.gz
+do
+name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
+echo $name
+hyphenless=${name//-/_}
+echo $hyphenless
+newname=${hyphenless//05hour/0.5hour}
+echo $newname
+mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
+mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
+done
+
+exit
+exit
+```
+
+Run 2:
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_2/
+scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_2
+```
+
+Run 3:
+
+```{r engine='bash', eval=F, echo=TRUE}
+scp /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_3.zip ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/
+
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
+
+cd /scratch/ts2hx/
+unzip TRPS1_timecourse_PRO_3.zip
+mv *.fastq.gz TRPS1_timecourse_PRO_3/
+rm TRPS1_timecourse_PRO_3.zip
+```
+
+Rename files to remove the excess.
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
+
+for i in *05hour*
+do
+  prefix=$(echo $i | awk -F"_05hour_" '{print $1}')
+  suffix=$(echo $i | awk -F"_05hour_" '{print $2}')
+  mv $i ${prefix}_0.5hour_${suffix}
+done
+```
+
+Combine the NextSeq550 reads to generate representative quality control metrics.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in *_R1_001.fastq.gz
@@ -1663,7 +1813,7 @@ do
 done
 ```
 
-Combine all reads for use in downstream analysis
+Combine all reads for use in downstream analysis.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in *_R1_001.fastq.gz
@@ -1811,7 +1961,7 @@ pigz ${name}_PE1.fastq
 pigz ${name}_PE2.fastq
 ```
 
-Wait for these jobs to finish before proceeding
+Run the above script on each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in *_NextSeq550_PE1.fastq.gz
@@ -1824,7 +1974,7 @@ do
 done
 ```
 
-Plot
+Plot the QC metrics.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 module load intel/18.0 intelmpi/18.0 R/4.1.1
@@ -1910,7 +2060,7 @@ mapBed -null "0" -s -a ${annotation_prefix}_sorted.bed -b ${name}_not_scaled_PE1
     awk '{OFS="\t";} {print $4,$7}' >> ${name}_gene_counts.txt
 ```
 
-Wait for these jobs to finish before proceeding
+Run the above script on each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in *_combined_PE1.fastq.gz
@@ -1921,16 +2071,17 @@ do
     /scratch/ts2hx/scripts/220928_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh
   sleep 1
 done
+```
 
-Combine the reads into one file
+Combine the reads into one file.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 paste -d'\t' *combined_gene_counts.txt > TRPS1_timecourse_PRO_gene_counts_combined.txt
 ```
 
-## Generate combined scaled bigWigs for visualization in the genome browser
+## Scale and merge bigWigs for use in the genome browser
 
-The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below:
+The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below. It scales each bigWig based on the read depth, broken down by strand.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 #! /bin/bash
@@ -1980,7 +2131,7 @@ bamCoverage --bam ${name}.rev.bam -bs 10 -p 10 -e --normalizeUsing BPM -o ${name
 rm ${name}.rev*
 ```
 
-Generate individual bigWigs normalized by read depth (have to break it up by strand)
+Run the above script on each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in *_combined.bam
@@ -1992,7 +2143,7 @@ do
 done
 ```
 
-The script used in the next code chunk (230403_PRO_to_browser_whole_fragment.sh) is below:
+The script used in the next code chunk (230403_PRO_to_browser_whole_fragment.sh) is below. It merges the scaled bigWigs across replicates into one bigWig and one bedGraph per condition.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 #! /bin/bash
@@ -2038,7 +2189,7 @@ bedGraphToBigWig ${name}_${strand}_scaled.bedGraph hg38.chrom.sizes ${name}_${st
 gzip -f ${name}_${strand}_scaled.bedGraph
 ```
 
-Merge the bigWigs into one composite per condition
+Run the above script on each sample in parallel.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 for i in T47D_Clone28_*_rep2_combined_whole_fragment_*_scaled.bigWig
@@ -2071,6 +2222,8 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_com
 
 ## Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)
 
+Set up.
+
 ```{r engine='bash', eval=F, echo=TRUE}
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=20 --time=12:00:00
@@ -2080,16 +2233,11 @@ mkdir -p heatmaps
 cd heatmaps
 
 module load deeptools/3.5.1
+```
 
-awk '$5 > 30' /scratch/ts2hx/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed > \
-  Functional_TRPS1_summits.bed
+Make the matrix (starting with the bed file from the matrix generated for ChIP).
 
-computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
-  -R Functional_TRPS1_summits.bed \
-  -S /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_DMSO_combined_normalized.bigWig \
-  /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_dTAG_combined_normalized.bigWig \
-  -o matrix_HA_ChIP_TRPS1_peaks.gz --outFileSortedRegions TRPS1_peaks_sorted_for_heatmap.bed
-  
+```{r engine='bash', eval=F, echo=TRUE}
 computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
   -R TRPS1_peaks_sorted_for_heatmap.bed \
   -S /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0hour_plus_combined_normalized.bigWig \
@@ -2097,20 +2245,29 @@ computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --miss
   /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0.5hour_plus_combined_normalized.bigWig \
   /scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_0.5hour_minus_combined_normalized.bigWig \
   -o matrix_PRO_TRPS1_peaks.gz
+```
 
+Plot the composites.
+
+```{r engine='bash', eval=F, echo=TRUE}
 plotProfile -m matrix_PRO_TRPS1_peaks.gz -out profile_PRO_TRPS1_peaks.pdf \
     --regionsLabel "Functional TRPS1 peaks" --perGroup --colors "#8B0000" "#00008B" "#FF7F7F" "#7F7FFF" \
     --samplesLabel "DMSO plus strand" "DMSO minus strand" "dTAG plus strand" "dTAG minus strand" 
-      
+```
+
+Leave the cluster environment, and copy files to your local computer.
+
+```{r engine='bash', eval=F, echo=TRUE}
 exit
 exit
 
-#Copy files
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
 scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .
 ```
 
-## Clustering of dynamic genes (Figure 4A,B)
+## Cluster dynamic genes (Figure 4A,B)
+
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/"
@@ -2215,27 +2372,38 @@ gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists
 gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
+```
 
+Read in the counts table and change the column names. Here we focus on the early time points.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #DESeq
 x = read.table("TRPS1_timecourse_PRO_gene_counts_Combined.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 x = x[,!grepl("24hour", colnames(x))]
+```
 
+Run DESeq2.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour"))
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
 deseq.df = DESeq(deseq.df)
+```
 
-#LRT
+Run the likelihood ratio test to identify dynamic peaks over the time course.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 dds.lrt = DESeq(deseq.df, test="LRT", reduced = ~ rep)
 res.lrt = results(dds.lrt)
 sum(res.lrt$padj < 0.1 & !is.na(res.lrt$padj))
+```
 
-write.table(gene.symbol$gene[gene.symbol$gene %in% rownames(res.lrt)[res.lrt$padj < 0.1]], 
-            file = "LRT_genes_no_24hour.txt", quote = F, row.names = F, col.names = F)
+Cluster the genes.
 
-#Clustering
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 rld = rlogTransformation(dds.lrt)
 rld_mat <- assay(rld)
 siglrt.re = res.lrt[res.lrt$padj < 0.1 & !is.na(res.lrt$padj),]
@@ -2243,7 +2411,11 @@ cluster_rlog = rld_mat[rownames(siglrt.re),]
 meta = cbind.data.frame(time, rep)
 rownames(meta) = colnames(cluster_rlog)
 clusters_lrt <- degPatterns(cluster_rlog, metadata = meta, minc = 0)
+```
 
+Set up a data frame for plotting.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 plot.df = clusters_lrt$normalized 
 plot.df$time = as.character(plot.df$time)
 plot.df$time[plot.df$time == '0hour'] = 0
@@ -2257,7 +2429,11 @@ plot.df = plot.df[order(plot.df$time),]
 plot.df$cluster = paste('cluster', as.character(plot.df$cluster), sep = '')
 head(plot.df)
 save(plot.df, file = "plot.df.pro.no.24hour.Rdata")
+```
 
+Generate a dendrogram to check where we can merge clusters.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x = as.data.table(plot.df)
 plot.df.cluster = dcast(x, genes + cluster ~ time, value.var="value")
 avg.clusters = as.data.frame(matrix(nrow = 0, ncol = 4))
@@ -2274,7 +2450,11 @@ pdf('Dendrogram_PRO_no_24hour.pdf', width=8, height=5)
 plot(hc, xlab = "Clusters", main = ' ', hang = -1)
 abline(h = 1.85, lty = 2)
 dev.off()
+```
 
+Merge clusters.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 gradual.down = plot.df[plot.df$cluster == 'cluster2' | 
                          plot.df$cluster == 'cluster7',]
 transient.down = plot.df[plot.df$cluster == 'cluster3' |
@@ -2301,6 +2481,11 @@ oscillating.up$supercluster = 'Oscillating Increase'
 immediate.up$supercluster = 'Immediate Increase' 
 transient.up$supercluster = 'Transient Increase' 
 gradual.up$supercluster = 'Gradual Increase' 
+```
+
+Make a data frame for plotting the superclusters.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 plot.df.pro = rbind(gradual.down,
                     transient.down,
                     oscillating.up,
@@ -2310,8 +2495,12 @@ plot.df.pro = rbind(gradual.down,
 plot.df.pro$supercluster <- factor(plot.df.pro$supercluster, 
                                    levels = c("Oscillating Increase", "Immediate Increase", "Gradual Increase",
                                               "Transient Increase", "Gradual Decrease", "Transient Decrease"))
-
 plot.df.pro$genes = as.factor(plot.df.pro$genes)
+```
+
+Assign the colors.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 cat.colours = plot.df.pro[plot.df.pro$merge == 'one_group0hour',]
 cat.colours$genes <- as.factor(cat.colours$genes)
 cat.colours$supercluster <- as.factor(cat.colours$supercluster)
@@ -2319,7 +2508,11 @@ cat.colours$colour[grep("Increase", cat.colours$supercluster)] <- '#FF000016'
 cat.colours$colour[grep("Decrease", cat.colours$supercluster)] <- '#0000FF16'
 cat.colours$colour <- as.factor(cat.colours$colour)
 cat.colours <- cat.colours[match(levels(plot.df.pro$genes), cat.colours$genes), ]
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf('pro_superclusters_transient_gradual_only.pdf', width=10, height=10)
 trellis.par.set(box.umbrella = list(lty = 1, col="black", lwd=1),
                 box.rectangle = list( lwd=1.0, col="black", alpha = 1.0),
@@ -2350,36 +2543,9 @@ dev.off()
 
 ## Over-representation analysis (Figure 4C,D)
 
-```{r class.source="bg-info", engine='R', eval=F, echo=T}
-genes = plot.df.pro$genes[(plot.df.pro$supercluster == "Gradual Decrease" | plot.df.pro$supercluster == "Transient Decrease") & plot.df.pro$merge == "one_group0hour"]
-m_t2g <- msigdbr(species = "Homo sapiens", category = "H") %>% 
-  dplyr::select(gs_name, ensembl_gene)
-set.seed(0)
-em <- enricher(genes, TERM2GENE=m_t2g, pvalueCutoff = 0.1)
-em$ID
-em$p.adjust
-fgseaResTidy <- em %>%
-  as_tibble() %>%
-  arrange(p.adjust)
-print(fgseaResTidy, n = 100)
-gse_top = fgseaResTidy
-gse_top$Ratio_ratio = 
-  (as.numeric(sapply(strsplit(gse_top$GeneRatio, "/"), "[", 1)) / 
-     as.numeric(sapply(strsplit(gse_top$GeneRatio, "/"), "[", 2))) / 
-  (as.numeric(sapply(strsplit(gse_top$BgRatio, "/"), "[", 1)) / 
-     as.numeric(sapply(strsplit(gse_top$BgRatio, "/"), "[", 2)))
-pdf("Hallmark_ORA_Combined_Decrease.pdf", width = 14)
-ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, base = 10))) +
-  geom_col() +
-  coord_flip() +
-  scale_fill_gradient(low="#000075", high="#8A8AFF") +
-  labs(y="Observed / Expected", x = NULL) + 
-  theme_minimal() + 
-  labs(fill = "log(padj)") +
-  theme(text = element_text(size = 20),
-        axis.text.x= element_text(size = 30)) 
-dev.off()
+Activated genes.
 
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 genes = plot.df.pro$genes[(plot.df.pro$supercluster == "Gradual Increase" | plot.df.pro$supercluster == "Transient Increase") & plot.df.pro$merge == "one_group0hour"]
 m_t2g <- msigdbr(species = "Homo sapiens", category = "H") %>% 
   dplyr::select(gs_name, ensembl_gene)
@@ -2410,9 +2576,44 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
 dev.off()
 ```
 
+Repressed genes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+genes = plot.df.pro$genes[(plot.df.pro$supercluster == "Gradual Decrease" | plot.df.pro$supercluster == "Transient Decrease") & plot.df.pro$merge == "one_group0hour"]
+m_t2g <- msigdbr(species = "Homo sapiens", category = "H") %>% 
+  dplyr::select(gs_name, ensembl_gene)
+set.seed(0)
+em <- enricher(genes, TERM2GENE=m_t2g, pvalueCutoff = 0.1)
+em$ID
+em$p.adjust
+fgseaResTidy <- em %>%
+  as_tibble() %>%
+  arrange(p.adjust)
+print(fgseaResTidy, n = 100)
+gse_top = fgseaResTidy
+gse_top$Ratio_ratio = 
+  (as.numeric(sapply(strsplit(gse_top$GeneRatio, "/"), "[", 1)) / 
+     as.numeric(sapply(strsplit(gse_top$GeneRatio, "/"), "[", 2))) / 
+  (as.numeric(sapply(strsplit(gse_top$BgRatio, "/"), "[", 1)) / 
+     as.numeric(sapply(strsplit(gse_top$BgRatio, "/"), "[", 2)))
+pdf("Hallmark_ORA_Combined_Decrease.pdf", width = 14)
+ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, base = 10))) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_gradient(low="#000075", high="#8A8AFF") +
+  labs(y="Observed / Expected", x = NULL) + 
+  theme_minimal() + 
+  labs(fill = "log(padj)") +
+  theme(text = element_text(size = 20),
+        axis.text.x= element_text(size = 30)) 
+dev.off()
+```
+
 # Integrative analysis
 
 ## CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)
+
+Make a data frame with dynamic genes and unchanged genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #CDFs separated by TRPS1 peaks overlapping increased vs decreased ATAC peaks 
@@ -2425,7 +2626,11 @@ unchanged = cbind.data.frame(genes, status = "Unchanged")
 
 df.deseq.effects.lattice = rbind.data.frame(unchanged, activated, repressed)
 rownames(df.deseq.effects.lattice) = df.deseq.effects.lattice$genes
+```
 
+Get the dynamic ATAC peaks.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x <- read.table("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/Combined_ATAC_peak_counts.txt", sep = '\t', header = TRUE)
 peak_qvalue = x[,5]
 
@@ -2440,12 +2645,20 @@ res.deseq$start = as.numeric(res.deseq$start) + 100
 res.deseq$end = as.numeric(res.deseq$end) - 100
 increasing = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
 decreasing = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0,]
+```
 
+Overlap with TRPS1 peaks.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 chip.peaks = read.table('~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed')
 chip.peaks = chip.peaks[chip.peaks$V5 > 30,]
 TRPS1_increasing_ATAC_peaks = bedTools.intersect(bed1 = chip.peaks, bed2 = increasing, opt.string = "-wa -wb")
 TRPS1_decreasing_ATAC_peaks = bedTools.intersect(bed1 = chip.peaks, bed2 = decreasing, opt.string = "-wa -wb")
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 df.all = cdf.deseq.df(df = df.deseq.effects.lattice, genes = gene.file, chip.peaks = TRPS1_increasing_ATAC_peaks)
 pdf("CDF_HA_ChIP_increasing_ATAC_by_gene_superclusters.pdf", height = 3.5, width = 4) 
 ecdfplot(~log(abs(dis), base = 10), groups = status, data = df.all,
@@ -2492,7 +2705,7 @@ dev.off()
 
 ## Identification of ER target genes (Figure S2)
 
-I used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: https://github.com/guertinlab/Nascent_RNA_Methods. 
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 setwd("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R")
@@ -2589,8 +2802,11 @@ gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists
 gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
+```
 
-#DESeq
+I used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: https://github.com/guertinlab/Nascent_RNA_Methods. Run DESeq2 with these counts.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x = read.table("Estrogen_treatment_PRO_gene_counts.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
@@ -2599,11 +2815,14 @@ sample.conditions = factor(sapply(strsplit(sapply(strsplit(colnames(x), 'T47D_')
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(rep, sample.conditions), ~ 0 + rep + sample.conditions)
 deseq.df = DESeq(deseq.df)
 
-#MA plot
 res.deseq.estrogen = results(deseq.df, contrast = c("sample.conditions", "Starved_Estrogen", "Starved_DMSO"))
 res.deseq.estrogen = res.deseq.estrogen[rownames(res.deseq.estrogen) %in% gene.symbol$gene,]
-
 ma.df = as.data.frame(res.deseq.estrogen)
+```
+
+Plot. 
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("MA_plot_Estrogen_vs_DMSO_black_activated.pdf", width=3.83, height=3.83)
 print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
              groups=(ma.df$padj < .1 & ma.df$log2FoldChange > 0 & !is.na(ma.df$padj)),
@@ -2613,7 +2832,9 @@ print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
 dev.off()
 ```
 
-## Clustering of dynamic ER target genes (Figure 5A)
+## Cluster of dynamic ER target genes (Figure 5A)
+
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/"
@@ -2650,17 +2871,27 @@ gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists
 gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
+```
 
-#DESeq
+Read in the counts table and change the column names.
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x = read.table("TRPS1_timecourse_PRO_60kb_gene_counts.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
+```
+
+Run DESeq2.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
 deseq.df = DESeq(deseq.df)
+```
 
-#LRT
+Run the likelihood ratio test to identify dynamic peaks over the time course.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 dds.lrt = DESeq(deseq.df, test="LRT", reduced = ~ rep)
 res.lrt = results(dds.lrt)
 rld = rlogTransformation(dds.lrt)
@@ -2668,29 +2899,40 @@ rld_mat <- assay(rld)
 
 sum(res.lrt$padj < 0.1 & !is.na(res.lrt$padj))
 siglrt.re = res.lrt[res.lrt$padj < 0.1 & !is.na(res.lrt$padj),]
+```
 
+Intersect with ER target genes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 estrogen_response_genes = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/estrogen_activated_gene_names.txt", header = FALSE)$V1
 estrogen_response_genes = gene.symbol$gene[gene.symbol$symbol %in% estrogen_response_genes]
 siglrt.re.sets = siglrt.re[rownames(siglrt.re) %in% estrogen_response_genes,] 
+```
 
-#Separate those that are activated at 30 minutes from those that are repressed
+Separate those that are activated at 30 minutes from those that are repressed.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 res.deseq = results(deseq.df, contrast = c("time", "0.5hour", "0hour"))
 sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
 sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & rownames(res.deseq) %in% estrogen_response_genes)
 act.res.deseq = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0 & rownames(res.deseq) %in% estrogen_response_genes,]
 rep.res.deseq = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0 & rownames(res.deseq) %in% estrogen_response_genes,]
 sig.res.deseq = rbind(act.res.deseq, rep.res.deseq)
+```
 
+Cluster the genes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 dim(sig.res.deseq)      
 cluster_rlog = rld_mat[rownames(sig.res.deseq),]
 meta = cbind.data.frame(time, rep)
 rownames(meta) = colnames(cluster_rlog)
 clusters_lrt <- degPatterns(cluster_rlog, metadata = meta, minc = 0)
-dev.off()
-pdf('Clustered_normalized_counts_estrogen_response_gene_set_significant_at_30min_60kb.pdf') 
-clusters_lrt$plot
-dev.off()
+```
 
+Set up a data frame for plotting.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 plot.df = clusters_lrt$normalized 
 plot.df$Class[plot.df$genes %in% rownames(act.res.deseq)] <- "Activated at 30 minutes"
 plot.df$Class[plot.df$genes %in% rownames(rep.res.deseq)] <- "Repressed at 30 minutes"
@@ -2709,16 +2951,22 @@ head(plot.df)
 
 save(plot.df, file = "LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData")
 load("LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData")
+```
 
-#Set colors
+Assign the colors.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 cat.colours = plot.df
 cat.colours$colour[plot.df$Class == "Activated at 30 minutes"] <- '#FF000064'
 cat.colours$colour[plot.df$Class == "Repressed at 30 minutes"] <- '#0000FF64'
 cat.colours$colour <- as.factor(cat.colours$colour)
 sum(plot.df$Class == "Activated at 30 minutes" & plot.df$time == 0) #37
 sum(plot.df$Class == "Repressed at 30 minutes" & plot.df$time == 0) #57
+```
 
-#plot all traces
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf('Normalized_counts_estrogen_response_gene_set_significant_at_30min_red_blue.pdf') 
 trellis.par.set(box.umbrella = list(lty = 1, col="black", lwd=1),
                 box.rectangle = list( lwd=1.0, col="black", alpha = 1.0),
@@ -2745,6 +2993,8 @@ dev.off()
 ```
 
 ## ER binding intensity near dynamic ER target genes (Figure 5B)
+
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/"
@@ -2853,15 +3103,62 @@ gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists
 gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
+```
 
-#Get peak counts
-x <- read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/Combined_ER_peak_counts.txt", sep = '\t', header = TRUE)
+Get read depth.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+complexity_estimate <- read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/logs/230322_complexity_estimate.txt", header = T)
+name = sapply(strsplit(complexity_estimate$name, "Clone28_"), "[", 2)
+complexity_estimate = t(complexity_estimate$unique_reads)
+colnames(complexity_estimate) = name
+complexity_estimate = complexity_estimate[,-grep("HA", colnames(complexity_estimate))]
+```
+
+Read in the counts table and change the column names.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+x <- read.table("Combined_ER_peak_counts.txt", sep = '\t', header = TRUE)
+rownames(x) = paste0(x[,1], ":", x[,2], "-", x[,3])
+peak_name = x[,4]
 peak_qvalue = x[,5]
+x = x[,-c(1:5)]
+colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), "Clone28_"), "[", 2), "_ER"), "[", 1)
+```
 
-factor = "ER"
-load('~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/deseq.df.ER.Rdata')
+Subtract the read depth normalized background signal.
+
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+background <- sweep(x[,grep("IgG", colnames(x))], 2, complexity_estimate[grep("IgG", names(complexity_estimate))], FUN = "/")
+background = rowMeans(background)
+background = cbind.data.frame(background, background, background, background, background, background, background, background)
+background <- sweep(as.data.frame(background), 2, complexity_estimate[grep("ER", names(complexity_estimate))], FUN = "*")
+background = round(background, digits = 0)
+
+x = x[,grep("ER", colnames(x))] - background
+x[x < 0] = 0
+```
+
+Run DESeq2.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+treatment = factor(sapply(strsplit(colnames(x), '_'), '[', 2), levels = c("DMSO", "dTAG"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, rep), ~ treatment)
+factors <- read.table("ER_sizeFactor.txt")
+size_factors = factors$V2
+names(size_factors) = factors$V1
+sizeFactors(deseq.df) <- size_factors
+deseq.df = DESeq(deseq.df)
+save(deseq.df, file = "deseq.df.ER.Rdata")
+load("deseq.df.ER.Rdata")
+```
+
+Get normalized counts for each condition.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 counts = as.data.frame(counts(deseq.df[peak_qvalue > 200,], normalized = TRUE))
-
 counts$chr = sapply(strsplit(rownames(counts), ":"), "[", 1)
 coord = sapply(strsplit(rownames(counts), ":"), "[", 2)
 counts$start = sapply(strsplit(coord, "-"), "[", 1)
@@ -2870,13 +3167,21 @@ counts$DMSO = rowMeans(counts[,grep("DMSO", colnames(counts))])
 counts$dTAG = rowMeans(counts[,grep("dTAG", colnames(counts))])
 counts = counts[,9:13]
 rownames(counts) = NULL
+```
 
-#Get gene sets
+Get dynamic ER target genes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 load("deseq.df_all_reads.RData")
 res.deseq = results(deseq.df, contrast = c("time", "0.5hour", "0hour"))
 estrogen_response_genes = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/estrogen_activated_gene_names.txt", header = FALSE)$V1
 estrogen_response_genes = gene.symbol$gene[gene.symbol$symbol %in% estrogen_response_genes]
 res.deseq = res.deseq[rownames(res.deseq) %in% estrogen_response_genes,]
+```
+
+Set up a window of 100kbp around each transcription start site.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tss.df = filter.deseq.into.bed(res.deseq, gene.file)
 colnames(tss.df) = c("tss.chr", "tss.start", "tss.end", "gene", "symbol", "strand")
 tss.df = merge.data.frame(tss.df, res.deseq, by.x = "gene", by.y = "row.names")
@@ -2884,8 +3189,11 @@ tss.df[,1:4] = tss.df[,c(2:4,1)]
 colnames(tss.df)[1:4] = colnames(tss.df)[c(2:4,1)]
 tss.df$tss.start = tss.df$tss.start - 100000
 tss.df$tss.end = tss.df$tss.end + 100000
+```
 
-#Get TPM
+Generate transcripts per million.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 counts.mat = counts(deseq.df, normalized = F)
 counts.mat = merge(counts.mat, gene.file, by.x = 0, by.y = "V4")
 rownames(counts.mat) = counts.mat$Row.names
@@ -2899,8 +3207,11 @@ tpm.mat$gene_length = gene.full.length
 tss.df = merge(tss.df, tpm.mat[, c("DMSO_TPM", "dTAG_TPM", "gene_length")], by.x = "gene", by.y = 0)
 tss.df[,1:4] = tss.df[,c(2:4,1)]
 colnames(tss.df)[1:4] = colnames(tss.df)[c(2:4,1)]
+```
 
-#Match expression
+Match unchanged genes based on expression.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tss.df$Match = "Controls"
 tss.df$Class = "Other Genes"
 tss.df$Class[!is.na(tss.df$padj) & tss.df$padj < 0.1 & tss.df$log2FoldChange > 0] = "Activated Genes"
@@ -2914,19 +3225,19 @@ out = matchit(Match ~ DMSO_TPM, data = tss.df[tss.df$Class != "Repressed Genes",
 out2 = matchit(Match ~ DMSO_TPM, data = tss.df[tss.df$Class != "Other Genes",], method = "optimal", ratio = 1)
 tss.df = tss.df[tss.df$Match == "Cases" | rownames(tss.df) %in% out$match.matrix | rownames(tss.df) %in% out2$match.matrix,]
 rownames(tss.df) = NULL
+```
 
-ggplot(as.data.frame(tss.df), aes(x = log(DMSO_TPM, base = 10), color = Class)) +
-  stat_ecdf(geom = "step", size = 1) +
-  ylab("Cumulative distribution function") +
-  xlab(expression("log"[10]~"(TPM)")) +
-  theme_bw() +
-  theme(text = element_text(size = 20))
+Get ER peaks near the genes.
 
-#Get peaks near TSS
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 peaks_near_genes = bedTools.intersect(bed1 = tss.df, bed2 = counts, opt.string = "-wa -wb")
 peaks_near_genes$Class = factor(peaks_near_genes$Class, levels = c("Activated Genes", "Other Genes", "Repressed Genes"))
 peaks_near_genes = peaks_near_genes[,c(1:22)]
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("ER_q200_ChIP_intensity_near_dynamic_ER_target_genes_100kb.pdf", width = 7, height = 3.5)
 ggplot(data = peaks_near_genes, aes(x = Class, y = log(dTAG/DMSO, base = 2), color = Class),) +
   theme(legend.position = "none") +
@@ -2942,7 +3253,11 @@ ggplot(data = peaks_near_genes, aes(x = Class, y = log(dTAG/DMSO, base = 2), col
   theme_bw() +
   theme(legend.position="none", plot.title = element_text(hjust = 0.5))
 dev.off()
+```
 
+T-tests.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Activated = peaks_near_genes[peaks_near_genes$Class == "Activated Genes",]
 t.test(log(Activated$dTAG), log(Activated$DMSO), paired = T) #0.000000000000002274
 Unchanged = peaks_near_genes[peaks_near_genes$Class == "Other Genes",]
@@ -2953,91 +3268,9 @@ t.test(log(Repressed$dTAG), log(Repressed$DMSO), paired = T) #0.000003224
 
 ## ER binding intensity by TRPS1 proximity (Figure 5C)
 
+Get the distance from each ER peak summit to the nearest TRPS1 peak summit.
+
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-direc = "~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/"
-setwd(direc)
-
-library(lattice)
-library(latticeExtra)
-library(DESeq2)
-library(viridis)
-library(tidyverse)
-library(ggplot2)
-library(readxl)
-
-source('https://raw.githubusercontent.com/mjg54/znf143_pro_seq_analysis/master/docs/ZNF143_functions.R')
-
-bedTools.closest <- function(functionstring="/usr/local/anaconda3/bin/closestBed",bed1,bed2,opt.string="") {
-  
-  options(scipen =99) # not to use scientific notation when writing out
-  
-  #write bed formatted dataframes to tempfile
-  write.table(bed1,file= 'a.file.bed', quote=F,sep="\t",col.names=F,row.names=F)
-  write.table(bed2,file= 'b.file.bed', quote=F,sep="\t",col.names=F,row.names=F)
-  
-  # create the command string and call the command using system()
-  command1=paste('sort -k1,1 -k2,2n', 'a.file.bed', '> a.file.sorted.bed')
-  cat(command1,"\n")
-  try(system(command1))
-  command2=paste('sort -k1,1 -k2,2n', 'b.file.bed', '> b.file.sorted.bed')
-  cat(command2,"\n")
-  try(system(command2))
-  
-  command=paste(functionstring, opt.string,"-a",'a.file.sorted.bed',"-b",'b.file.sorted.bed',">",'out.file.bed',sep=" ")
-  cat(command,"\n")
-  try(system(command))
-  
-  res=read.table('out.file.bed',header=F, comment.char='')
-  
-  command3=paste('rm', 'a.file.bed', 'b.file.bed', 'a.file.sorted.bed', 'b.file.sorted.bed', 'out.file.bed')
-  cat(command3,"\n")
-  try(system(command3))
-  
-  colnames(res) = c(colnames(bed1), colnames(bed2), 'dis' )
-  return(res)
-}
-
-plot_cdf <- function(df.all, col.lines = c("#FF0000", "grey60", "#0000FF")) {
-  ecdfplot(~log(abs(as.numeric(dis)), base = 10), groups = status, data = df.all,
-           auto.key = list(lines=TRUE, points=FALSE),
-           col = col.lines,
-           aspect = 1,
-           scales=list(relation="free",alternating=c(1,1,1,1)),
-           ylab = 'Cumulative Distribution Function',
-           xlab = expression('log'[10]~" TRPS1 summit distance from ER summit"),
-           between=list(y=1.0),
-           type = 'a',
-           xlim = c(0,7.5),
-           lwd=2,
-           par.settings = list(superpose.line = list(col = col.lines, lwd=3), 
-                               strip.background=list(col="grey85")),
-           panel = function(...) {
-             panel.abline(v= 200, lty =2)
-             panel.ecdfplot(...)
-           })
-}
-
-#Get ER peak counts
-x <- read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/Combined_ER_peak_counts.txt", sep = '\t', header = TRUE)
-peak_qvalue = x[,5]
-
-factor = "ER"
-load('~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/deseq.df.ER.Rdata')
-
-counts = as.data.frame(counts(deseq.df[peak_qvalue > 200,], normalized = TRUE))
-
-counts$chr = sapply(strsplit(rownames(counts), ":"), "[", 1)
-coord = sapply(strsplit(rownames(counts), ":"), "[", 2)
-counts$start = sapply(strsplit(coord, "-"), "[", 1)
-counts$end = sapply(strsplit(coord, "-"), "[", 2)
-counts$DMSO = rowMeans(counts[,grep("DMSO", colnames(counts))])
-counts$dTAG = rowMeans(counts[,grep("dTAG", colnames(counts))])
-counts = counts[,(ncol(counts) - 4):ncol(counts)]
-rownames(counts) = NULL
-
-res.deseq = lfcShrink(deseq.df[peak_qvalue > 200,], coef = "treatment_dTAG_vs_DMSO")
-counts = cbind.data.frame(counts, res.deseq)
-
 q = 30
 peaks = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed", sep = "\t")
 x <- read.table("Combined_HA_DMSO_vs_dTAG_peak_counts.txt", sep = '\t', header = TRUE)
@@ -3048,21 +3281,21 @@ peaks$status[!is.na(peaks$padj) & peaks$padj < 0.1 & peaks$log2FoldChange < 0] =
 peaks$status[!is.na(peaks$padj) & peaks$padj >= 0.1] = "Not significantly changing"
 peaks$status = factor(peaks$status, levels = c("Increasing", "Not significantly changing", "Decreasing"))
 colnames(peaks)[colnames(peaks) == "V5"] = "q_value"
+```
 
+Bin the ER peaks by proximity to TRPS1 peaks.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 peaks$Class = NULL
 peaks$Class[peaks$dis < 200] = "< 200bp"
 peaks$Class[peaks$dis >= 200 & peaks$dis <= 500] = "200 - 500bp"
 peaks$Class[peaks$dis > 500] = "> 500bp"
 peaks$Class = factor(peaks$Class, levels = c("< 200bp", "200 - 500bp", "> 500bp"))
+```
 
-plot(log(peaks$dis, base = 10), log(peaks$dTAG/peaks$DMSO, base = 2))
-ggplot(data = peaks, aes(x = log(dis, base = 10), y = log(dTAG/DMSO, base = 2))) +
-  geom_point() +
-  geom_smooth(method = "loess") +
-  geom_hline(yintercept = 0, linetype="dashed") 
-median(log(peaks$dTAG/peaks$DMSO, base = 2)[peaks$dis >= 200 & peaks$dis <= 500])
+Plot.
 
-#Get change in intensity
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("ER_ChIP_intensity_by_binned_HA_proximity.pdf", width = 7, height = 3.5)
 ggplot(data = peaks[peaks$Class %in% levels(peaks$Class),], aes(x = Class, y = log(dTAG/DMSO, base = 2), color = Class),) +
   theme(legend.position = "none") +
@@ -3078,7 +3311,11 @@ ggplot(data = peaks[peaks$Class %in% levels(peaks$Class),], aes(x = Class, y = l
   theme_bw() +
   theme(legend.position="none", plot.title = element_text(hjust = 0.5))
 dev.off()
+```
 
+T-tests.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Close = peaks[peaks$Class == "< 200bp",]
 t.test(log(Close$dTAG), log(Close$DMSO), paired = T) #<0.00000000000000022
 Intermediate = peaks[peaks$Class == "200 - 500bp",]
@@ -3089,7 +3326,9 @@ t.test(log(Far$dTAG), log(Far$DMSO), paired = T) #0.00001017
 
 # Outcomes associations
 
-## 24 hour differentially expressed genes (Figure 6A)
+## MA plot of gene expression at 24 hours dTAG vs. DMSO (Figure 6A)
+
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/"
@@ -3166,7 +3405,11 @@ gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists
 gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
+```
 
+Identify differentially expressed genes at 24 hours, shrinking the fold changes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 load("deseq.df_all_reads.RData")
 i = "24hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
@@ -3176,14 +3419,17 @@ res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = "gene"
 res.deseq.shrink <- lfcShrink(deseq.df, coef = "time_24hour_vs_0hour", type="ashr")
 res.deseq.shrink = res.deseq.shrink[rownames(res.deseq.shrink) %in% gene.symbol$gene,]
 sum(res.deseq.shrink$padj < 0.1 & !is.na(res.deseq.shrink$padj))
-plotMA(res.deseq.shrink, ylim = c(-1,1), xlim = c(10, 100000))
 
 df.deseq.effects.lattice = res.deseq.shrink
 df.deseq.effects.lattice$status = "Other"
 df.deseq.effects.lattice$status[res.deseq.shrink$padj < 0.1 & !is.na(res.deseq.shrink$padj) & res.deseq.shrink$log2FoldChange > 0] = "Activated"
 df.deseq.effects.lattice$status[res.deseq.shrink$padj < 0.1 & !is.na(res.deseq.shrink$padj) & res.deseq.shrink$log2FoldChange < 0] = "Repressed"
 df.deseq.effects.lattice$status = factor(df.deseq.effects.lattice$status, levels = c("Other", "Activated", "Repressed"))
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("MA_PRO_24hour_ashr_for_figure.pdf", width = 7, height = 3.5)
 ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(baseMean, 10), y = log2FoldChange, color = status)) +
   geom_point() +
@@ -3202,6 +3448,8 @@ dev.off()
 
 ## 24 hour gene set enrichment analysis (Figure 6B)
 
+Rank genes based on shrunken fold change.
+
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 original_gene_list <- res.deseq.shrink$log2FoldChange
 names(original_gene_list) <- rownames(res.deseq.shrink)
@@ -3219,7 +3467,11 @@ fgseaResTidy <- fgseaRes %>%
 
 print(fgseaResTidy[fgseaResTidy$padj < 0.1,], n = 100)
 gse_top = fgseaResTidy[fgseaResTidy$padj < 0.1,]
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #padj 2.45e-19
 pdf("Mountain_plot_24hour_E2F_targets.pdf", height = 5)
 plotEnrichment(msigdbr_list[["HALLMARK_E2F_TARGETS"]], gene_list) + 
@@ -3230,7 +3482,7 @@ dev.off()
 
 ## Growth curves (Figure 6C)
 
-I can upload the raw cell counts data
+Set up in R.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = "~/Library/CloudStorage/Box-Box/GuertinLab/Cell_Counts/"
@@ -3270,25 +3522,40 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE, conf.i
   datac$ci <- datac$se * ciMult
   return(datac)
 }
+```
 
-#Read data
+Read in the counts data.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Cell_Counts <- read_excel("220831_dTAG_TRPS1_reps_3_to_6.xlsx")
+```
 
-#Convert to cells/well
+Convert to cells/well.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Dilution_factor <- 10000*Cell_Counts$mL/9
 Cell_Counts <- Cell_Counts[,-6]
 Cell_Counts[,3:5] = Cell_Counts[,3:5]*Dilution_factor
+```
 
-#Average technical replicates
+Average the technical replicates.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Cell_Counts <- pivot_longer(Cell_Counts, colnames(Cell_Counts)[3:5], names_to = "Condition", values_to = "Count")
 Cell_Counts <- summarySE(Cell_Counts, measurevar="Count", groupvars=c("Condition", "Day", "Rep"))
 Cell_Counts <- Cell_Counts[,c(1,2,3,5)]
 Cell_Counts <- na.omit(Cell_Counts)
+```
 
-#Mean and SEM for biological replicates
+Calculate mean and standard error for the biological replicates.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 Summary <- summarySE(Cell_Counts, measurevar="Count", groupvars=c("Condition", "Day"))
+```
 
-#Plot
+Fit a linear model to the data with and without an interaction term for the effect of dTAG.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pd <- position_dodge(0.1)
 ylim <- c(0, 500000)
 fit = lm(log(Count, base = 2) ~ Day*Condition, data = Cell_Counts[Cell_Counts$Condition != "Untreated",])
@@ -3297,6 +3564,11 @@ anova(fit_no_interaction, fit) # p = 1.01e-05
 predict = predict(fit, interval = "confidence")
 Cell_Counts$lwr[Cell_Counts$Condition != "Untreated"] = predict[,2]
 Cell_Counts$upr[Cell_Counts$Condition != "Untreated"] = predict[,3]
+```
+
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("dTAG_TRPS1_reps3_to_6_curve_fit_confidence.pdf", width = 14)
 ggplot(Cell_Counts, aes(x=Day, y=Count, colour=Condition, fill = Condition)) + 
   geom_point(data=Cell_Counts, size=3, shape=21) +
@@ -3320,6 +3592,8 @@ dev.off()
 
 ## Plot example patient with high TRPS1 activity score (Figure 6D)
 
+Set up in R.
+
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 direc = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/"
 setwd(direc)
@@ -3336,8 +3610,11 @@ gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists
 gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
+```
 
-#Just immediate target genes
+Identify primary TRPS1-reponsive genes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 load("deseq.df_all_reads.RData")
 i = "0.5hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
@@ -3346,8 +3623,11 @@ res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = "gene"
 
 activated = res.deseq$symbol[res.deseq$padj < 0.01 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0] 
 repressed = res.deseq$symbol[res.deseq$padj < 0.01 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0] 
+```
 
-#Merge the 2 METABRIC cohorts after the GSEA step
+Define the TRPS1 regulon based on our own primary gene set.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 data("rtni1st")
 TRPS1 = rtni1st@regulatoryElements["TRPS1"]
 ILMN_SYMBOL = rtni1st@rowAnnotation
@@ -3371,8 +3651,11 @@ rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in%
 
 tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", event = "event", keycovar =c("Age", "Grade"))
 tns2nd <-tnsGSEA2(tns2nd)
+```
 
-#Merge
+Merge the two halves of the cohort.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tns_both = tns1st
 tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
 tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
@@ -3383,24 +3666,40 @@ tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity
                                                   tns2nd@results$regulonActivity$negative)
 tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
                                                 tns2nd@results$regulonActivity$status)
+```
 
-#Get regulon activity and sample attributes
+Get regulon activity and sample attributes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
 sdata <-tnsGet(tns_both, "survivalData")
 attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+```
 
-#Run KM and Cox analysis
+Run KM and Cox analysis.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tns_both <-tnsKM(tns_both)
 tns_both <-tnsCox(tns_both)
+```
 
+Identify the patient with the highest TRPS1 activity score.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 max = rownames(tns_both@results$regulonActivity$differential)[tns_both@results$regulonActivity$differential == max(tns_both@results$regulonActivity$differential)]
+```
 
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.01.pdf", height = 3, width = 3)
 tnsPlotGSEA2(tns_both, max, regs = "TRPS1")
 dev.off()
 ```
 
 ## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)
+
+Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #Logrank p-value 8.3e-6
