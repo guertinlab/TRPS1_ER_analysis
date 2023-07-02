@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 30 June 2023</h4>
+<h4 class="date">Last compiled on 02 July 2023</h4>
 
 </div>
 
@@ -719,25 +719,24 @@ function toggle_visibility(id1) {
 </ul></li>
 <li><a href="#chip-seq-data-pre-processing" id="toc-chip-seq-data-pre-processing"><span class="toc-section-number">4</span> ChIP-seq data pre-processing</a>
 <ul>
-<li><a href="#download-the-raw-sequencing-data" id="toc-download-the-raw-sequencing-data"><span class="toc-section-number">4.1</span> Download the raw sequencing data</a></li>
-<li><a href="#set-up" id="toc-set-up"><span class="toc-section-number">4.2</span> Set up</a></li>
-<li><a href="#download-the-raw-data-from-both-sequencing-runs" id="toc-download-the-raw-data-from-both-sequencing-runs"><span class="toc-section-number">4.3</span> Download the raw data (from both sequencing runs)</a></li>
-<li><a href="#process-each-sample.-just-re-processing-the-re-sequenced-samples-now." id="toc-process-each-sample.-just-re-processing-the-re-sequenced-samples-now."><span class="toc-section-number">4.4</span> Process each sample. Just re-processing the re-sequenced samples now.</a></li>
-<li><a href="#call-peaks" id="toc-call-peaks"><span class="toc-section-number">4.5</span> Call peaks</a></li>
-<li><a href="#count-reads-in-peaks" id="toc-count-reads-in-peaks"><span class="toc-section-number">4.6</span> Count reads in peaks</a></li>
-<li><a href="#call-trps1-peaks-with-the-dtag-samples-as-a-control" id="toc-call-trps1-peaks-with-the-dtag-samples-as-a-control"><span class="toc-section-number">4.7</span> Call TRPS1 peaks with the dTAG samples as a control</a></li>
-<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser"><span class="toc-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</a></li>
-<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer"><span class="toc-section-number">4.9</span> Leave the cluster environment, and copy files to your local computer</a></li>
+<li><a href="#set-up" id="toc-set-up"><span class="toc-section-number">4.1</span> Set up</a></li>
+<li><a href="#download-the-raw-data-from-both-sequencing-runs-rename-the-files-and-combine-the-reads" id="toc-download-the-raw-data-from-both-sequencing-runs-rename-the-files-and-combine-the-reads"><span class="toc-section-number">4.2</span> Download the raw data from both sequencing runs, rename the files, and combine the reads</a></li>
+<li><a href="#process-each-sample" id="toc-process-each-sample"><span class="toc-section-number">4.3</span> Process each sample</a></li>
+<li><a href="#call-peaks" id="toc-call-peaks"><span class="toc-section-number">4.4</span> Call peaks</a></li>
+<li><a href="#count-reads-in-peaks" id="toc-count-reads-in-peaks"><span class="toc-section-number">4.5</span> Count reads in peaks</a></li>
+<li><a href="#call-trps1-peaks-with-the-dtag-samples-as-a-control" id="toc-call-trps1-peaks-with-the-dtag-samples-as-a-control"><span class="toc-section-number">4.6</span> Call TRPS1 peaks with the dTAG samples as a control</a></li>
+<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser"><span class="toc-section-number">4.7</span> Scale and merge bigWigs for use in the genome browser</a></li>
+<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer"><span class="toc-section-number">4.8</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
 <li><a href="#trps1-chip-seq-analysis" id="toc-trps1-chip-seq-analysis"><span class="toc-section-number">5</span> TRPS1 ChIP-seq analysis</a>
 <ul>
-<li><a href="#heatmap-figure-2c" id="toc-heatmap-figure-2c"><span class="toc-section-number">5.1</span> Heatmap (Figure 2C)</a></li>
-<li><a href="#ma-plot-figure-2d" id="toc-ma-plot-figure-2d"><span class="toc-section-number">5.2</span> MA plot (Figure 2D)</a></li>
+<li><a href="#heatmap-of-trps1-peak-intensity-in-dtag-vs.-dmso-figure-2c" id="toc-heatmap-of-trps1-peak-intensity-in-dtag-vs.-dmso-figure-2c"><span class="toc-section-number">5.1</span> Heatmap of TRPS1 peak intensity in dTAG vs. DMSO (Figure 2C)</a></li>
+<li><a href="#ma-plot-of-trps1-peak-intensity-in-dtag-vs.-dmso-figure-2d" id="toc-ma-plot-of-trps1-peak-intensity-in-dtag-vs.-dmso-figure-2d"><span class="toc-section-number">5.2</span> MA plot of TRPS1 peak intensity in dTAG vs. DMSO (Figure 2D)</a></li>
 </ul></li>
 <li><a href="#atac-seq-data-pre-processing" id="toc-atac-seq-data-pre-processing"><span class="toc-section-number">6</span> ATAC-seq data pre-processing</a>
 <ul>
-<li><a href="#download-the-raw-sequencing-data-1" id="toc-download-the-raw-sequencing-data-1"><span class="toc-section-number">6.1</span> Download the raw sequencing data</a></li>
-<li><a href="#get-the-required-scripts-and-files-onto-the-computing-cluster" id="toc-get-the-required-scripts-and-files-onto-the-computing-cluster"><span class="toc-section-number">6.2</span> Get the required scripts and files onto the computing cluster</a></li>
+<li><a href="#download-the-raw-sequencing-data" id="toc-download-the-raw-sequencing-data"><span class="toc-section-number">6.1</span> Download the raw sequencing data</a></li>
+<li><a href="#set-up-1" id="toc-set-up-1"><span class="toc-section-number">6.2</span> Set up</a></li>
 <li><a href="#change-the-file-names" id="toc-change-the-file-names"><span class="toc-section-number">6.3</span> Change the file names</a></li>
 <li><a href="#process-the-samples-in-parallel-wait-until-these-jobs-finish-before-proceeding" id="toc-process-the-samples-in-parallel-wait-until-these-jobs-finish-before-proceeding"><span class="toc-section-number">6.4</span> Process the samples in parallel (wait until these jobs finish before proceeding)</a></li>
 <li><a href="#combine-scaled-bigwigs-into-one-bedgraph-and-bigwig-per-condition-for-visualization-on-the-genome-browser" id="toc-combine-scaled-bigwigs-into-one-bedgraph-and-bigwig-per-condition-for-visualization-on-the-genome-browser"><span class="toc-section-number">6.5</span> Combine scaled bigWigs into one bedGraph and bigWig per condition for visualization on the genome browser</a></li>
@@ -806,7 +805,7 @@ max-height: 600px;
 </style>
 <div id="introduction" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>This is a work in progress. Code chunks will be preceded by a brief description.</p>
+<p>This is a work in progress.</p>
 </div>
 <div id="gwas-summary-statistics-processing" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> GWAS summary statistics processing</h1>
@@ -882,29 +881,15 @@ wilcox.test(Chronos_luminal_last$TRPS1[cols == &quot;red&quot;],
 </div>
 <div id="chip-seq-data-pre-processing" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> ChIP-seq data pre-processing</h1>
-<div id="download-the-raw-sequencing-data" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> Download the raw sequencing data</h2>
-<p>Note to self: Once these files are confirmed by GEO, we can update the SRR numbers.</p>
-<pre class="bash"><code>fasterq-dump SRRTBD</code></pre>
-</div>
-<div id="set-up" class="section level2" number="4.2">
-<h2><span class="header-section-number">4.2</span> Set up</h2>
-<pre class="bash"><code>#Copy code to the cluster
-cd ~/Library/CloudStorage/Box-Box/GuertinLab/Code/
-scp 230322_chipseq_analysis_on_input_file.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
-scp 230308_macs2.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
-scp 230317_meme.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
-scp 230317_meme_short.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
-scp 230313_ChIPQC.R ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts
-
-#Log in to the cluster
-ssh -Y ts2hx@rivanna.hpc.virginia.edu
+<div id="set-up" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Set up</h2>
+<p>Log in to the cluster to perform the processing for each sample in parallel.</p>
+<pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu
 ijob -A gioeli_lab -p standard --cpus-per-task=10 --time=8:00:00
 module load sratoolkit/2.10.5
-vdb-config -i #press x to exit
-
-#Make directories
-title=ChIP
+vdb-config -i #press x to exit</code></pre>
+<p>Make directories for the later scripts to write files</p>
+<pre class="bash"><code>title=ChIP
 scripts=/scratch/ts2hx/scripts
 main=/scratch/ts2hx/${title}/results
 
@@ -918,11 +903,20 @@ mkdir -p ${main}/chipqc/meta
 mkdir -p ${main}/chipqc/bams
 mkdir -p ${main}/counts
 mkdir -p ${main}/bigWigs</code></pre>
+<p>Get the required script for bigWig merging and move to a directory that will end up in the $PATH</p>
+<pre class="bash"><code>wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
+chmod +x normalize_bedGraph.py
+mv normalize_bedGraph.py $HOME/bin/</code></pre>
+<p>Get the ENCODE blacklist</p>
+<pre class="bash"><code>wget https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/hg38-blacklist.v2.bed.gz -P $HOME/hg38/
+gunzip $HOME/hg38/hg38-blacklist.v2.bed.gz
+mv $HOME/hg38/hg38-blacklist.v2.bed $HOME/hg38/hg38.blacklist.bed</code></pre>
 </div>
-<div id="download-the-raw-data-from-both-sequencing-runs" class="section level2" number="4.3">
-<h2><span class="header-section-number">4.3</span> Download the raw data (from both sequencing runs)</h2>
-<pre class="bash"><code>#Download the fastq&#39;s
-cd /scratch/ts2hx/${title}/raw_data
+<div id="download-the-raw-data-from-both-sequencing-runs-rename-the-files-and-combine-the-reads" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Download the raw data from both sequencing runs, rename the files, and combine the reads</h2>
+<p>Download the first run.</p>
+<pre class="bash"><code>cd /scratch/ts2hx/${title}/raw_data
+
 wget http://guertinlab.cam.uchc.edu/230302_tgs_pool1.zip
 md5sum 230302_tgs_pool1.zip
 unzip 230302_tgs_pool1.zip
@@ -931,28 +925,26 @@ wget http://guertinlab.cam.uchc.edu/230306_tgs_pool2.zip
 md5sum 230306_tgs_pool2.zip
 unzip 230306_tgs_pool2.zip
 #There are no &quot;x&quot; samples in this pool
-rm -r *_x_*
-
-#Rename files
-for i in *_R1_001.fastq.gz
+rm -r *_x_*</code></pre>
+<p>Rename files to remove the excess.</p>
+<pre class="bash"><code>for i in *_R1_001.fastq.gz
 do
   name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
   echo $name
   mv ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz
   mv ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz
-done
-
-#Resequenced
-wget http://guertinlab.cam.uchc.edu/230320_tgs_ChIP_pool1.zip
+done</code></pre>
+<p>Download the second run.</p>
+<pre class="bash"><code>wget http://guertinlab.cam.uchc.edu/230320_tgs_ChIP_pool1.zip
 md5sum 230320_tgs_ChIP_pool1.zip
 unzip 230320_tgs_ChIP_pool1.zip
 wget http://guertinlab.cam.uchc.edu/230321_TGS_ChIP_pool2.zip
 md5sum 230321_TGS_ChIP_pool2.zip
 unzip 230321_TGS_ChIP_pool2.zip
 #There are no &quot;x&quot; samples in this pool
-rm -r *_x_*
-
-for i in *_R1_001.fastq.gz
+rm -r *_x_*</code></pre>
+<p>Combine the reads.</p>
+<pre class="bash"><code>for i in *_R1_001.fastq.gz
 do
   name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
   echo $name
@@ -962,11 +954,9 @@ do
   cat ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz &gt; ${name}_tmp.fastq.gz
   mv ${name}_tmp.fastq.gz ${name}_PE2.fastq.gz
   rm ${name}_*_R2_001.fastq.gz
-done
-
-#Combine the libraries with 2 indices each
-#Also process each separately as &quot;HAx&quot; and &quot;HAy&quot; to see if they cluster with the combined &quot;HA&quot;
-for i in *_x_*
+done</code></pre>
+<p>Some HA samples got 2 indices each, so combine them.</p>
+<pre class="bash"><code>for i in *_x_*
 do
   factor=$(echo $i | awk -F&quot;_&quot; &#39;{print $3}&#39;)
   treatment=$(echo $i | awk -F&quot;_&quot; &#39;{print $4}&#39;)
@@ -982,8 +972,8 @@ do
     ${pre}_${factor}_${treatment}_${post}
 done</code></pre>
 </div>
-<div id="process-each-sample.-just-re-processing-the-re-sequenced-samples-now." class="section level2" number="4.4">
-<h2><span class="header-section-number">4.4</span> Process each sample. Just re-processing the re-sequenced samples now.</h2>
+<div id="process-each-sample" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Process each sample</h2>
 <p>The script used in the next code chunk (230322_chipseq_analysis_on_input_file.sh) is below:</p>
 <pre class="bash"><code>#!/bin/bash/
 
@@ -1085,9 +1075,10 @@ module purge
 module load deeptools/3.5.1
 
 #Convert bam to bigWig for coverage visualization
+#We re-do this later with a larger bin size, so this is not necessary here (should change in future)
 bamCoverage --bam ${bowtie_results}/${name}.bam -o ${bigWigs_out}/${name}_not_scaled.bw -p $cores \
   --binSize 1 --extendReads --centerReads</code></pre>
-<p>(wait for these jobs to finish before proceeding)</p>
+<p>Run the above script on each sample in parallel.</p>
 <pre class="bash"><code>chmod +x ${scripts}/230322_chipseq_analysis_on_input_file.sh
 for fastq in *_HA*_PE1.fastq.gz *_ER_*_PE1.fastq.gz *_IgG_*_PE1.fastq.gz
 do
@@ -1098,12 +1089,15 @@ do
     --wrap=&quot;sh ${scripts}/230322_chipseq_analysis_on_input_file.sh $fastq $main&quot;
   sleep 1
 done</code></pre>
+<p>Move IgG samples to subdirectory</p>
+<pre class="bash"><code>cd ${main}/bowtie2/
+mv *IgG*.bam* controls/</code></pre>
 </div>
-<div id="call-peaks" class="section level2" number="4.5">
-<h2><span class="header-section-number">4.5</span> Call peaks</h2>
+<div id="call-peaks" class="section level2" number="4.4">
+<h2><span class="header-section-number">4.4</span> Call peaks</h2>
 <p>The script used in the next code chunk (230308_macs2.sh) is below:</p>
 <pre class="bash"><code>#!/bin/bash
-
+#Get the variables from the arguments
 samples=$1
 control=$2
 factor=$3
@@ -1115,15 +1109,13 @@ module load macs2/2.2.7.1 gcc/7.1.0 openmpi/3.1.4 intel/18.0 intelmpi/18.0 R/4.1
 
 macs2 callpeak -t ${samples}_*.bam -c ${control}_*.bam -f BAMPE -g hs -n $factor --keep-dup all \
   --outdir ${main}/macs2 
+
+#Remove noncanonical chromosomes and blacklisted regions, and make a window of 50bp on either side of the summit
 grep -v &quot;random&quot; ${main}/macs2/${factor}_summits.bed | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | grep -v &quot;chrM&quot; | \
   intersectBed -v -a stdin -b $blacklist | slopBed -b 50 -i stdin -g $HOME/hg38/hg38.chrom.sizes &gt; \
   ${main}/macs2/${factor}_summit_window.bed</code></pre>
-<p>(wait for these jobs to finish before proceeding)</p>
-<pre class="bash"><code>#Move IgG samples to subdirectory
-cd ${main}/bowtie2/
-mv *IgG*.bam* controls/
-
-#Call peaks for each factor 
+<p>Run the above script on each sample in parallel.</p>
+<pre class="bash"><code>#Call peaks for each factor 
 chmod +x ${scripts}/230308_macs2.sh
 for bam in *_DMSO_rep1.bam
 do
@@ -1136,11 +1128,8 @@ do
     --wrap=&quot;sh ${scripts}/230308_macs2.sh $samples $control $factor $main&quot;
   sleep 1
 done</code></pre>
-</div>
-<div id="count-reads-in-peaks" class="section level2" number="4.6">
-<h2><span class="header-section-number">4.6</span> Count reads in peaks</h2>
-<pre class="bash"><code>#Remove blacklist before counting in peaks
-blacklist=$HOME/hg38/hg38.blacklist.bed
+<p>Remove noncanonical chromosomes and blacklisted regions. Could have added this to the macs2 script when I did it for the summit window.</p>
+<pre class="bash"><code>blacklist=$HOME/hg38/hg38.blacklist.bed
 module load gcc/9.2.0 bedtools/2.29.2
 for bam in *_DMSO_rep1.bam
 do
@@ -1152,10 +1141,12 @@ do
   grep -v &quot;random&quot; ${main}/macs2/${factor}_summits.bed | grep -v &quot;chrUn&quot; | grep -v &quot;chrEBV&quot; | grep -v &quot;chrM&quot; | \
     intersectBed -v -a stdin -b $blacklist &gt; ${factor}_tmp.txt
   mv ${factor}_tmp.txt ${main}/macs2/${factor}_summits.bed 
-done
-
-#Count reads in peaks (wait for these jobs to finish before proceeding)
-cd ${main}/counts/
+done</code></pre>
+</div>
+<div id="count-reads-in-peaks" class="section level2" number="4.5">
+<h2><span class="header-section-number">4.5</span> Count reads in peaks</h2>
+<p>Count reads that overlap any part of the full narrowPeak region.</p>
+<pre class="bash"><code>cd ${main}/counts/
 for bed in `ls *_not_scaled.bed | grep -v IgG`
 do
   name=`basename $bed _not_scaled.bed`
@@ -1165,19 +1156,17 @@ do
     --wrap=&quot;module load gcc/9.2.0 bedtools/2.29.2; \
       mapBed -null &quot;0&quot; -a ${main}/macs2/${factor}_peaks.narrowPeak -b $bed &gt; ${name}_peak_counts.txt&quot;
   sleep 1 # wait 1 second between each job submission
-done
-
-#Just keep the last column (the counts)
-for counts in T47D_Clone28_*_peak_counts.txt
+done</code></pre>
+<p>Just keep the last column (the counts). I should do this in the above jobs.</p>
+<pre class="bash"><code>for counts in T47D_Clone28_*_peak_counts.txt
 do
   name=`basename $counts _peak_counts.txt`
   awk &#39;{print $NF}&#39; ${name}_peak_counts.txt &gt; ${name}_peak_counts_only.txt
   echo $name | cat - ${name}_peak_counts_only.txt &gt; ${name}_peak_counts.txt
   rm ${name}_peak_counts_only.txt
-done
-
-#Combine into 1 file per factor
-for peaks in ../macs2/*_peaks.narrowPeak
+done</code></pre>
+<p>Combine into 1 file per factor</p>
+<pre class="bash"><code>for peaks in ../macs2/*_peaks.narrowPeak
 do
   factor=`basename $peaks _peaks.narrowPeak`
   awk &#39;{OFS = &quot;\t&quot;} {print $1, $2, $3}&#39; $peaks &gt; peaks.bed
@@ -1186,8 +1175,8 @@ do
   rm peaks*
 done</code></pre>
 </div>
-<div id="call-trps1-peaks-with-the-dtag-samples-as-a-control" class="section level2" number="4.7">
-<h2><span class="header-section-number">4.7</span> Call TRPS1 peaks with the dTAG samples as a control</h2>
+<div id="call-trps1-peaks-with-the-dtag-samples-as-a-control" class="section level2" number="4.6">
+<h2><span class="header-section-number">4.6</span> Call TRPS1 peaks with the dTAG samples as a control</h2>
 <p>The script used in the next code chunk (230322_macs2.sh) is below:</p>
 <pre class="bash"><code>#!/bin/bash
 
@@ -1210,7 +1199,7 @@ grep -v &quot;random&quot; ${main}/macs2/${factor}_summits.bed | grep -v &quot;c
 mv ${factor}_tmp.txt ${main}/macs2/${factor}_summits.bed 
 slopBed -b 50 -i ${main}/macs2/${factor}_summits.bed -g $HOME/hg38/hg38.chrom.sizes &gt; \
   ${main}/macs2/${factor}_summit_window.bed</code></pre>
-<p>Call peaks</p>
+<p>Run the above script on the HA samples.</p>
 <pre class="bash"><code>cd ${main}/bowtie2/
 factor=HA_DMSO_vs_dTAG
 samples=T47D_Clone28_HA_DMSO
@@ -1218,7 +1207,7 @@ control=T47D_Clone28_HA_dTAG
 sbatch -p largemem -A gioeli_lab -t 4:00:00 -N 1 -n 1 --mem-per-cpu=64000 --job-name macs2 \
   -o /scratch/ts2hx/${title}/logs/${factor}_macs2.log \
   --wrap=&quot;sh ${scripts}/230322_macs2.sh $samples $control $factor $main&quot;</code></pre>
-<p>Count reads in peaks</p>
+<p>Count reads in HA peaks</p>
 <pre class="bash"><code>cd ${main}/counts/
 #Just count read fragments that overlap the summit
 peaks=${main}/macs2/${factor}_summits.bed
@@ -1237,9 +1226,9 @@ echo -e &quot;chr\tstart\tend\tname\tqvalue&quot; | cat - $peaks | \
   paste -d&#39;\t&#39; - *${factor}_peak_counts.txt &gt; Combined_${factor}_peak_counts.txt
 rm T47D_Clone28_*${factor}_peak_counts.txt</code></pre>
 </div>
-<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser" class="section level2" number="4.8">
-<h2><span class="header-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</h2>
-<p>First make size factors based on total mapped reads (divide each by the geometric mean of all of them)</p>
+<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser" class="section level2" number="4.7">
+<h2><span class="header-section-number">4.7</span> Scale and merge bigWigs for use in the genome browser</h2>
+<p>First make size factors based on total mapped reads (divide each by the geometric mean of all of them like in DESeq2)</p>
 <pre class="bash"><code>cd ${main}/bowtie2
 module load samtools/1.12
 for i in HA ER
@@ -1273,7 +1262,7 @@ for (i in samples) {
   write.table(estimateSizeFactorsForMatrix(x), file = paste0(&quot;/scratch/ts2hx/ChIP/results/bigWigs/&quot;, factor, &#39;_sizeFactor.txt&#39;), quote =F, col.names=F)
 }
 q()</code></pre>
-<p>Generate the binned bigWigs</p>
+<p>Generate the binned bigWigs.</p>
 <pre class="bash"><code>for i in *.bam
 do
   name=$(echo $i | awk -F&quot;.bam&quot; &#39;{print $1}&#39;)
@@ -1282,7 +1271,7 @@ do
     bamCoverage --bam ${name}.bam -o ${main}/bigWigs/${name}_binned_not_scaled.bw -p 10 --extendReads --centerReads;&quot;
   sleep 1
 done</code></pre>
-<p>The script used in the next code chunk (230329_ChIP_scale_bigWig_binned.sh) is below:</p>
+<p>The script used in the next code chunk (230329_ChIP_scale_bigWig_binned.sh) is below. It scales each bigWig based on the read depth.</p>
 <pre class="bash"><code>#! /bin/bash
 factor=$2
 directory=$3
@@ -1312,13 +1301,8 @@ bedGraphToBigWig ${name}_scaled.bg $HOME/hg38/hg38.chrom.sizes ${name}_scaled.bi
 rm ${name}_scaled.bg
 rm ${name}_scaled_sorted.bg
 rm ${name}.bg</code></pre>
-<p>Scale the bigWigs based on read depth</p>
-<pre class="bash"><code>#First get the required script and move to a directory that will end up in the $PATH
-wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
-chmod +x normalize_bedGraph.py
-mv normalize_bedGraph.py $HOME/bin/
-
-cd ${main}/bigWigs
+<p>Run the above script on each sample in parallel.</p>
+<pre class="bash"><code>cd ${main}/bigWigs
 for i in *_binned_not_scaled.bw
 do
   name=$(echo $i | awk -F&quot;_binned_not_scaled.bw&quot; &#39;{print $1}&#39;)
@@ -1328,7 +1312,7 @@ do
       ${name}_binned_not_scaled.bw $factor ${main}/bigWigs&quot;
   sleep 1
 done</code></pre>
-<p>The script used in the next code chunk (230329_ChIP_to_browser_binned.sh) is below:</p>
+<p>The script used in the next code chunk (230329_ChIP_to_browser_binned.sh) is below. It merges the scaled bigWigs across replicates into one bigWig and one bedGraph per condition.</p>
 <pre class="bash"><code>#! /bin/bash
 directory=$2
 
@@ -1362,7 +1346,7 @@ head ${name}_scaled.bedGraph
 bedGraphToBigWig ${name}_scaled.bedGraph $HOME/hg38/hg38.chrom.sizes \
   ${name}_combined_normalized.bigWig
 gzip ${name}_scaled.bedGraph</code></pre>
-<p>Merge the bigWigs</p>
+<p>Run the above script on each condition in parallel.</p>
 <pre class="bash"><code>for i in T47D_Clone28_*_rep1_binned_scaled.bigWig
 do
   name=$(echo $i | awk -F&quot;_rep1_scaled.bigWig&quot; &#39;{print $1}&#39;)
@@ -1371,8 +1355,8 @@ do
   sleep 1
 done</code></pre>
 </div>
-<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer" class="section level2" number="4.9">
-<h2><span class="header-section-number">4.9</span> Leave the cluster environment, and copy files to your local computer</h2>
+<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer" class="section level2" number="4.8">
+<h2><span class="header-section-number">4.8</span> Leave the cluster environment, and copy files to your local computer</h2>
 <pre class="bash"><code>exit
 exit
 
@@ -1391,8 +1375,9 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_sizeFac
 </div>
 <div id="trps1-chip-seq-analysis" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> TRPS1 ChIP-seq analysis</h1>
-<div id="heatmap-figure-2c" class="section level2" number="5.1">
-<h2><span class="header-section-number">5.1</span> Heatmap (Figure 2C)</h2>
+<div id="heatmap-of-trps1-peak-intensity-in-dtag-vs.-dmso-figure-2c" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Heatmap of TRPS1 peak intensity in dTAG vs. DMSO (Figure 2C)</h2>
+<p>Set up</p>
 <pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=20 --time=12:00:00
 main=/scratch/ts2hx/ChIP/results
@@ -1400,32 +1385,29 @@ cd $main
 mkdir -p heatmaps
 cd heatmaps
 
-module load deeptools/3.5.1
-#Defined functional TRPS1 peaks by MACS2 q-value &lt; 10^(-30)
-awk &#39;$5 &gt; 30&#39; /scratch/ts2hx/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed &gt; \
-  Functional_TRPS1_summits.bed
-
-#Make the matrix (this can be used for a composite profile as well)
-computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
+module load deeptools/3.5.1</code></pre>
+<p>Define functional TRPS1 peaks by MACS2 q-value &lt; 10^(-30). I chose this based on making CDFs for TRPS1 proximity to activated genes using the PRO-seq data. More liberal q-values gave peaks that were promoter-proximal and not differentially close to activated genes compared to unchanged genes.</p>
+<pre class="bash"><code>awk &#39;$5 &gt; 30&#39; /scratch/ts2hx/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed &gt; \
+  Functional_TRPS1_summits.bed</code></pre>
+<p>Make the matrix (this can be used for a composite profile as well).</p>
+<pre class="bash"><code>computeMatrix reference-point --referencePoint center -b 500 -a 500 -p 20 --missingDataAsZero \
   -R Functional_TRPS1_summits.bed \
   -S /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_DMSO_combined_normalized.bigWig \
   /scratch/ts2hx/ChIP/results/bigWigs/T47D_Clone28_HA_dTAG_combined_normalized.bigWig \
-  -o matrix_HA_ChIP_TRPS1_peaks.gz --outFileSortedRegions TRPS1_peaks_sorted_for_heatmap.bed
-  
-#Make the heatmap
-plotHeatmap -m matrix_HA_ChIP_TRPS1_peaks.gz -out heatmap_HA_ChIP_TRPS1_peaks.pdf --heatmapHeight 14 \
+  -o matrix_HA_ChIP_TRPS1_peaks.gz --outFileSortedRegions TRPS1_peaks_sorted_for_heatmap.bed</code></pre>
+<p>Make the heatmap</p>
+<pre class="bash"><code>plotHeatmap -m matrix_HA_ChIP_TRPS1_peaks.gz -out heatmap_HA_ChIP_TRPS1_peaks.pdf --heatmapHeight 14 \
    --regionsLabel &quot;Functional TRPS1 peaks&quot; --xAxisLabel &quot;Distance from summit&quot; \
-   --samplesLabel &quot;DMSO&quot; &quot;dTAG&quot; --colorMap Purples --whatToShow &quot;heatmap and colorbar&quot; 
-
+   --samplesLabel &quot;DMSO&quot; &quot;dTAG&quot; --colorMap Purples --whatToShow &quot;heatmap and colorbar&quot; </code></pre>
+<p>Leave the cluster environment, and copy files to your local computer.</p>
+<pre class="bash"><code>exit
 exit
-exit
 
-#Copy files
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
 scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .</code></pre>
 </div>
-<div id="ma-plot-figure-2d" class="section level2" number="5.2">
-<h2><span class="header-section-number">5.2</span> MA plot (Figure 2D)</h2>
+<div id="ma-plot-of-trps1-peak-intensity-in-dtag-vs.-dmso-figure-2d" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> MA plot of TRPS1 peak intensity in dTAG vs. DMSO (Figure 2D)</h2>
 <p>First get the complexity estimate file for size factors (total aligned reads)</p>
 <pre class="bash"><code>title=ChIP
 cd /Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/${title}/
@@ -1446,7 +1428,7 @@ do
   echo -e &quot;$name\t$raw_reads\t$aligned_reads\t$unique_reads\t$estimated_size\t$resultant_reads&quot; &gt;&gt; \
     230322_complexity_estimate.txt
 done</code></pre>
-<p>Now use DESeq2 to identify differentially bound peaks (all of them)</p>
+<p>Now use DESeq2 to identify differentially bound peaks (in this case all of them)</p>
 <pre class="r bg-info"><code>direc = &#39;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/counts/&#39;
 setwd(direc)
 
@@ -1458,64 +1440,40 @@ library(lattice)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(data.table)
-
-#Make sure IgG counts aren&#39;t changing
-x &lt;- read.table(&quot;Combined_HA_DMSO_vs_dTAG_peak_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
-rownames(x) = paste0(x[,1], &quot;:&quot;, x[,2], &quot;-&quot;, x[,3])
-peak_name = x[,4]
-peak_qvalue = x[,5]
-x = x[,-c(1:6)]
-colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), &quot;Clone28_&quot;), &quot;[&quot;, 2), &quot;_HA_DMSO&quot;), &quot;[&quot;, 1)
-x = x[,9:16]
-treatment = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 2), levels = c(&quot;DMSO&quot;, &quot;dTAG&quot;))
-rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
-deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, rep), ~ treatment)
-factors &lt;- read.table(&quot;IgG_sizeFactor.txt&quot;)
-size_factors = factors$V2
-names(size_factors) = factors$V1
-sizeFactors(deseq.df) &lt;- size_factors
-deseq.df = DESeq(deseq.df)
-
-res.deseq = results(deseq.df, contrast = c(&quot;treatment&quot;, &quot;dTAG&quot;, &quot;DMSO&quot;))
-sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj))
-pdf(&quot;MA_IgG.pdf&quot;)
-plotMA(res.deseq, ylim = c(-8,8))
-dev.off()
-
-#Get read depth
-complexity_estimate &lt;- read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/logs/230322_complexity_estimate.txt&quot;, header = T)
+library(data.table)</code></pre>
+<p>Get read depth</p>
+<pre class="r bg-info"><code>complexity_estimate &lt;- read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/logs/230322_complexity_estimate.txt&quot;, header = T)
 name = sapply(strsplit(complexity_estimate$name, &quot;Clone28_&quot;), &quot;[&quot;, 2)
 complexity_estimate = t(complexity_estimate$unique_reads)
 colnames(complexity_estimate) = name
-complexity_estimate = complexity_estimate[,-grep(&quot;ER&quot;, colnames(complexity_estimate))]
-
-x &lt;- read.table(&quot;Combined_HA_DMSO_vs_dTAG_peak_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+complexity_estimate = complexity_estimate[,-grep(&quot;ER&quot;, colnames(complexity_estimate))]</code></pre>
+<p>Read in the counts table and change the column names</p>
+<pre class="r bg-info"><code>x &lt;- read.table(&quot;Combined_HA_DMSO_vs_dTAG_peak_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = paste0(x[,1], &quot;:&quot;, x[,2], &quot;-&quot;, x[,3])
 peak_name = x[,4]
 peak_qvalue = x[,5]
 x = x[,-c(1:6)]
-colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), &quot;Clone28_&quot;), &quot;[&quot;, 2), &quot;_HA_DMSO&quot;), &quot;[&quot;, 1)
-
-background &lt;- sweep(x[,grep(&quot;IgG&quot;, colnames(x))], 2, complexity_estimate[grep(&quot;IgG&quot;, names(complexity_estimate))], FUN = &quot;/&quot;)
+colnames(x) = sapply(strsplit(sapply(strsplit(colnames(x), &quot;Clone28_&quot;), &quot;[&quot;, 2), &quot;_HA_DMSO&quot;), &quot;[&quot;, 1)</code></pre>
+<p>Subtract the read depth normalized background signal</p>
+<pre class="r bg-info"><code>background &lt;- sweep(x[,grep(&quot;IgG&quot;, colnames(x))], 2, complexity_estimate[grep(&quot;IgG&quot;, names(complexity_estimate))], FUN = &quot;/&quot;)
 background = rowMeans(background)
 background = cbind.data.frame(background, background, background, background, background, background, background, background)
 background &lt;- sweep(as.data.frame(background), 2, complexity_estimate[grep(&quot;HA&quot;, names(complexity_estimate))], FUN = &quot;*&quot;)
 background = round(background, digits = 0)
 
 x = x[,grep(&quot;HA&quot;, colnames(x))] - background
-x[x &lt; 0] = 0
-
-treatment = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 2), levels = c(&quot;DMSO&quot;, &quot;dTAG&quot;))
+x[x &lt; 0] = 0</code></pre>
+<p>Run Deseq2</p>
+<pre class="r bg-info"><code>treatment = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 2), levels = c(&quot;DMSO&quot;, &quot;dTAG&quot;))
 rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, rep), ~ treatment)
 factors &lt;- read.table(&quot;HA_sizeFactor.txt&quot;)
 size_factors = factors$V2
 names(size_factors) = factors$V1
 sizeFactors(deseq.df) &lt;- size_factors
-deseq.df = DESeq(deseq.df)
-
-pdf(&quot;MA_HA_DMSO_vs_dTAG_subtract_IgG_qvalue_30.pdf&quot;)
+deseq.df = DESeq(deseq.df)</code></pre>
+<p>Plot</p>
+<pre class="r bg-info"><code>pdf(&quot;MA_HA_DMSO_vs_dTAG_subtract_IgG_qvalue_30.pdf&quot;)
 res.deseq = results(deseq.df[peak_qvalue &gt; 30,], contrast = c(&quot;treatment&quot;, &quot;dTAG&quot;, &quot;DMSO&quot;))
 save(res.deseq, file = &quot;res.deseq.HA.q30.Rdata&quot;)
 plotMA(res.deseq, ylim = c(-4,4))
@@ -1524,23 +1482,19 @@ dev.off()</code></pre>
 </div>
 <div id="atac-seq-data-pre-processing" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> ATAC-seq data pre-processing</h1>
-<div id="download-the-raw-sequencing-data-1" class="section level2" number="6.1">
+<div id="download-the-raw-sequencing-data" class="section level2" number="6.1">
 <h2><span class="header-section-number">6.1</span> Download the raw sequencing data</h2>
-<p>Note to self: Once these files are confirmed by GEO, we can update the SRR numbers.</p>
+<p>Once these files are public on SRA, we can update the SRR numbers.</p>
 <pre class="bash"><code>fasterq-dump SRRTBD</code></pre>
 </div>
-<div id="get-the-required-scripts-and-files-onto-the-computing-cluster" class="section level2" number="6.2">
-<h2><span class="header-section-number">6.2</span> Get the required scripts and files onto the computing cluster</h2>
-<pre class="bash"><code>#Copy scripts
-cd ~/Library/CloudStorage/Box-Box/GuertinLab/Code
-scp 230417_*.sh ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/scripts 
-
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+<div id="set-up-1" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Set up</h2>
+<pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=10 --time=8:00:00
 main=/scratch/ts2hx/TRPS1_timecourse_ATAC
 cd $main
 
-#First get the required script for bigWig merging and move to a directory that will end up in the $PATH
+#Get the required script for bigWig merging and move to a directory that will end up in the $PATH
 wget https://raw.githubusercontent.com/guertinlab/Nascent_RNA_Methods/main/normalize_bedGraph.py
 chmod +x normalize_bedGraph.py
 mv normalize_bedGraph.py $HOME/bin/
@@ -1661,6 +1615,7 @@ done</code></pre>
 </div>
 <div id="combine-scaled-bigwigs-into-one-bedgraph-and-bigwig-per-condition-for-visualization-on-the-genome-browser" class="section level2" number="6.5">
 <h2><span class="header-section-number">6.5</span> Combine scaled bigWigs into one bedGraph and bigWig per condition for visualization on the genome browser</h2>
+<p>The script used in the next code chunk (230417_ATAC_to_browser.sh) is below:</p>
 <pre class="bash"><code>#! /bin/bash
 directory=/scratch/$USER/TRPS1_timecourse_ATAC
 
