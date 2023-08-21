@@ -2391,6 +2391,7 @@ time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
 deseq.df = DESeq(deseq.df)
+save(deseq.df, file = "TRPS1_timecourse_PRO_deseq.df.RData")
 ```
 
 Run the likelihood ratio test to identify dynamic peaks over the time course.
@@ -2873,20 +2874,10 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
 ```
 
-Read in the counts table and change the column names.
-```{r class.source="bg-info", engine='R', eval=F, echo=T}
-x = read.table("TRPS1_timecourse_PRO_60kb_gene_counts.txt", sep = '\t', header = TRUE)
-rownames(x) = x[,1]
-x = x[,seq(2,to=ncol(x),by=2)]
-```
-
-Run DESeq2.
+Load the DESeq2 object.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
-rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
-deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
-deseq.df = DESeq(deseq.df)
+load("TRPS1_timecourse_PRO_deseq.df.RData")
 ```
 
 Run the likelihood ratio test to identify dynamic peaks over the time course.
@@ -2949,8 +2940,8 @@ plot.df = plot.df[order(plot.df$time),]
 plot.df$cluster = paste('cluster', as.character(plot.df$cluster), sep = '')
 head(plot.df)
 
-save(plot.df, file = "LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData")
-load("LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData")
+save(plot.df, file = "LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData")
+load("LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData")
 ```
 
 Assign the colors.
@@ -3172,7 +3163,7 @@ rownames(counts) = NULL
 Get dynamic ER target genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("deseq.df_all_reads.RData")
+load("TRPS1_timecourse_PRO_deseq.df.RData")
 res.deseq = results(deseq.df, contrast = c("time", "0.5hour", "0hour"))
 estrogen_response_genes = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/estrogen_activated_gene_names.txt", header = FALSE)$V1
 estrogen_response_genes = gene.symbol$gene[gene.symbol$symbol %in% estrogen_response_genes]
@@ -3410,7 +3401,7 @@ colnames(gene.symbol) = c("gene", "symbol")
 Identify differentially expressed genes at 24 hours, shrinking the fold changes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("deseq.df_all_reads.RData")
+load("TRPS1_timecourse_PRO_deseq.df.RData")
 i = "24hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
@@ -3615,7 +3606,7 @@ colnames(gene.symbol) = c("gene", "symbol")
 Identify primary TRPS1-reponsive genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("deseq.df_all_reads.RData")
+load("TRPS1_timecourse_PRO_deseq.df.RData")
 i = "0.5hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
