@@ -3553,7 +3553,15 @@ gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_ta
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Identify differentially expressed genes at 24 hours, shrinking the fold changes.</p>
-<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
+<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_Combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;, &quot;24hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
 i = &quot;24hour&quot;
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
