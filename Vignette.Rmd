@@ -2378,7 +2378,7 @@ Read in the counts table and change the column names. Here we focus on the early
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #DESeq
-x = read.table("TRPS1_timecourse_PRO_gene_counts_Combined.txt", sep = '\t', header = TRUE)
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 x = x[,!grepl("24hour", colnames(x))]
@@ -3401,7 +3401,7 @@ colnames(gene.symbol) = c("gene", "symbol")
 Identify differentially expressed genes at 24 hours, shrinking the fold changes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-x = read.table("TRPS1_timecourse_PRO_gene_counts_Combined.txt", sep = '\t', header = TRUE)
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 
