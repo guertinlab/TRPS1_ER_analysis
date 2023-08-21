@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 02 July 2023</h4>
+<h4 class="date">Last compiled on 21 August 2023</h4>
 
 </div>
 
@@ -2714,7 +2714,8 @@ x = x[,!grepl(&quot;24hour&quot;, colnames(x))]</code></pre>
 <pre class="r bg-info"><code>time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;))
 rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
-deseq.df = DESeq(deseq.df)</code></pre>
+deseq.df = DESeq(deseq.df)
+save(deseq.df, file = &quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)</code></pre>
 <p>Run the likelihood ratio test to identify dynamic peaks over the time course.</p>
 <pre class="r bg-info"><code>dds.lrt = DESeq(deseq.df, test=&quot;LRT&quot;, reduced = ~ rep)
 res.lrt = results(dds.lrt)
@@ -3128,15 +3129,8 @@ gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antago
 gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
-<p>Read in the counts table and change the column names.</p>
-<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_60kb_gene_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
-rownames(x) = x[,1]
-x = x[,seq(2,to=ncol(x),by=2)]</code></pre>
-<p>Run DESeq2.</p>
-<pre class="r bg-info"><code>time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;, &quot;24hour&quot;))
-rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
-deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
-deseq.df = DESeq(deseq.df)</code></pre>
+<p>Load the DESeq2 object.</p>
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)</code></pre>
 <p>Run the likelihood ratio test to identify dynamic peaks over the time course.</p>
 <pre class="r bg-info"><code>dds.lrt = DESeq(deseq.df, test=&quot;LRT&quot;, reduced = ~ rep)
 res.lrt = results(dds.lrt)
@@ -3179,8 +3173,8 @@ plot.df = plot.df[order(plot.df$time),]
 plot.df$cluster = paste(&#39;cluster&#39;, as.character(plot.df$cluster), sep = &#39;&#39;)
 head(plot.df)
 
-save(plot.df, file = &quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData&quot;)
-load(&quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData&quot;)</code></pre>
+save(plot.df, file = &quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData&quot;)
+load(&quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData&quot;)</code></pre>
 <p>Assign the colors.</p>
 <pre class="r bg-info"><code>cat.colours = plot.df
 cat.colours$colour[plot.df$Class == &quot;Activated at 30 minutes&quot;] &lt;- &#39;#FF000064&#39;
@@ -3366,7 +3360,7 @@ counts$dTAG = rowMeans(counts[,grep(&quot;dTAG&quot;, colnames(counts))])
 counts = counts[,9:13]
 rownames(counts) = NULL</code></pre>
 <p>Get dynamic ER target genes.</p>
-<pre class="r bg-info"><code>load(&quot;deseq.df_all_reads.RData&quot;)
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, &quot;0.5hour&quot;, &quot;0hour&quot;))
 estrogen_response_genes = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/estrogen_activated_gene_names.txt&quot;, header = FALSE)$V1
 estrogen_response_genes = gene.symbol$gene[gene.symbol$symbol %in% estrogen_response_genes]
@@ -3559,7 +3553,7 @@ gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_ta
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Identify differentially expressed genes at 24 hours, shrinking the fold changes.</p>
-<pre class="r bg-info"><code>load(&quot;deseq.df_all_reads.RData&quot;)
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
 i = &quot;24hour&quot;
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
@@ -3719,7 +3713,7 @@ gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_ta
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Identify primary TRPS1-reponsive genes.</p>
-<pre class="r bg-info"><code>load(&quot;deseq.df_all_reads.RData&quot;)
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
 i = &quot;0.5hour&quot;
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
