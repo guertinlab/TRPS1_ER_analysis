@@ -2706,7 +2706,7 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Read in the counts table and change the column names. Here we focus on the early time points.</p>
 <pre class="r bg-info"><code>#DESeq
-x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_Combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 x = x[,!grepl(&quot;24hour&quot;, colnames(x))]</code></pre>
@@ -3553,7 +3553,7 @@ gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_ta
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Identify differentially expressed genes at 24 hours, shrinking the fold changes.</p>
-<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_Combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 
