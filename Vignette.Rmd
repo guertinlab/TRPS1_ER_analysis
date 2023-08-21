@@ -3401,7 +3401,15 @@ colnames(gene.symbol) = c("gene", "symbol")
 Identify differentially expressed genes at 24 hours, shrinking the fold changes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("TRPS1_timecourse_PRO_deseq.df.RData")
+x = read.table("TRPS1_timecourse_PRO_gene_counts_Combined.txt", sep = '\t', header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
 i = "24hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
