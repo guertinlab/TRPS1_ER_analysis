@@ -1263,7 +1263,8 @@ Identify differentially accessible peaks.
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 i = "0.5hour"
 res.deseq = results(deseq.df[peak_qvalue > 100,], contrast = c("time", i, "0hour"))
-sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
+sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0) #472
+sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0) #36
 ```
 
 Match the unchanged peaks to activated peaks based on accessibility.
