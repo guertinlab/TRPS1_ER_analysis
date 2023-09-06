@@ -1202,7 +1202,7 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_siz
 
 # ATAC-seq analysis
 
-## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)
+## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A and Tables S1,2)
 
 Set up libraries and functions in R.
 
@@ -1306,6 +1306,20 @@ ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(
 dev.off()
 ```
 
+Write regions as tables.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+increased = as.data.frame(activated)
+increased$region = rownames(increased)
+increased = increased[,c(ncol(increased), 1:(ncol(increased) - 1))]
+write.table(increased, file = "increased_ATAC_30min.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+
+decreased = as.data.frame(repressed)
+decreased$region = rownames(decreased)
+decreased = decreased[,c(ncol(decreased), 1:(ncol(decreased) - 1))]
+write.table(decreased, file = "decreased_ATAC_30min.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+```
+
 ## de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)
 
 For each time point, identify differentially accessible peaks and match based on accessibility. Should have called these "increased" and "decreased" for consistency.
@@ -1365,7 +1379,7 @@ do
 done
 ```
 
-## Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)
+## Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S3,4)
 
 Report results at FDR 0.1 (1401 total in the above database).
 
