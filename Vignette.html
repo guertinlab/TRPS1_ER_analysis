@@ -746,9 +746,9 @@ function toggle_visibility(id1) {
 </ul></li>
 <li><a href="#atac-seq-analysis" id="toc-atac-seq-analysis"><span class="toc-section-number">7</span> ATAC-seq analysis</a>
 <ul>
-<li><a href="#ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a" id="toc-ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a"><span class="toc-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)</a></li>
+<li><a href="#ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a-and-tables-s12" id="toc-ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a-and-tables-s12"><span class="toc-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A and Tables S1,2)</a></li>
 <li><a href="#de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b" id="toc-de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b"><span class="toc-section-number">7.2</span> de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)</a></li>
-<li><a href="#identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" id="toc-identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2"><span class="toc-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</a></li>
+<li><a href="#identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s34" id="toc-identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s34"><span class="toc-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S3,4)</a></li>
 <li><a href="#count-individual-motif-instances-in-dynamic-peaks-at-30-minutes-figure-3cd" id="toc-count-individual-motif-instances-in-dynamic-peaks-at-30-minutes-figure-3cd"><span class="toc-section-number">7.4</span> Count individual motif instances in dynamic peaks at 30 minutes (Figure 3C,D)</a></li>
 <li><a href="#cluster-dynamic-peaks-and-plot-the-heatmap-figure-3e" id="toc-cluster-dynamic-peaks-and-plot-the-heatmap-figure-3e"><span class="toc-section-number">7.5</span> Cluster dynamic peaks and plot the heatmap (Figure 3E)</a></li>
 <li><a href="#count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f" id="toc-count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f"><span class="toc-section-number">7.6</span> Count GATA motif instances in dynamic peaks across time points (Figure 3F)</a></li>
@@ -1733,8 +1733,8 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_siz
 </div>
 <div id="atac-seq-analysis" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> ATAC-seq analysis</h1>
-<div id="ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a" class="section level2" number="7.1">
-<h2><span class="header-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)</h2>
+<div id="ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a-and-tables-s12" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A and Tables S1,2)</h2>
 <p>Set up libraries and functions in R.</p>
 <pre class="r bg-info"><code>direc = &#39;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/&#39;
 setwd(direc)
@@ -1813,6 +1813,16 @@ ggplot(as.data.frame(df.deseq.effects.lattice) %&gt;% arrange(status), aes(x = l
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(color=NULL)
 dev.off()</code></pre>
+<p>Write regions as tables.</p>
+<pre class="r bg-info"><code>increased = as.data.frame(activated)
+increased$region = rownames(increased)
+increased = increased[,c(ncol(increased), 1:(ncol(increased) - 1))]
+write.table(increased, file = &quot;increased_ATAC_30min.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = TRUE, quote = FALSE)
+
+decreased = as.data.frame(repressed)
+decreased$region = rownames(decreased)
+decreased = decreased[,c(ncol(decreased), 1:(ncol(decreased) - 1))]
+write.table(decreased, file = &quot;decreased_ATAC_30min.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = TRUE, quote = FALSE)</code></pre>
 </div>
 <div id="de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b" class="section level2" number="7.2">
 <h2><span class="header-section-number">7.2</span> de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)</h2>
@@ -1866,8 +1876,8 @@ do
     ${name}.fasta
 done</code></pre>
 </div>
-<div id="identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" class="section level2" number="7.3">
-<h2><span class="header-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</h2>
+<div id="identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s34" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S3,4)</h2>
 <p>Report results at FDR 0.1 (1401 total in the above database).</p>
 <pre class="bash"><code>cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/
 motifs=~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/tomtom_db/homer_uniprobe_jaspar_edited.txt
