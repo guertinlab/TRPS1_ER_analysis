@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 21 August 2023</h4>
+<h4 class="date">Last compiled on 06 September 2023</h4>
 
 </div>
 
@@ -1780,7 +1780,8 @@ load(&quot;deseq.df.ATAC.Rdata&quot;)</code></pre>
 <p>Identify differentially accessible peaks.</p>
 <pre class="r bg-info"><code>i = &quot;0.5hour&quot;
 res.deseq = results(deseq.df[peak_qvalue &gt; 100,], contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
-sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj))</code></pre>
+sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0) #472
+sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0) #36</code></pre>
 <p>Match the unchanged peaks to activated peaks based on accessibility.</p>
 <pre class="r bg-info"><code>activated = res.deseq[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0,]
 unchanged = res.deseq[!is.na(res.deseq$padj) &amp; res.deseq$padj &gt; 0.1 &amp; abs(res.deseq$log2FoldChange) &lt; 0.01,]
