@@ -1311,13 +1311,17 @@ Write regions as tables.
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 increased = as.data.frame(activated)
 increased$region = rownames(increased)
-increased = increased[,c(ncol(increased), 1:(ncol(increased) - 1))]
-write.table(increased, file = "increased_ATAC_30min.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+increased$chr = sapply(strsplit(increased$region, ":"), "[", 1)
+increased$start = sapply(strsplit(sapply(strsplit(increased$region, ":"), "[", 2), "-"), "[", 1)
+increased$end = sapply(strsplit(sapply(strsplit(increased$region, ":"), "[", 2), "-"), "[", 2)
+write.table(increased[,c("chr", "start", "end")], file = "increased_ATAC_30min_summits.bed", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 decreased = as.data.frame(repressed)
 decreased$region = rownames(decreased)
-decreased = decreased[,c(ncol(decreased), 1:(ncol(decreased) - 1))]
-write.table(decreased, file = "decreased_ATAC_30min.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+decreased$chr = sapply(strsplit(decreased$region, ":"), "[", 1)
+decreased$start = sapply(strsplit(sapply(strsplit(decreased$region, ":"), "[", 2), "-"), "[", 1)
+decreased$end = sapply(strsplit(sapply(strsplit(decreased$region, ":"), "[", 2), "-"), "[", 2)
+write.table(decreased[,c("chr", "start", "end")], file = "decreased_ATAC_30min_summits.bed", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 ```
 
 ## de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)
