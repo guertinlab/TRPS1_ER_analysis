@@ -2893,10 +2893,18 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
 ```
 
-Load the DESeq2 object.
+Load the DESeq2 object and the counts table to get the variable names.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 load("TRPS1_timecourse_PRO_deseq.df.RData")
+
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+x = x[,!grepl("24hour", colnames(x))]
+
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
 ```
 
 Run the likelihood ratio test to identify dynamic peaks over the time course.
@@ -2970,8 +2978,8 @@ cat.colours = plot.df
 cat.colours$colour[plot.df$Class == "Activated at 30 minutes"] <- '#FF000064'
 cat.colours$colour[plot.df$Class == "Repressed at 30 minutes"] <- '#0000FF64'
 cat.colours$colour <- as.factor(cat.colours$colour)
-sum(plot.df$Class == "Activated at 30 minutes" & plot.df$time == 0) #37
-sum(plot.df$Class == "Repressed at 30 minutes" & plot.df$time == 0) #57
+sum(plot.df$Class == "Activated at 30 minutes" & plot.df$time == 0) #65
+sum(plot.df$Class == "Repressed at 30 minutes" & plot.df$time == 0) #58
 ```
 
 Plot.
@@ -3000,6 +3008,18 @@ print(
          })
 )
 dev.off()
+```
+
+Write the gene names as tables.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+activated = plot.df$genes[plot.df$Class == "Activated at 30 minutes"]
+activated = gene.symbol$symbol[gene.symbol$gene %in% activated]
+write.table(activated, file = "activated_ER_target_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+repressed = plot.df$genes[plot.df$Class == "Repressed at 30 minutes"]
+repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
+write.table(repressed, file = "repressed_ER_target_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 ```
 
 ## ER binding intensity near dynamic ER target genes (Figure 5B)
