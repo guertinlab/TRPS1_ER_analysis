@@ -2739,6 +2739,7 @@ sum(res.lrt$padj &lt; 0.1 &amp; !is.na(res.lrt$padj))</code></pre>
 <pre class="r bg-info"><code>rld = rlogTransformation(dds.lrt)
 rld_mat &lt;- assay(rld)
 siglrt.re = res.lrt[res.lrt$padj &lt; 0.1 &amp; !is.na(res.lrt$padj),]
+nrow(siglrt.re) #1425
 cluster_rlog = rld_mat[rownames(siglrt.re),]
 meta = cbind.data.frame(time, rep)
 rownames(meta) = colnames(cluster_rlog)
@@ -2908,6 +2909,22 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
   theme(text = element_text(size = 20),
         axis.text.x= element_text(size = 30)) 
 dev.off()</code></pre>
+<p>Write the gene names as a table.</p>
+<pre><code>genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Gradual Increase&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;gradually_activated_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Transient Increase&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;transiently_activated_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Gradual Decrease&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;gradually_repressed_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Transient Decrease&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;transiently_repressed_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
 </div>
 <div id="integrative-analysis" class="section level1" number="10">
