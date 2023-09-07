@@ -2427,6 +2427,7 @@ Cluster the genes.
 rld = rlogTransformation(dds.lrt)
 rld_mat <- assay(rld)
 siglrt.re = res.lrt[res.lrt$padj < 0.1 & !is.na(res.lrt$padj),]
+nrow(siglrt.re) #1425
 cluster_rlog = rld_mat[rownames(siglrt.re),]
 meta = cbind.data.frame(time, rep)
 rownames(meta) = colnames(cluster_rlog)
@@ -2627,6 +2628,26 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
   theme(text = element_text(size = 20),
         axis.text.x= element_text(size = 30)) 
 dev.off()
+```
+
+Write the gene names as a table.
+
+```
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Gradual Increase" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "gradually_activated_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Transient Increase" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "transiently_activated_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Gradual Decrease" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "gradually_repressed_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Transient Decrease" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "transiently_repressed_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 ```
 
 # Integrative analysis
