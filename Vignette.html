@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 06 September 2023</h4>
+<h4 class="date">Last compiled on 07 September 2023</h4>
 
 </div>
 
@@ -1816,13 +1816,17 @@ dev.off()</code></pre>
 <p>Write regions as tables.</p>
 <pre class="r bg-info"><code>increased = as.data.frame(activated)
 increased$region = rownames(increased)
-increased = increased[,c(ncol(increased), 1:(ncol(increased) - 1))]
-write.table(increased, file = &quot;increased_ATAC_30min.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = TRUE, quote = FALSE)
+increased$chr = sapply(strsplit(increased$region, &quot;:&quot;), &quot;[&quot;, 1)
+increased$start = sapply(strsplit(sapply(strsplit(increased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 1)
+increased$end = sapply(strsplit(sapply(strsplit(increased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 2)
+write.table(increased[,c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;)], file = &quot;increased_ATAC_30min_summits.bed&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 decreased = as.data.frame(repressed)
 decreased$region = rownames(decreased)
-decreased = decreased[,c(ncol(decreased), 1:(ncol(decreased) - 1))]
-write.table(decreased, file = &quot;decreased_ATAC_30min.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = TRUE, quote = FALSE)</code></pre>
+decreased$chr = sapply(strsplit(decreased$region, &quot;:&quot;), &quot;[&quot;, 1)
+decreased$start = sapply(strsplit(sapply(strsplit(decreased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 1)
+decreased$end = sapply(strsplit(sapply(strsplit(decreased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 2)
+write.table(decreased[,c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;)], file = &quot;decreased_ATAC_30min_summits.bed&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
 <div id="de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b" class="section level2" number="7.2">
 <h2><span class="header-section-number">7.2</span> de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)</h2>
