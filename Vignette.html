@@ -3144,8 +3144,16 @@ gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antago
 gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
-<p>Load the DESeq2 object.</p>
-<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)</code></pre>
+<p>Load the DESeq2 object and the counts table to get the variable names.</p>
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
+
+x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+x = x[,!grepl(&quot;24hour&quot;, colnames(x))]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))</code></pre>
 <p>Run the likelihood ratio test to identify dynamic peaks over the time course.</p>
 <pre class="r bg-info"><code>dds.lrt = DESeq(deseq.df, test=&quot;LRT&quot;, reduced = ~ rep)
 res.lrt = results(dds.lrt)
@@ -3195,8 +3203,8 @@ load(&quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData&quo
 cat.colours$colour[plot.df$Class == &quot;Activated at 30 minutes&quot;] &lt;- &#39;#FF000064&#39;
 cat.colours$colour[plot.df$Class == &quot;Repressed at 30 minutes&quot;] &lt;- &#39;#0000FF64&#39;
 cat.colours$colour &lt;- as.factor(cat.colours$colour)
-sum(plot.df$Class == &quot;Activated at 30 minutes&quot; &amp; plot.df$time == 0) #37
-sum(plot.df$Class == &quot;Repressed at 30 minutes&quot; &amp; plot.df$time == 0) #57</code></pre>
+sum(plot.df$Class == &quot;Activated at 30 minutes&quot; &amp; plot.df$time == 0) #65
+sum(plot.df$Class == &quot;Repressed at 30 minutes&quot; &amp; plot.df$time == 0) #58</code></pre>
 <p>Plot.</p>
 <pre class="r bg-info"><code>pdf(&#39;Normalized_counts_estrogen_response_gene_set_significant_at_30min_red_blue.pdf&#39;) 
 trellis.par.set(box.umbrella = list(lty = 1, col=&quot;black&quot;, lwd=1),
@@ -3221,6 +3229,14 @@ print(
          })
 )
 dev.off()</code></pre>
+<p>Write the gene names as tables.</p>
+<pre class="r bg-info"><code>activated = plot.df$genes[plot.df$Class == &quot;Activated at 30 minutes&quot;]
+activated = gene.symbol$symbol[gene.symbol$gene %in% activated]
+write.table(activated, file = &quot;activated_ER_target_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+repressed = plot.df$genes[plot.df$Class == &quot;Repressed at 30 minutes&quot;]
+repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
+write.table(repressed, file = &quot;repressed_ER_target_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
 <div id="er-binding-intensity-near-dynamic-er-target-genes-figure-5b" class="section level2" number="10.4">
 <h2><span class="header-section-number">10.4</span> ER binding intensity near dynamic ER target genes (Figure 5B)</h2>
