@@ -3671,7 +3671,7 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
 ```
 
-Identify primary TRPS1-reponsive genes.
+Identify primary TRPS1-responsive genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 load("TRPS1_timecourse_PRO_deseq.df.RData")
@@ -3735,11 +3735,10 @@ sdata <-tnsGet(tns_both, "survivalData")
 attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
 ```
 
-Run KM and Cox analysis.
+Run Kaplan-Meier analysis.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
 ```
 
 Identify the patient with the highest TRPS1 activity score.
@@ -3756,13 +3755,99 @@ tnsPlotGSEA2(tns_both, max, regs = "TRPS1")
 dev.off()
 ```
 
-## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)
+## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)
 
 Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #Logrank p-value 8.3e-6
 pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.01_no_endpoint.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+```
+
+## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S...)
+
+Identify TRPS1-responsive genes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
+i = "24hour"
+res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
+res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
+res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = "gene")
+```
+
+Define the TRPS1 regulon based on this gene set.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+data("rtni1st")
+TRPS1 = rtni1st@regulatoryElements["TRPS1"]
+ILMN_SYMBOL = rtni1st@rowAnnotation
+rtni1st@results$tn.dpi[,TRPS1] <- 0
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] <- -1
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] <- 1
+
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", event = "event", keycovar =c("Age","Grade"))
+tns1st <-tnsGSEA2(tns1st)
+
+data("rtni2nd")
+TRPS1 = rtni2nd@regulatoryElements["TRPS1"]
+ILMN_SYMBOL = rtni2nd@rowAnnotation
+rtni2nd@results$tn.dpi[,TRPS1] <- 0
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] <- -1
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] <- 1
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", event = "event", keycovar =c("Age", "Grade"))
+tns2nd <-tnsGSEA2(tns2nd)
+```
+
+Merge the two halves of the cohort.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+```
+
+Get regulon activity and sample attributes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+```
+
+Run Kaplan-Meier analysis.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+tns_both <-tnsKM(tns_both)
+```
+
+Plot.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Logrank p-value 8.3e-6
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.01_no_endpoint.pdf", height = 3, width = 6)
 tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()
 ```
