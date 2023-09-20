@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 07 September 2023</h4>
+<h4 class="date">Last compiled on 08 September 2023</h4>
 
 </div>
 
@@ -782,7 +782,8 @@ function toggle_visibility(id1) {
 <li><a href="#hour-gene-set-enrichment-analysis-figure-6b" id="toc-hour-gene-set-enrichment-analysis-figure-6b"><span class="toc-section-number">11.2</span> 24 hour gene set enrichment analysis (Figure 6B)</a></li>
 <li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">11.3</span> Growth curves (Figure 6C)</a></li>
 <li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">11.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
-<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-scorefigure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-scorefigure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s"><span class="toc-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S…)</a></li>
 </ul></li>
 </ul>
 </div>
@@ -3768,7 +3769,7 @@ gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antago
 gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
-<p>Identify primary TRPS1-reponsive genes.</p>
+<p>Identify primary TRPS1-responsive genes.</p>
 <pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
 i = &quot;0.5hour&quot;
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
@@ -3816,9 +3817,8 @@ tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$s
 <pre class="r bg-info"><code>regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
 sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
 attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)</code></pre>
-<p>Run KM and Cox analysis.</p>
-<pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)
-tns_both &lt;-tnsCox(tns_both)</code></pre>
+<p>Run Kaplan-Meier analysis.</p>
+<pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)</code></pre>
 <p>Identify the patient with the highest TRPS1 activity score.</p>
 <pre class="r bg-info"><code>max = rownames(tns_both@results$regulonActivity$differential)[tns_both@results$regulonActivity$differential == max(tns_both@results$regulonActivity$differential)]</code></pre>
 <p>Plot.</p>
@@ -3826,11 +3826,74 @@ tns_both &lt;-tnsCox(tns_both)</code></pre>
 tnsPlotGSEA2(tns_both, max, regs = &quot;TRPS1&quot;)
 dev.off()</code></pre>
 </div>
-<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-scorefigure-6ef" class="section level2" number="11.5">
-<h2><span class="header-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)</h2>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" class="section level2" number="11.5">
+<h2><span class="header-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</h2>
 <p>Plot.</p>
 <pre class="r bg-info"><code>#Logrank p-value 8.3e-6
 pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.01_no_endpoint.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()</code></pre>
+</div>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s" class="section level2" number="11.6">
+<h2><span class="header-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S…)</h2>
+<p>Identify TRPS1-responsive genes.</p>
+<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;, &quot;24hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
+i = &quot;24hour&quot;
+res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
+res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
+res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = &quot;gene&quot;)</code></pre>
+<p>Define the TRPS1 regulon based on this gene set.</p>
+<pre class="r bg-info"><code>data(&quot;rtni1st&quot;)
+TRPS1 = rtni1st@regulatoryElements[&quot;TRPS1&quot;]
+ILMN_SYMBOL = rtni1st@rowAnnotation
+rtni1st@results$tn.dpi[,TRPS1] &lt;- 0
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] &lt;- -1
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] &lt;- 1
+
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+data(&quot;rtni2nd&quot;)
+TRPS1 = rtni2nd@regulatoryElements[&quot;TRPS1&quot;]
+ILMN_SYMBOL = rtni2nd@rowAnnotation
+rtni2nd@results$tn.dpi[,TRPS1] &lt;- 0
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] &lt;- -1
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] &lt;- 1
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, event = &quot;event&quot;, keycovar =c(&quot;Age&quot;, &quot;Grade&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)</code></pre>
+<p>Merge the two halves of the cohort.</p>
+<pre class="r bg-info"><code>tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)</code></pre>
+<p>Get regulon activity and sample attributes.</p>
+<pre class="r bg-info"><code>regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)</code></pre>
+<p>Run Kaplan-Meier analysis.</p>
+<pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)</code></pre>
+<p>Plot.</p>
+<pre class="r bg-info"><code>#Logrank p-value 8.3e-6
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.01_no_endpoint.pdf&quot;, height = 3, width = 6)
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
