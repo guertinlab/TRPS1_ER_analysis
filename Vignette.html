@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 20 September 2023</h4>
+<h4 class="date">Last compiled on 21 September 2023</h4>
 
 </div>
 
@@ -760,7 +760,7 @@ function toggle_visibility(id1) {
 <ul>
 <li><a href="#set-up-2" id="toc-set-up-2"><span class="toc-section-number">8.1</span> Set up</a></li>
 <li><a href="#download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads" id="toc-download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads"><span class="toc-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</a></li>
-<li><a href="#generate-a-plot-of-quality-control-metrics-figure-s1" id="toc-generate-a-plot-of-quality-control-metrics-figure-s1"><span class="toc-section-number">8.3</span> Generate a plot of quality control metrics (Figure S1)</a></li>
+<li><a href="#generate-a-plot-of-quality-control-metrics-figure-s5" id="toc-generate-a-plot-of-quality-control-metrics-figure-s5"><span class="toc-section-number">8.3</span> Generate a plot of quality control metrics (Figure S5)</a></li>
 <li><a href="#process-the-combined-reads" id="toc-process-the-combined-reads"><span class="toc-section-number">8.4</span> Process the combined reads</a></li>
 <li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-1"><span class="toc-section-number">8.5</span> Scale and merge bigWigs for use in the genome browser</a></li>
 <li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-2"><span class="toc-section-number">8.6</span> Leave the cluster environment, and copy files to your local computer</a></li>
@@ -769,13 +769,13 @@ function toggle_visibility(id1) {
 <ul>
 <li><a href="#composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" id="toc-composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g"><span class="toc-section-number">9.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</a></li>
 <li><a href="#cluster-dynamic-genes-figure-4ab" id="toc-cluster-dynamic-genes-figure-4ab"><span class="toc-section-number">9.2</span> Cluster dynamic genes (Figure 4A,B)</a></li>
-<li><a href="#over-representation-analysis-figure-4cd" id="toc-over-representation-analysis-figure-4cd"><span class="toc-section-number">9.3</span> Over-representation analysis (Figure 4C,D)</a></li>
+<li><a href="#over-representation-analysis-figure-4cd-tables-s5-8" id="toc-over-representation-analysis-figure-4cd-tables-s5-8"><span class="toc-section-number">9.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</a></li>
 </ul></li>
 <li><a href="#integrative-analysis" id="toc-integrative-analysis"><span class="toc-section-number">10</span> Integrative analysis</a>
 <ul>
 <li><a href="#cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" id="toc-cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef"><span class="toc-section-number">10.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</a></li>
-<li><a href="#identification-of-er-target-genes-figure-s2" id="toc-identification-of-er-target-genes-figure-s2"><span class="toc-section-number">10.2</span> Identification of ER target genes (Figure S2)</a></li>
-<li><a href="#cluster-of-dynamic-er-target-genes-figure-5a" id="toc-cluster-of-dynamic-er-target-genes-figure-5a"><span class="toc-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A)</a></li>
+<li><a href="#identification-of-er-target-genes-figure-s7" id="toc-identification-of-er-target-genes-figure-s7"><span class="toc-section-number">10.2</span> Identification of ER target genes (Figure S7)</a></li>
+<li><a href="#cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" id="toc-cluster-of-dynamic-er-target-genes-figure-5a-tables-s910"><span class="toc-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</a></li>
 <li><a href="#er-binding-intensity-near-dynamic-er-target-genes-figure-5b" id="toc-er-binding-intensity-near-dynamic-er-target-genes-figure-5b"><span class="toc-section-number">10.4</span> ER binding intensity near dynamic ER target genes (Figure 5B)</a></li>
 <li><a href="#er-binding-intensity-by-trps1-proximity-figure-5c" id="toc-er-binding-intensity-by-trps1-proximity-figure-5c"><span class="toc-section-number">10.5</span> ER binding intensity by TRPS1 proximity (Figure 5C)</a></li>
 </ul></li>
@@ -786,7 +786,7 @@ function toggle_visibility(id1) {
 <li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">11.3</span> Growth curves (Figure 6C)</a></li>
 <li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">11.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
 <li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
-<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s"><span class="toc-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S…)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8"><span class="toc-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)</a></li>
 </ul></li>
 </ul>
 </div>
@@ -1300,6 +1300,27 @@ samplesheet[9:16,9] &lt;- &quot;macs2/HA_DMSO_vs_dTAG_peaks.narrowPeak&quot;
 
 write.csv(samplesheet, file = &quot;/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv&quot;, row.names = FALSE)
 q()</code></pre>
+<p>The script used in the next code chunk (230313_ChIPQC.R) is below:</p>
+<pre class="r bg-info"><code>if (!require(&quot;BiocManager&quot;, quietly = TRUE))
+  install.packages(&quot;BiocManager&quot;)
+library(BiocManager)
+if (!require(&quot;ChIPQC&quot;, quietly = TRUE))
+  BiocManager::install(&quot;ChIPQC&quot;)
+library(ChIPQC)
+if (!require(&quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;, quietly = TRUE))
+  install.packages(&quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+setwd(&quot;/scratch/ts2hx/ChIP/results/&quot;)
+samples &lt;- read.csv(&quot;/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv&quot;)
+register(SerialParam())
+chipObj &lt;- ChIPQC(samples, annotation=&quot;hg38&quot;)
+save(chipObj, file = &quot;/scratch/ts2hx/ChIP/results/chipqc/chipObj.R&quot;)
+load(&quot;/scratch/ts2hx/ChIP/results/chipqc/chipObj.R&quot;)
+setwd(&quot;/scratch/ts2hx/ChIP/results/chipqc&quot;)
+ChIPQCreport(chipObj, reportName=&quot;ChIPQC&quot;, reportFolder=&quot;ChIPQCreport&quot;)</code></pre>
+<p>Run the above script to generate the ChIPQC object.</p>
+<pre class="bash"><code>sbatch -p standard -A gioeli_lab -t 2:00:00 -N 1 -n 1 --job-name chipqc -o /scratch/ts2hx/${title}/logs/chipqc.log \
+  --wrap=&quot;module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1; Rscript ${scripts}/230313_ChIPQC.R&quot;</code></pre>
 </div>
 <div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser" class="section level2" number="4.8">
 <h2><span class="header-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</h2>
@@ -1457,6 +1478,11 @@ library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 setwd(&quot;/Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/chipqc/&quot;)
 load(&quot;chipObj.R&quot;)
 
+pdf(&quot;ChIP_CC.pdf&quot;)
+plotCC(chipObj, facetBy = c(&quot;Factor&quot;, &quot;Condition&quot;))
+dev.off()
+
+plotFrip(chipObj)
 frip = frip(chipObj)[1:16]
 Factor = sapply(strsplit(names(frip), &quot;_&quot;), &quot;[&quot;, 1)
 Condition = sapply(strsplit(names(frip), &quot;_&quot;), &quot;[&quot;, 2)
@@ -1473,10 +1499,6 @@ ggplot(frip, aes(x = Sample, y = FRiP, fill = Factor, alpha = Condition)) +
   scale_alpha_manual(values = c(1, 0.5)) +
   ylab(&quot;FRiP (%)&quot;) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-dev.off()
-
-pdf(&quot;ChIP_CC.pdf&quot;)
-plotCC(chipObj, facetBy = c(&quot;Factor&quot;, &quot;Condition&quot;))
 dev.off()</code></pre>
 </div>
 </div>
@@ -1907,6 +1929,9 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/T47D_Clo
 setwd(direc)
 
 library(BiocManager)
+BiocManager::install(c(&quot;ATACseqQC&quot;, &quot;ChIPpeakAnno&quot;, &quot;MotifDb&quot;, &quot;GenomicAlignments&quot;,
+                       &quot;BSgenome.Hsapiens.UCSC.hg38&quot;, &quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;,
+                       &quot;phastCons100way.UCSC.hg38&quot;))
 library(ATACseqQC)
 library(Rsamtools)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
@@ -1914,12 +1939,10 @@ library(GenomicAlignments)
 
 #input the bamFiles
 bamfile &lt;- list.files(path = &quot;.&quot;, pattern = &quot;*.hg38.bam$&quot;, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+#change the order to reflect the time points
 bamfile = bamfile[c(5:8, 1:4, 9:12, 17:24, 13:16)]
+#change names to remove excess
 bamfile.labels &lt;- gsub(&quot;.hg38.bam&quot;, &quot;&quot;, basename(bamfile))
-
-#files will be output into outPath
-outPath &lt;- &quot;split&quot;
-dir.create(outPath)
 
 #get TSS&#39;s
 txs &lt;- transcripts(TxDb.Hsapiens.UCSC.hg38.knownGene)
@@ -1934,7 +1957,7 @@ possibleTag &lt;- list(&quot;integer&quot;=c(&quot;AM&quot;, &quot;AS&quot;, &qu
                                   &quot;Q2&quot;, &quot;QT&quot;, &quot;QX&quot;, &quot;R2&quot;, &quot;RG&quot;, &quot;RX&quot;, &quot;SA&quot;, &quot;TS&quot;,
                                   &quot;U2&quot;))
 
-#get fragment size distributions (modified from ATACQC for easier plotting)
+#get fragment size distributions (modified from ATACseqQC for easier plotting)
 bamFiles = bamfile
 bamFiles.labels = bamfile.labels
 index = bamFiles
@@ -1975,10 +1998,10 @@ minor.ticks.axis &lt;- function(ax, n = 9, t.ratio = 0.5, mn, mx, ...) {
 }
 
 #save for future use
-save(fragment.len, file = &quot;ATAC_fragment_lengths.RData&quot;)
+save(fragment.len, file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragment_lengths.RData&quot;)
 
 #plot
-pdf(&quot;ATAC_fragSize.pdf&quot;, height = 10, width = 15)
+pdf(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragSize.pdf&quot;, height = 10, width = 15)
 par(mfcol=c(4,6))
 null &lt;- mapply(function(frag.len, frag.name) {
   x &lt;- 1:1010
@@ -1988,39 +2011,63 @@ null &lt;- mapply(function(frag.len, frag.name) {
   y &lt;- as.numeric(y)
   names(y) &lt;- x
   plot(x, y * 10^3, main = frag.name, 
-       xlim = c(0, 1010), ylim = ylim, xlab = &quot;Fragment length (bp)&quot;, 
+       xlim = c(0, 1010), ylim = c(0,13), xlab = &quot;Fragment length (bp)&quot;, 
        ylab = expression(Normalized ~ read ~ density ~ x ~ 10^-3), type = &quot;l&quot;)
-}, fragment.len, names(fragment.len))
+}, fragment.len, sapply(strsplit(names(fragment.len), &quot;T47D_Clone28_&quot;), &quot;[&quot;, 2))
 dev.off()
 
-#plot TSS enrichments
-pdf(&quot;ATAC_TSS_enrichment.pdf&quot;, height = 10, width = 15)
-par(mfcol=c(4,6))
+#get TSS enrichments
+#initialize
+seqlev &lt;- &quot;chr1&quot; ## subsample data for quick run
+seqinformation &lt;- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
+which &lt;- as(seqinformation[seqlev], &quot;GRanges&quot;)
+
+#make an empty list to fill with each sample
+TSSEs &lt;- sapply(bamfile.labels,function(x) NULL)
+
 for (i in 1:length(bamfile)) {
+  
   print(bamfile[i])
+  
   #get reads with tags
-  bamTop100 &lt;- scanBam(BamFile(bamfile[i], yieldSize = 100),
+  bamTop100 &lt;- scanBam(BamFile(bamfile[i], yieldSize = 100), 
                        param = ScanBamParam(tag=unlist(possibleTag)))[[1]]$tag
   tags &lt;- names(bamTop100)[lengths(bamTop100)&gt;0]
   tags
   
   #shift the coordinates of 5&#39;ends of alignments in the bam file
-  seqlev &lt;- &quot;chr1&quot; ## subsample data for quick run
-  seqinformation &lt;- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
-  which &lt;- as(seqinformation[seqlev], &quot;GRanges&quot;)
   gal &lt;- readBamFile(bamfile[i], tag=tags, which=which, asMates=TRUE, bigFile=TRUE)
-  shiftedBamfile &lt;- file.path(outPath, &quot;shifted.bam&quot;)
-  gal1 &lt;- shiftGAlignmentsList(gal, outbam=shiftedBamfile)
+  rm(gal1)
+  gal1 &lt;- shiftGAlignmentsList(gal)
   
-  #calculate TSS enrichment score
+  #calculate TSS enrichment and append to the list
   tsse &lt;- TSSEscore(gal1, txs)
-  tsse$TSSEscore
+  TSSEs[[i]] = tsse$values
+  save(TSSEs, file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData&quot;)
+  print(tsse$values)
   
   #plot enrichment around TSS&#39;s
   plot(100*(-9:10-.5), tsse$values, type=&quot;b&quot;, 
+       xlim=c(-1000, 1000),
        xlab=&quot;distance to TSS&quot;,
        ylab=&quot;aggregate TSS score&quot;,
-       main=paste0(bamfile[i]), &quot; TSS enricment&quot;)
+       main=sapply(strsplit(sapply(strsplit(bamfile[i], &quot;T47D_Clone28_&quot;), &quot;[&quot;, 2), &quot;.hg38.bam&quot;), &quot;[&quot;, 1))
+}
+
+#save for future use
+save(TSSEs, file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData&quot;)
+load(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData&quot;)
+
+#plot
+pdf(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSS_enrichment.pdf&quot;, height = 10, width = 15)
+par(mfcol=c(4,6))
+for (i in 1:length(TSSEs)) {
+plot(100*(-9:10-.5), TSSEs[[i]], type=&quot;b&quot;, 
+     xlim=c(-1000, 1000),
+     ylim=c(0,75),
+     xlab=&quot;distance to TSS&quot;,
+     ylab=&quot;aggregate TSS score&quot;,
+     main=sapply(strsplit(names(TSSEs)[i], &quot;T47D_Clone28_&quot;), &quot;[&quot;, 2))
 }
 dev.off()</code></pre>
 </div>
@@ -2520,8 +2567,8 @@ do
   cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE2.fastq.gz ${name}_*_R2_001.fastq.gz &gt; ${name}_combined_PE2.fastq.gz
 done</code></pre>
 </div>
-<div id="generate-a-plot-of-quality-control-metrics-figure-s1" class="section level2" number="8.3">
-<h2><span class="header-section-number">8.3</span> Generate a plot of quality control metrics (Figure S1)</h2>
+<div id="generate-a-plot-of-quality-control-metrics-figure-s5" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> Generate a plot of quality control metrics (Figure S5)</h2>
 <p>The script used in the next code chunk (220927_PROseq_analysis_on_input_file.sh) is below:</p>
 <pre class="bash"><code>#! /bin/bash
 UMI_length=8
@@ -3143,8 +3190,8 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 )
 dev.off()</code></pre>
 </div>
-<div id="over-representation-analysis-figure-4cd" class="section level2" number="9.3">
-<h2><span class="header-section-number">9.3</span> Over-representation analysis (Figure 4C,D)</h2>
+<div id="over-representation-analysis-figure-4cd-tables-s5-8" class="section level2" number="9.3">
+<h2><span class="header-section-number">9.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</h2>
 <p>Activated genes.</p>
 <pre class="r bg-info"><code>genes = plot.df.pro$genes[(plot.df.pro$supercluster == &quot;Gradual Increase&quot; | plot.df.pro$supercluster == &quot;Transient Increase&quot;) &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
 m_t2g &lt;- msigdbr(species = &quot;Homo sapiens&quot;, category = &quot;H&quot;) %&gt;% 
@@ -3203,8 +3250,8 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
   theme(text = element_text(size = 20),
         axis.text.x= element_text(size = 30)) 
 dev.off()</code></pre>
-<p>Write the gene names as a table.</p>
-<pre><code>genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Gradual Increase&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+<p>Write the gene names as tables.</p>
+<pre class="r bg-info"><code>genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Gradual Increase&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
 names = gene.symbol$symbol[gene.symbol$gene %in% genes]
 write.table(names, file = &quot;gradually_activated_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
 
@@ -3300,8 +3347,8 @@ ecdfplot(~log(abs(dis), base = 10), groups = status, data = df.all,
          })
 dev.off()</code></pre>
 </div>
-<div id="identification-of-er-target-genes-figure-s2" class="section level2" number="10.2">
-<h2><span class="header-section-number">10.2</span> Identification of ER target genes (Figure S2)</h2>
+<div id="identification-of-er-target-genes-figure-s7" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Identification of ER target genes (Figure S7)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>setwd(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R&quot;)
 
@@ -3418,8 +3465,8 @@ print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
              par.settings=list(par.xlab.text=list(cex=1.1,font=2), par.ylab.text=list(cex=1.1,font=2))))
 dev.off()</code></pre>
 </div>
-<div id="cluster-of-dynamic-er-target-genes-figure-5a" class="section level2" number="10.3">
-<h2><span class="header-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A)</h2>
+<div id="cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" class="section level2" number="10.3">
+<h2><span class="header-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -4127,8 +4174,8 @@ pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.0
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
-<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s" class="section level2" number="11.6">
-<h2><span class="header-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S…)</h2>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8" class="section level2" number="11.6">
+<h2><span class="header-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)</h2>
 <p>Identify TRPS1-responsive genes.</p>
 <pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
