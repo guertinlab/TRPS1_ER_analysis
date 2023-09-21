@@ -610,6 +610,35 @@ write.csv(samplesheet, file = "/scratch/ts2hx/ChIP/results/chipqc/meta/sampleshe
 q()
 ```
 
+The script used in the next code chunk (230313_ChIPQC.R) is below:
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+library(BiocManager)
+if (!require("ChIPQC", quietly = TRUE))
+  BiocManager::install("ChIPQC")
+library(ChIPQC)
+if (!require("TxDb.Hsapiens.UCSC.hg38.knownGene", quietly = TRUE))
+  install.packages("TxDb.Hsapiens.UCSC.hg38.knownGene")
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+setwd("/scratch/ts2hx/ChIP/results/")
+samples <- read.csv("/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv")
+register(SerialParam())
+chipObj <- ChIPQC(samples, annotation="hg38")
+save(chipObj, file = "/scratch/ts2hx/ChIP/results/chipqc/chipObj.R")
+load("/scratch/ts2hx/ChIP/results/chipqc/chipObj.R")
+setwd("/scratch/ts2hx/ChIP/results/chipqc")
+ChIPQCreport(chipObj, reportName="ChIPQC", reportFolder="ChIPQCreport")
+```
+
+Run the above script to generate the ChIPQC object.
+
+```{r engine='bash', eval=F, echo=TRUE}
+sbatch -p standard -A gioeli_lab -t 2:00:00 -N 1 -n 1 --job-name chipqc -o /scratch/ts2hx/${title}/logs/chipqc.log \
+  --wrap="module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1; Rscript ${scripts}/230313_ChIPQC.R"
+```
+
 ## Scale and merge bigWigs for use in the genome browser
 
 First make size factors based on total mapped reads (divide each by the geometric mean of all of them like in DESeq2).
@@ -797,6 +826,11 @@ library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 setwd("/Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/chipqc/")
 load("chipObj.R")
 
+pdf("ChIP_CC.pdf")
+plotCC(chipObj, facetBy = c("Factor", "Condition"))
+dev.off()
+
+plotFrip(chipObj)
 frip = frip(chipObj)[1:16]
 Factor = sapply(strsplit(names(frip), "_"), "[", 1)
 Condition = sapply(strsplit(names(frip), "_"), "[", 2)
@@ -813,10 +847,6 @@ ggplot(frip, aes(x = Sample, y = FRiP, fill = Factor, alpha = Condition)) +
   scale_alpha_manual(values = c(1, 0.5)) +
   ylab("FRiP (%)") +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-dev.off()
-
-pdf("ChIP_CC.pdf")
-plotCC(chipObj, facetBy = c("Factor", "Condition"))
 dev.off()
 ```
 
@@ -1369,6 +1399,9 @@ direc = '/Volumes/External/Users/TScott/TRPS1_timecourse_ATAC_bams'
 setwd(direc)
 
 library(BiocManager)
+BiocManager::install(c("ATACseqQC", "ChIPpeakAnno", "MotifDb", "GenomicAlignments",
+                       "BSgenome.Hsapiens.UCSC.hg38", "TxDb.Hsapiens.UCSC.hg38.knownGene",
+                       "phastCons100way.UCSC.hg38"))
 library(ATACseqQC)
 library(Rsamtools)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
@@ -1376,12 +1409,10 @@ library(GenomicAlignments)
 
 #input the bamFiles
 bamfile <- list.files(path = ".", pattern = "*.hg38.bam$", all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+#change the order to reflect the time points
 bamfile = bamfile[c(5:8, 1:4, 9:12, 17:24, 13:16)]
+#change names to remove excess
 bamfile.labels <- gsub(".hg38.bam", "", basename(bamfile))
-
-#files will be output into outPath
-outPath <- "split"
-dir.create(outPath)
 
 #get TSS's
 txs <- transcripts(TxDb.Hsapiens.UCSC.hg38.knownGene)
@@ -1396,7 +1427,7 @@ possibleTag <- list("integer"=c("AM", "AS", "CM", "CP", "FI", "H0", "H1", "H2",
                                   "Q2", "QT", "QX", "R2", "RG", "RX", "SA", "TS",
                                   "U2"))
 
-#get fragment size distributions (modified from ATACQC for easier plotting)
+#get fragment size distributions (modified from ATACseqQC for easier plotting)
 bamFiles = bamfile
 bamFiles.labels = bamfile.labels
 index = bamFiles
@@ -1437,10 +1468,10 @@ minor.ticks.axis <- function(ax, n = 9, t.ratio = 0.5, mn, mx, ...) {
 }
 
 #save for future use
-save(fragment.len, file = "ATAC_fragment_lengths.RData")
+save(fragment.len, file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragment_lengths.RData")
 
 #plot
-pdf("ATAC_fragSize.pdf", height = 10, width = 15)
+pdf("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragSize.pdf", height = 10, width = 15)
 par(mfcol=c(4,6))
 null <- mapply(function(frag.len, frag.name) {
   x <- 1:1010
@@ -1450,39 +1481,63 @@ null <- mapply(function(frag.len, frag.name) {
   y <- as.numeric(y)
   names(y) <- x
   plot(x, y * 10^3, main = frag.name, 
-       xlim = c(0, 1010), ylim = ylim, xlab = "Fragment length (bp)", 
+       xlim = c(0, 1010), ylim = c(0,13), xlab = "Fragment length (bp)", 
        ylab = expression(Normalized ~ read ~ density ~ x ~ 10^-3), type = "l")
-}, fragment.len, names(fragment.len))
+}, fragment.len, sapply(strsplit(names(fragment.len), "T47D_Clone28_"), "[", 2))
 dev.off()
 
-#plot TSS enrichments
-pdf("ATAC_TSS_enrichment.pdf", height = 10, width = 15)
-par(mfcol=c(4,6))
+#get TSS enrichments
+#initialize
+seqlev <- "chr1" ## subsample data for quick run
+seqinformation <- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
+which <- as(seqinformation[seqlev], "GRanges")
+
+#make an empty list to fill with each sample
+TSSEs <- sapply(bamfile.labels,function(x) NULL)
+
 for (i in 1:length(bamfile)) {
+  
   print(bamfile[i])
+  
   #get reads with tags
-  bamTop100 <- scanBam(BamFile(bamfile[i], yieldSize = 100),
+  bamTop100 <- scanBam(BamFile(bamfile[i], yieldSize = 100), 
                        param = ScanBamParam(tag=unlist(possibleTag)))[[1]]$tag
   tags <- names(bamTop100)[lengths(bamTop100)>0]
   tags
   
   #shift the coordinates of 5'ends of alignments in the bam file
-  seqlev <- "chr1" ## subsample data for quick run
-  seqinformation <- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
-  which <- as(seqinformation[seqlev], "GRanges")
   gal <- readBamFile(bamfile[i], tag=tags, which=which, asMates=TRUE, bigFile=TRUE)
-  shiftedBamfile <- file.path(outPath, "shifted.bam")
-  gal1 <- shiftGAlignmentsList(gal, outbam=shiftedBamfile)
+  rm(gal1)
+  gal1 <- shiftGAlignmentsList(gal)
   
-  #calculate TSS enrichment score
+  #calculate TSS enrichment and append to the list
   tsse <- TSSEscore(gal1, txs)
-  tsse$TSSEscore
+  TSSEs[[i]] = tsse$values
+  save(TSSEs, file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData")
+  print(tsse$values)
   
   #plot enrichment around TSS's
   plot(100*(-9:10-.5), tsse$values, type="b", 
+       xlim=c(-1000, 1000),
        xlab="distance to TSS",
        ylab="aggregate TSS score",
-       main=paste0(bamfile[i]), " TSS enricment")
+       main=sapply(strsplit(sapply(strsplit(bamfile[i], "T47D_Clone28_"), "[", 2), ".hg38.bam"), "[", 1))
+}
+
+#save for future use
+save(TSSEs, file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData")
+load("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData")
+
+#plot
+pdf("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSS_enrichment.pdf", height = 10, width = 15)
+par(mfcol=c(4,6))
+for (i in 1:length(TSSEs)) {
+plot(100*(-9:10-.5), TSSEs[[i]], type="b", 
+     xlim=c(-1000, 1000),
+     ylim=c(0,75),
+     xlab="distance to TSS",
+     ylab="aggregate TSS score",
+     main=sapply(strsplit(names(TSSEs)[i], "T47D_Clone28_"), "[", 2))
 }
 dev.off()
 ```
@@ -2130,7 +2185,7 @@ do
 done
 ```
 
-## Generate a plot of quality control metrics (Figure S1)
+## Generate a plot of quality control metrics (Figure S5)
 
 The script used in the next code chunk (220927_PROseq_analysis_on_input_file.sh) is below:
 
@@ -2849,7 +2904,7 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 dev.off()
 ```
 
-## Over-representation analysis (Figure 4C,D)
+## Over-representation analysis (Figure 4C,D, Tables S5-8)
 
 Activated genes.
 
@@ -2917,9 +2972,9 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
 dev.off()
 ```
 
-Write the gene names as a table.
+Write the gene names as tables.
 
-```
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 genes = plot.df.pro$genes[plot.df.pro$supercluster == "Gradual Increase" & plot.df.pro$merge == "one_group0hour"]
 names = gene.symbol$symbol[gene.symbol$gene %in% genes]
 write.table(names, file = "gradually_activated_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
@@ -3031,7 +3086,7 @@ ecdfplot(~log(abs(dis), base = 10), groups = status, data = df.all,
 dev.off()
 ```
 
-## Identification of ER target genes (Figure S2)
+## Identification of ER target genes (Figure S7)
 
 Set up in R.
 
@@ -3160,7 +3215,7 @@ print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
 dev.off()
 ```
 
-## Cluster of dynamic ER target genes (Figure 5A)
+## Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)
 
 Set up in R.
 
@@ -4053,7 +4108,7 @@ tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), wid
 dev.off()
 ```
 
-## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S...)
+## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)
 
 Identify TRPS1-responsive genes.
 
