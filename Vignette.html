@@ -762,8 +762,8 @@ function toggle_visibility(id1) {
 <li><a href="#download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads" id="toc-download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads"><span class="toc-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</a></li>
 <li><a href="#generate-a-plot-of-quality-control-metrics-figure-s5" id="toc-generate-a-plot-of-quality-control-metrics-figure-s5"><span class="toc-section-number">8.3</span> Generate a plot of quality control metrics (Figure S5)</a></li>
 <li><a href="#process-the-combined-reads" id="toc-process-the-combined-reads"><span class="toc-section-number">8.4</span> Process the combined reads</a></li>
-<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-1"><span class="toc-section-number">8.5</span> Scale and merge bigWigs for use in the genome browser</a></li>
-<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-2" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-2"><span class="toc-section-number">8.6</span> Scale and merge bigWigs for use in the genome browser</a></li>
+<li><a href="#merge-bigwigs-to-upload-to-dreg" id="toc-merge-bigwigs-to-upload-to-dreg"><span class="toc-section-number">8.5</span> Merge bigWigs to upload to dREG</a></li>
+<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-1"><span class="toc-section-number">8.6</span> Scale and merge bigWigs for use in the genome browser</a></li>
 <li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-2"><span class="toc-section-number">8.7</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
 <li><a href="#pro-seq-analysis" id="toc-pro-seq-analysis"><span class="toc-section-number">9</span> PRO-seq analysis</a>
@@ -2917,8 +2917,8 @@ done</code></pre>
 <p>Combine the reads into one file.</p>
 <pre class="bash"><code>paste -d&#39;\t&#39; *combined_gene_counts.txt &gt; TRPS1_timecourse_PRO_gene_counts_combined.txt</code></pre>
 </div>
-<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" class="section level2" number="8.5">
-<h2><span class="header-section-number">8.5</span> Scale and merge bigWigs for use in the genome browser</h2>
+<div id="merge-bigwigs-to-upload-to-dreg" class="section level2" number="8.5">
+<h2><span class="header-section-number">8.5</span> Merge bigWigs to upload to dREG</h2>
 <p>Here we merge the bigWigs to create T47D_all_plus_PE1.bigWig and T47D_all_minus_PE1.bigWig to upload to the dREG portal (<a href="https://dreg.dnasequence.org/" class="uri">https://dreg.dnasequence.org/</a>). The output includes a dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed file that represents the genomic coordinates of each bidirectionally transcribed putative regulatory element. We use this output above in this vignette to separate ATAC-seq peaks that are distal to bidirectional transcription.</p>
 <pre class="bash"><code>#This only worked for the positive strand because the counts are positive
 for i in T47D_Clone28_0hour_rep1_combined_*_PE1.bigWig
@@ -2955,7 +2955,7 @@ bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_minus_PE1.bigWig
 rm tmp.bg
 rm tmp_sorted.bg</code></pre>
 </div>
-<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser-2" class="section level2" number="8.6">
+<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" class="section level2" number="8.6">
 <h2><span class="header-section-number">8.6</span> Scale and merge bigWigs for use in the genome browser</h2>
 <p>The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below. It scales each bigWig based on the read depth, broken down by strand.</p>
 <pre class="bash"><code>#! /bin/bash
