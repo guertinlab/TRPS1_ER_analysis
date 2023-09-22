@@ -1544,7 +1544,7 @@ dev.off()
 
 # ATAC-seq analysis
 
-## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A and Tables S1,2)
+## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figures 3A,S6 and Tables S1,2)
 
 Set up libraries and functions in R.
 
@@ -1664,6 +1664,56 @@ decreased$chr = sapply(strsplit(decreased$region, ":"), "[", 1)
 decreased$start = sapply(strsplit(sapply(strsplit(decreased$region, ":"), "[", 2), "-"), "[", 1)
 decreased$end = sapply(strsplit(sapply(strsplit(decreased$region, ":"), "[", 2), "-"), "[", 2)
 write.table(decreased[,c("chr", "start", "end")], file = "decreased_ATAC_30min_summits.bed", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+```
+
+Repeat above with ATAC-seq peaks that are distal to sites of bidirectional transcription. The dREG elements are generated below in this vignette in the PRO-seq data pre-processing section.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Get dREG elements
+dREG = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/dTAG_TRPS1_timecourse_dREG/dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed")
+
+#Get distal peaks
+res.deseq$chr = sapply(strsplit(rownames(res.deseq), ":"), "[", 1)
+res.deseq$start = sapply(strsplit(sapply(strsplit(rownames(res.deseq), ":"), "[", 2), "-"), "[", 1)
+res.deseq$end = sapply(strsplit(sapply(strsplit(rownames(res.deseq), ":"), "[", 2), "-"), "[", 2)
+res.deseq = res.deseq[, c(7:9,1:6)]
+res.deseq$start = as.numeric(res.deseq$start) + 100
+res.deseq$end = as.numeric(res.deseq$end) - 100
+dREG_distal_ATAC_peaks = bedTools.intersect(bed1 = res.deseq, bed2 = dREG, opt.string = "-v")
+res.deseq = dREG_distal_ATAC_peaks
+
+#Match the unchanged peaks to activated peaks based on accessibility.
+activated = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
+unchanged = res.deseq[!is.na(res.deseq$padj) & res.deseq$padj > 0.1 & abs(res.deseq$log2FoldChange) < 0.01,]
+unchanged$treatment = 0
+activated$treatment = 1
+df.deseq.effects.lattice = rbind(unchanged, activated)
+out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = "optimal", ratio = 1)
+unchanged = df.deseq.effects.lattice[rownames(df.deseq.effects.lattice) %in% out$match.matrix,]
+repressed = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0,]
+
+df.deseq.effects.lattice = res.deseq
+df.deseq.effects.lattice$status = "Other"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(activated)] = "Increased"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(unchanged)] = "Unchanged"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(repressed)] = "Decreased"
+df.deseq.effects.lattice$status = factor(df.deseq.effects.lattice$status, levels = c("Other", "Increased", "Unchanged", "Decreased"))
+
+#Plot
+pdf("MA_dREG_distal_ATAC_peaks.pdf", width = 7, height = 3.5)
+ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(baseMean, 10), y = log2FoldChange, color = status)) +
+  geom_point() +
+  scale_color_manual(values = c("grey90", "red", "grey60", "blue")) +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  ylim(-1.2, 1.2) +
+  xlim(1.5, 3.5) +
+  ylab(expression("log"[2]~"(fold change in ATAC signal)")) +
+  xlab(expression("log"[10]~"(mean of normalized intensity)")) +
+  ggtitle("Change in chromatin accessibility upon TRPS1 depletion distal to dREG elements") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(color=NULL)
+dev.off()
 ```
 
 ## de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)
@@ -2064,11 +2114,9 @@ ssh -Y ts2hx@rivanna.hpc.virginia.edu
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
 ```
 
-Make a directory for each sequencing run.
+Make a directory.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-mkdir -p TRPS1_timecourse_PRO
-mkdir -p TRPS1_timecourse_PRO_2
 mkdir -p TRPS1_timecourse_PRO_3
 ```
 
@@ -2098,91 +2146,147 @@ exit
 
 ## Download the raw data from the three sequencing runs, rename the files, and combine the reads
 
-We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first put each sequencing run into its own folder.
+We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first download the fastq’s and gzip.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO/
-
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-```
-
-Rename files to remove the excess.
-
-```{r engine='bash', eval=F, echo=TRUE}
-cd /scratch/ts2hx/TRPS1_timecourse_PRO/
-
-for i in *_R1_001.fastq.gz
-do
-name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
-echo $name
-hyphenless=${name//-/_}
-echo $hyphenless
-newname=${hyphenless//05hour/0.5hour}
-echo $newname
-mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
-mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
-done
-
-exit
-exit
-```
-
-Run 2:
-
-```{r engine='bash', eval=F, echo=TRUE}
-cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_2/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_2
-```
-
-Run 3:
-
-```{r engine='bash', eval=F, echo=TRUE}
-scp /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_3.zip ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/
-
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
 
-cd /scratch/ts2hx/
-unzip TRPS1_timecourse_PRO_3.zip
-mv *.fastq.gz TRPS1_timecourse_PRO_3/
-rm TRPS1_timecourse_PRO_3.zip
-```
-
-Rename files to remove the excess.
-
-```{r engine='bash', eval=F, echo=TRUE}
 cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
 
-for i in *05hour*
+for i in {24..92}
 do
-  prefix=$(echo $i | awk -F"_05hour_" '{print $1}')
-  suffix=$(echo $i | awk -F"_05hour_" '{print $2}')
-  mv $i ${prefix}_0.5hour_${suffix}
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o logs/SRR250747${i}_fasterq_dump.log \
+    --wrap="module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}; gzip SRR250747${i}_*.fastq"
+  sleep 1
 done
 ```
 
 Combine the NextSeq550 reads to generate representative quality control metrics.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F"_S" '{print $1}')
-  cat ../TRPS1_timecourse_PRO_2/${name}_PE1.fastq.gz $i > ${name}_NextSeq550_PE1.fastq.gz
-  cat ../TRPS1_timecourse_PRO_2/${name}_PE2.fastq.gz ${name}_*_R2_001.fastq.gz > ${name}_NextSeq550_PE2.fastq.gz
-done
+cat SRR25074724_1.fastq.gz SRR25074726_1.fastq.gz > T47D_Clone28_24hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074727_1.fastq.gz SRR25074729_1.fastq.gz > T47D_Clone28_24hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074730_1.fastq.gz SRR25074732_1.fastq.gz > T47D_Clone28_24hour_rep2_NextSeq550_PE1.fastq.gz
+
+cat SRR25074733_1.fastq.gz SRR25074735_1.fastq.gz > T47D_Clone28_4hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074736_1.fastq.gz SRR25074738_1.fastq.gz > T47D_Clone28_4hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074739_1.fastq.gz SRR25074741_1.fastq.gz > T47D_Clone28_4hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074742_1.fastq.gz SRR25074744_1.fastq.gz > T47D_Clone28_4hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074745_1.fastq.gz SRR25074747_1.fastq.gz > T47D_Clone28_2hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074748_1.fastq.gz SRR25074750_1.fastq.gz > T47D_Clone28_2hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074751_1.fastq.gz SRR25074753_1.fastq.gz > T47D_Clone28_2hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074754_1.fastq.gz SRR25074756_1.fastq.gz > T47D_Clone28_2hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074757_1.fastq.gz SRR25074759_1.fastq.gz > T47D_Clone28_1hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074760_1.fastq.gz SRR25074762_1.fastq.gz > T47D_Clone28_1hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074763_1.fastq.gz SRR25074765_1.fastq.gz > T47D_Clone28_1hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074766_1.fastq.gz SRR25074768_1.fastq.gz > T47D_Clone28_1hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074769_1.fastq.gz SRR25074771_1.fastq.gz > T47D_Clone28_0.5hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074772_1.fastq.gz SRR25074774_1.fastq.gz > T47D_Clone28_0.5hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074775_1.fastq.gz SRR25074777_1.fastq.gz > T47D_Clone28_0.5hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074778_1.fastq.gz SRR25074780_1.fastq.gz > T47D_Clone28_0.5hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074781_1.fastq.gz SRR25074783_1.fastq.gz > T47D_Clone28_0hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074784_1.fastq.gz SRR25074786_1.fastq.gz > T47D_Clone28_0hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074787_1.fastq.gz SRR25074789_1.fastq.gz > T47D_Clone28_0hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074790_1.fastq.gz SRR25074792_1.fastq.gz > T47D_Clone28_0hour_rep1_NextSeq550_PE1.fastq.gz
+
+
+cat SRR25074724_2.fastq.gz SRR25074726_2.fastq.gz > T47D_Clone28_24hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074727_2.fastq.gz SRR25074729_2.fastq.gz > T47D_Clone28_24hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074730_2.fastq.gz SRR25074732_2.fastq.gz > T47D_Clone28_24hour_rep2_NextSeq550_PE2.fastq.gz
+
+cat SRR25074733_2.fastq.gz SRR25074735_2.fastq.gz > T47D_Clone28_4hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074736_2.fastq.gz SRR25074738_2.fastq.gz > T47D_Clone28_4hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074739_2.fastq.gz SRR25074741_2.fastq.gz > T47D_Clone28_4hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074742_2.fastq.gz SRR25074744_2.fastq.gz > T47D_Clone28_4hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074745_2.fastq.gz SRR25074747_2.fastq.gz > T47D_Clone28_2hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074748_2.fastq.gz SRR25074750_2.fastq.gz > T47D_Clone28_2hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074751_2.fastq.gz SRR25074753_2.fastq.gz > T47D_Clone28_2hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074754_2.fastq.gz SRR25074756_2.fastq.gz > T47D_Clone28_2hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074757_2.fastq.gz SRR25074759_2.fastq.gz > T47D_Clone28_1hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074760_2.fastq.gz SRR25074762_2.fastq.gz > T47D_Clone28_1hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074763_2.fastq.gz SRR25074765_2.fastq.gz > T47D_Clone28_1hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074766_2.fastq.gz SRR25074768_2.fastq.gz > T47D_Clone28_1hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074769_2.fastq.gz SRR25074771_2.fastq.gz > T47D_Clone28_0.5hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074772_2.fastq.gz SRR25074774_2.fastq.gz > T47D_Clone28_0.5hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074775_2.fastq.gz SRR25074777_2.fastq.gz > T47D_Clone28_0.5hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074778_2.fastq.gz SRR25074780_2.fastq.gz > T47D_Clone28_0.5hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074781_2.fastq.gz SRR25074783_2.fastq.gz > T47D_Clone28_0hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074784_2.fastq.gz SRR25074786_2.fastq.gz > T47D_Clone28_0hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074787_2.fastq.gz SRR25074789_2.fastq.gz > T47D_Clone28_0hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074790_2.fastq.gz SRR25074792_2.fastq.gz > T47D_Clone28_0hour_rep1_NextSeq550_PE2.fastq.gz
 ```
 
 Combine all reads for use in downstream analysis.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F"_S" '{print $1}')
-  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE1.fastq.gz $i > ${name}_combined_PE1.fastq.gz
-  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE2.fastq.gz ${name}_*_R2_001.fastq.gz > ${name}_combined_PE2.fastq.gz
-done
+cat SRR25074724_1.fastq.gz SRR25074725_1.fastq.gz SRR25074726_1.fastq.gz > T47D_Clone28_24hour_rep4_combined_PE1.fastq.gz
+cat SRR25074727_1.fastq.gz SRR25074728_1.fastq.gz SRR25074729_1.fastq.gz > T47D_Clone28_24hour_rep3_combined_PE1.fastq.gz
+cat SRR25074730_1.fastq.gz SRR25074731_1.fastq.gz SRR25074732_1.fastq.gz > T47D_Clone28_24hour_rep2_combined_PE1.fastq.gz
+
+cat SRR25074733_1.fastq.gz SRR25074734_1.fastq.gz SRR25074735_1.fastq.gz > T47D_Clone28_4hour_rep4_combined_PE1.fastq.gz
+cat SRR25074736_1.fastq.gz SRR25074737_1.fastq.gz SRR25074738_1.fastq.gz > T47D_Clone28_4hour_rep3_combined_PE1.fastq.gz
+cat SRR25074739_1.fastq.gz SRR25074740_1.fastq.gz SRR25074741_1.fastq.gz > T47D_Clone28_4hour_rep2_combined_PE1.fastq.gz
+cat SRR25074742_1.fastq.gz SRR25074743_1.fastq.gz SRR25074744_1.fastq.gz > T47D_Clone28_4hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074745_1.fastq.gz SRR25074746_1.fastq.gz SRR25074747_1.fastq.gz > T47D_Clone28_2hour_rep4_combined_PE1.fastq.gz
+cat SRR25074748_1.fastq.gz SRR25074749_1.fastq.gz SRR25074750_1.fastq.gz > T47D_Clone28_2hour_rep3_combined_PE1.fastq.gz
+cat SRR25074751_1.fastq.gz SRR25074752_1.fastq.gz SRR25074753_1.fastq.gz > T47D_Clone28_2hour_rep2_combined_PE1.fastq.gz
+cat SRR25074754_1.fastq.gz SRR25074755_1.fastq.gz SRR25074756_1.fastq.gz > T47D_Clone28_2hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074757_1.fastq.gz SRR25074758_1.fastq.gz SRR25074759_1.fastq.gz > T47D_Clone28_1hour_rep4_combined_PE1.fastq.gz
+cat SRR25074760_1.fastq.gz SRR25074761_1.fastq.gz SRR25074762_1.fastq.gz > T47D_Clone28_1hour_rep3_combined_PE1.fastq.gz
+cat SRR25074763_1.fastq.gz SRR25074764_1.fastq.gz SRR25074765_1.fastq.gz > T47D_Clone28_1hour_rep2_combined_PE1.fastq.gz
+cat SRR25074766_1.fastq.gz SRR25074767_1.fastq.gz SRR25074768_1.fastq.gz > T47D_Clone28_1hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074769_1.fastq.gz SRR25074770_1.fastq.gz SRR25074771_1.fastq.gz > T47D_Clone28_0.5hour_rep4_combined_PE1.fastq.gz
+cat SRR25074772_1.fastq.gz SRR25074773_1.fastq.gz SRR25074774_1.fastq.gz > T47D_Clone28_0.5hour_rep3_combined_PE1.fastq.gz
+cat SRR25074775_1.fastq.gz SRR25074776_1.fastq.gz SRR25074777_1.fastq.gz > T47D_Clone28_0.5hour_rep2_combined_PE1.fastq.gz
+cat SRR25074778_1.fastq.gz SRR25074779_1.fastq.gz SRR25074780_1.fastq.gz > T47D_Clone28_0.5hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074781_1.fastq.gz SRR25074782_1.fastq.gz SRR25074783_1.fastq.gz > T47D_Clone28_0hour_rep4_combined_PE1.fastq.gz
+cat SRR25074784_1.fastq.gz SRR25074785_1.fastq.gz SRR25074786_1.fastq.gz > T47D_Clone28_0hour_rep3_combined_PE1.fastq.gz
+cat SRR25074787_1.fastq.gz SRR25074788_1.fastq.gz SRR25074789_1.fastq.gz > T47D_Clone28_0hour_rep2_combined_PE1.fastq.gz
+cat SRR25074790_1.fastq.gz SRR25074791_1.fastq.gz SRR25074792_1.fastq.gz > T47D_Clone28_0hour_rep1_combined_PE1.fastq.gz
+
+
+cat SRR25074724_2.fastq.gz SRR25074725_2.fastq.gz SRR25074726_2.fastq.gz > T47D_Clone28_24hour_rep4_combined_PE2.fastq.gz
+cat SRR25074727_2.fastq.gz SRR25074728_2.fastq.gz SRR25074729_2.fastq.gz > T47D_Clone28_24hour_rep3_combined_PE2.fastq.gz
+cat SRR25074730_2.fastq.gz SRR25074731_2.fastq.gz SRR25074732_2.fastq.gz > T47D_Clone28_24hour_rep2_combined_PE2.fastq.gz
+
+cat SRR25074733_2.fastq.gz SRR25074734_2.fastq.gz SRR25074735_2.fastq.gz > T47D_Clone28_4hour_rep4_combined_PE2.fastq.gz
+cat SRR25074736_2.fastq.gz SRR25074737_2.fastq.gz SRR25074738_2.fastq.gz > T47D_Clone28_4hour_rep3_combined_PE2.fastq.gz
+cat SRR25074739_2.fastq.gz SRR25074740_2.fastq.gz SRR25074741_2.fastq.gz > T47D_Clone28_4hour_rep2_combined_PE2.fastq.gz
+cat SRR25074742_2.fastq.gz SRR25074743_2.fastq.gz SRR25074744_2.fastq.gz > T47D_Clone28_4hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074745_2.fastq.gz SRR25074746_2.fastq.gz SRR25074747_2.fastq.gz > T47D_Clone28_2hour_rep4_combined_PE2.fastq.gz
+cat SRR25074748_2.fastq.gz SRR25074749_2.fastq.gz SRR25074750_2.fastq.gz > T47D_Clone28_2hour_rep3_combined_PE2.fastq.gz
+cat SRR25074751_2.fastq.gz SRR25074752_2.fastq.gz SRR25074753_2.fastq.gz > T47D_Clone28_2hour_rep2_combined_PE2.fastq.gz
+cat SRR25074754_2.fastq.gz SRR25074755_2.fastq.gz SRR25074756_2.fastq.gz > T47D_Clone28_2hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074757_2.fastq.gz SRR25074758_2.fastq.gz SRR25074759_2.fastq.gz > T47D_Clone28_1hour_rep4_combined_PE2.fastq.gz
+cat SRR25074760_2.fastq.gz SRR25074761_2.fastq.gz SRR25074762_2.fastq.gz > T47D_Clone28_1hour_rep3_combined_PE2.fastq.gz
+cat SRR25074763_2.fastq.gz SRR25074764_2.fastq.gz SRR25074765_2.fastq.gz > T47D_Clone28_1hour_rep2_combined_PE2.fastq.gz
+cat SRR25074766_2.fastq.gz SRR25074767_2.fastq.gz SRR25074768_2.fastq.gz > T47D_Clone28_1hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074769_2.fastq.gz SRR25074770_2.fastq.gz SRR25074771_2.fastq.gz > T47D_Clone28_0.5hour_rep4_combined_PE2.fastq.gz
+cat SRR25074772_2.fastq.gz SRR25074773_2.fastq.gz SRR25074774_2.fastq.gz > T47D_Clone28_0.5hour_rep3_combined_PE2.fastq.gz
+cat SRR25074775_2.fastq.gz SRR25074776_2.fastq.gz SRR25074777_2.fastq.gz > T47D_Clone28_0.5hour_rep2_combined_PE2.fastq.gz
+cat SRR25074778_2.fastq.gz SRR25074779_2.fastq.gz SRR25074780_2.fastq.gz > T47D_Clone28_0.5hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074781_2.fastq.gz SRR25074782_2.fastq.gz SRR25074783_2.fastq.gz > T47D_Clone28_0hour_rep4_combined_PE2.fastq.gz
+cat SRR25074784_2.fastq.gz SRR25074785_2.fastq.gz SRR25074786_2.fastq.gz > T47D_Clone28_0hour_rep3_combined_PE2.fastq.gz
+cat SRR25074787_2.fastq.gz SRR25074788_2.fastq.gz SRR25074789_2.fastq.gz > T47D_Clone28_0hour_rep2_combined_PE2.fastq.gz
+cat SRR25074790_2.fastq.gz SRR25074791_2.fastq.gz SRR25074792_2.fastq.gz > T47D_Clone28_0hour_rep1_combined_PE2.fastq.gz
 ```
 
 ## Generate a plot of quality control metrics (Figure S5)
@@ -2440,6 +2544,48 @@ Combine the reads into one file.
 paste -d'\t' *combined_gene_counts.txt > TRPS1_timecourse_PRO_gene_counts_combined.txt
 ```
 
+
+## Scale and merge bigWigs for use in the genome browser
+
+Here we merge the bigWigs to create T47D_all_plus_PE1.bigWig and T47D_all_minus_PE1.bigWig to upload to the dREG portal (https://dreg.dnasequence.org/). The output includes a dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed file that represents the genomic coordinates of each bidirectionally transcribed putative regulatory element. We use this output above in this vignette to separate ATAC-seq peaks that are distal to bidirectional transcription.
+
+```{r engine='bash', eval=F, echo=TRUE}
+#This only worked for the positive strand because the counts are positive
+for i in T47D_Clone28_0hour_rep1_combined_*_PE1.bigWig
+do
+  strand=$(echo $i | awk -F"T47D_Clone28_0hour_rep1_combined_" '{print $2}' | awk -F"_PE1.bigWig" '{print $1}')
+  echo $strand
+  files=$(ls T47D_Clone28_*combined*_${strand}_PE1.bigWig)
+  echo $files
+  bigWigMerge $files tmp.bg
+  LC_COLLATE=C sort -k1,1 -k2,2n tmp.bg > tmp_sorted.bg
+  bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_${strand}_PE1.bigWig
+  rm tmp.bg
+  rm tmp_sorted.bg
+done
+
+#For minus strand
+#Could have done this for loop as independent jobs
+for i in T47D_*_combined_minus_PE1.bigWig
+do
+  name=$(echo $i | awk -F"_PE1.bigWig" '{print $1}')
+  echo $name
+  bigWigToBedGraph $i tmp.bg
+  echo normalizing
+  normalize_bedGraph.py -i tmp.bg -s -1 -o tmp2.bg
+  bedGraphToBigWig tmp2.bg hg38.chrom.sizes ${name}_positive_PE1.bigWig
+  rm tmp.bg
+  rm tmp2.bg
+done
+files=$(ls T47D_*_minus_positive_PE1.bigWig)
+echo $files
+bigWigMerge $files tmp.bg
+LC_COLLATE=C sort -k1,1 -k2,2n tmp.bg > tmp_sorted.bg
+bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_minus_PE1.bigWig
+rm tmp.bg
+rm tmp_sorted.bg
+```
+
 ## Scale and merge bigWigs for use in the genome browser
 
 The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below. It scales each bigWig based on the read depth, broken down by strand.
@@ -2577,6 +2723,7 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_t
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_combined.txt .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_scaled.bedGraph.gz .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_combined_normalized.bigWig .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_all_*us_PE1.bigWig .
 ``` 
 
 # PRO-seq analysis
