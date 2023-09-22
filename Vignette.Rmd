@@ -2545,7 +2545,7 @@ paste -d'\t' *combined_gene_counts.txt > TRPS1_timecourse_PRO_gene_counts_combin
 ```
 
 
-## Scale and merge bigWigs for use in the genome browser
+## Merge bigWigs to upload to dREG
 
 Here we merge the bigWigs to create T47D_all_plus_PE1.bigWig and T47D_all_minus_PE1.bigWig to upload to the dREG portal (https://dreg.dnasequence.org/). The output includes a dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed file that represents the genomic coordinates of each bidirectionally transcribed putative regulatory element. We use this output above in this vignette to separate ATAC-seq peaks that are distal to bidirectional transcription.
 
