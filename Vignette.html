@@ -787,7 +787,8 @@ function toggle_visibility(id1) {
 <li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">11.3</span> Growth curves (Figure 6C)</a></li>
 <li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">11.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
 <li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
-<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8"><span class="toc-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)</a></li>
+<li><a href="#plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" id="toc-plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10"><span class="toc-section-number">11.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11"><span class="toc-section-number">11.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</a></li>
 </ul></li>
 </ul>
 </div>
@@ -4290,8 +4291,8 @@ res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
 res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = &quot;gene&quot;)
 
-activated = res.deseq$symbol[res.deseq$padj &lt; 0.01 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0] 
-repressed = res.deseq$symbol[res.deseq$padj &lt; 0.01 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0] </code></pre>
+activated = res.deseq$symbol[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0] 
+repressed = res.deseq$symbol[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0] </code></pre>
 <p>Define the TRPS1 regulon based on our own primary gene set.</p>
 <pre class="r bg-info"><code>data(&quot;rtni1st&quot;)
 TRPS1 = rtni1st@regulatoryElements[&quot;TRPS1&quot;]
@@ -4336,7 +4337,7 @@ attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot
 <p>Identify the patient with the highest TRPS1 activity score.</p>
 <pre class="r bg-info"><code>max = rownames(tns_both@results$regulonActivity$differential)[tns_both@results$regulonActivity$differential == max(tns_both@results$regulonActivity$differential)]</code></pre>
 <p>Plot.</p>
-<pre class="r bg-info"><code>pdf(&quot;RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.01.pdf&quot;, height = 3, width = 3)
+<pre class="r bg-info"><code>pdf(&quot;RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.1.pdf&quot;, height = 3, width = 3)
 tnsPlotGSEA2(tns_both, max, regs = &quot;TRPS1&quot;)
 dev.off()</code></pre>
 </div>
@@ -4344,12 +4345,306 @@ dev.off()</code></pre>
 <h2><span class="header-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</h2>
 <p>Plot.</p>
 <pre class="r bg-info"><code>#Logrank p-value 8.3e-6
-pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.01_no_endpoint.pdf&quot;, height = 3, width = 6)
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint.pdf&quot;, height = 3, width = 6)
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
-<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8" class="section level2" number="11.6">
-<h2><span class="header-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)</h2>
+<div id="plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" class="section level2" number="11.6">
+<h2><span class="header-section-number">11.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</h2>
+<pre class="r bg-info"><code>#Just ER positive
+data(&quot;rtni1st&quot;)
+TRPS1 = rtni1st@regulatoryElements[&quot;TRPS1&quot;]
+ILMN_SYMBOL = rtni1st@rowAnnotation
+rtni1st@results$tn.dpi[,TRPS1] &lt;- 0
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] &lt;- -1
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] &lt;- 1
+
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;)
+                           , excludeAttribs = &quot;ER-&quot;
+                           )
+tns1st &lt;-tnsGSEA2(tns1st)
+
+data(&quot;rtni2nd&quot;)
+TRPS1 = rtni2nd@regulatoryElements[&quot;TRPS1&quot;]
+ILMN_SYMBOL = rtni2nd@rowAnnotation
+rtni2nd@results$tn.dpi[,TRPS1] &lt;- 0
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] &lt;- -1
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] &lt;- 1
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;, &quot;Grade&quot;)
+                           , excludeAttribs = &quot;ER-&quot;
+                           )
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 3.86e-6
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_ER_positive.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+#Just ER negative
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = &quot;ER+&quot;)
+tns1st &lt;-tnsGSEA2(tns1st)
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = &quot;ER+&quot;)
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_ER_negative.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+
+#Just Basal
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;LumA&quot;, &quot;LumB&quot;, &quot;Her2&quot;, &quot;Normal&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;LumA&quot;, &quot;LumB&quot;, &quot;Her2&quot;, &quot;Normal&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_Basal.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+#Just Normal
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;LumA&quot;, &quot;LumB&quot;, &quot;Her2&quot;, &quot;Basal&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;LumA&quot;, &quot;LumB&quot;, &quot;Her2&quot;, &quot;Basal&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_Normal.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+#Just Her2-amplified
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;LumA&quot;, &quot;LumB&quot;, &quot;Normal&quot;, &quot;Basal&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;LumA&quot;, &quot;LumB&quot;, &quot;Normal&quot;, &quot;Basal&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_HER2.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+
+#Just luminal A
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;Basal&quot;, &quot;Her2&quot;, &quot;Normal&quot;, &quot;LumB&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;Basal&quot;, &quot;Her2&quot;, &quot;Normal&quot;, &quot;LumB&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 4.23e-4
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_luminal_A.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+#Just luminal B
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;Basal&quot;, &quot;Her2&quot;, &quot;Normal&quot;, &quot;LumA&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, 
+                           event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;), 
+                           excludeAttribs = c(&quot;Basal&quot;, &quot;Her2&quot;, &quot;Normal&quot;, &quot;LumA&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)
+
+#Run KM and Cox analysis
+tns_both &lt;-tnsKM(tns_both)
+tns_both &lt;-tnsCox(tns_both)
+
+#Logrank p-value 2.34e-1
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_luminal_B.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()</code></pre>
+</div>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" class="section level2" number="11.7">
+<h2><span class="header-section-number">11.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</h2>
 <p>Identify TRPS1-responsive genes.</p>
 <pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
@@ -4406,8 +4701,8 @@ attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot
 <p>Run Kaplan-Meier analysis.</p>
 <pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)</code></pre>
 <p>Plot.</p>
-<pre class="r bg-info"><code>#Logrank p-value 8.3e-6
-pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.01_no_endpoint.pdf&quot;, height = 3, width = 6)
+<pre class="r bg-info"><code>#Logrank p-value 4.99e-4
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.1_no_endpoint.pdf&quot;, height = 3, width = 6)
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
