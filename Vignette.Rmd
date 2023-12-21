@@ -3558,6 +3558,123 @@ repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
 write.table(repressed, file = "repressed_ER_target_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 ```
 
+## Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)
+
+Set up in R.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1/"
+setwd(direc)
+
+library(DESeq2)
+library(pheatmap)
+
+categorize.deseq.df.mods <- function(df, fdr = 0.05, log2fold = 0.0, treat = 'Estrogen') 
+{
+  df.activated = df[df$padj < fdr & !is.na(df$padj) & df$log2FoldChange > log2fold,]
+  df.repressed = df[df$padj < fdr & !is.na(df$padj) & df$log2FoldChange < -log2fold,]
+  df.unchanged = df[df$padj > 0.5 & !is.na(df$padj) & abs(df$log2FoldChange) < 0.1,]
+  df.dregs = df[!(df$padj < fdr & !is.na(df$padj) & df$log2FoldChange > log2fold) &
+                  !(df$padj < fdr & !is.na(df$padj) & df$log2FoldChange < -log2fold) &
+                  !(df$padj > 0.5 & !is.na(df$padj) & abs(df$log2FoldChange) < 0.1), ]
+  df.unchanged$treatment = paste(treat, 'Unchanged')
+  df.activated$treatment = paste(treat, 'Activated')
+  df.repressed$treatment = paste(treat, 'Repressed')
+  df.dregs$treatment = paste(treat, 'All Other Genes')
+  df.effects.lattice =
+    rbind(df.activated,
+          df.unchanged,
+          df.repressed,
+          df.dregs)
+  df.effects.lattice$treatment = factor(df.effects.lattice$treatment)
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, 'Activated'))
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, 'Repressed'))
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, 'Unchanged'))
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, 'All Other Genes'))
+  return(df.effects.lattice)
+}
+
+rwb <- colorRampPalette(colors = c("red", "white", "blue"))
+
+#For converting gene names
+gene.file = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/Homo_sapiens.GRCh38.104.bed", sep = '\t', header = FALSE)
+`%notin%` <- Negate(`%in%`)
+gene.file = gene.file[gene.file$V5 %notin% c("havana", "havana_tagene", "ensembl_havana"),]
+gene.symbol = gene.file[,c(4,5)]
+colnames(gene.symbol) = c("gene", "symbol")
+```
+
+Identify differentially expressed genes across the three clones
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#DESeq2
+x = read.table("TRPS1_PRO_gene_counts.txt", sep = '\t', header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+treatment = factor(sapply(strsplit(colnames(x), '_'), '[', 3))
+clone = factor(sapply(strsplit(colnames(x), '_'), '[', 2))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, clone, rep), ~ rep + clone + treatment)
+deseq.df = DESeq(deseq.df)
+
+res.deseq.treatment = results(deseq.df, contrast = c("treatment", "dTAG13", "DMSO"))
+res.deseq.treatment = res.deseq.treatment[rownames(res.deseq.treatment) %in% gene.symbol$gene,]
+sum(res.deseq.treatment$padj < 0.1 & !is.na(res.deseq.treatment$padj))
+
+#Gene classes
+df.deseq.effects.lattice = 
+  categorize.deseq.df.mods(res.deseq.treatment, fdr = 0.1, log2fold = 0.0, treat = 'dTAG13')
+```
+
+Get dynamic ER target genes
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+dTAG_activated_ER_targets = read.table(file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/activated_ER_target_genes.txt")$V1
+dTAG_activated_ER_targets = gene.symbol$gene[gene.symbol$symbol %in% dTAG_activated_ER_targets]
+
+dTAG_repressed_ER_targets = read.table(file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/repressed_ER_target_genes.txt")$V1
+dTAG_repressed_ER_targets = gene.symbol$gene[gene.symbol$symbol %in% dTAG_repressed_ER_targets]
+```
+
+Plot heatmaps
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Activated heatmap
+wide_counts = counts(deseq.df[rownames(deseq.df) %in% dTAG_activated_ER_targets,], normalized = TRUE)
+wide_counts = as.data.frame(wide_counts)
+wide_counts = cbind.data.frame("Clone28" = log(rowSums(wide_counts[,5:8])/rowSums(wide_counts[,1:4]), base = 2), 
+                               "Clone35" = log(rowSums(wide_counts[,13:16])/rowSums(wide_counts[,9:12]), base = 2),
+                               "Clone39" = log(rowSums(wide_counts[,21:24])/rowSums(wide_counts[,17:20]), base = 2))
+wide_counts = merge.data.frame(wide_counts, gene.symbol, by.x = "row.names", by.y = "gene")
+rownames(wide_counts) = wide_counts$symbol
+wide_counts = wide_counts[,2:4]
+head(wide_counts)
+
+pdf("dTAG_activated_ER_targets_heatmap.pdf", height = 10)
+pheatmap(wide_counts, scale = "none", angle_col = 0,
+         color = rev(rwb(100)),
+         breaks = seq(-.6, .6, 1.2/100))
+dev.off()
+
+#Repressed heatmap
+wide_counts = counts(deseq.df[rownames(deseq.df) %in% dTAG_repressed_ER_targets,], normalized = TRUE)
+wide_counts = as.data.frame(wide_counts)
+wide_counts = cbind.data.frame("Clone28" = log(rowSums(wide_counts[,5:8])/rowSums(wide_counts[,1:4]), base = 2), 
+                               "Clone35" = log(rowSums(wide_counts[,13:16])/rowSums(wide_counts[,9:12]), base = 2),
+                               "Clone39" = log(rowSums(wide_counts[,21:24])/rowSums(wide_counts[,17:20]), base = 2))
+wide_counts = merge.data.frame(wide_counts, gene.symbol, by.x = "row.names", by.y = "gene")
+rownames(wide_counts) = wide_counts$symbol
+wide_counts = wide_counts[,2:4]
+head(wide_counts)
+
+pdf("dTAG_repressed_ER_targets_heatmap.pdf", height = 10)
+pheatmap(wide_counts, scale = "none", angle_col = 0,
+         color = rev(rwb(100)),
+         breaks = seq(-.6, .6, 1.2/100))
+dev.off()
+```
+
 ## ER binding intensity near dynamic ER target genes (Figure 5B)
 
 Set up in R.
