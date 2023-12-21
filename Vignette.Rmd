@@ -3621,8 +3621,8 @@ res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
 res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = "gene")
 
-activated = res.deseq$symbol[res.deseq$padj < 0.01 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0] 
-repressed = res.deseq$symbol[res.deseq$padj < 0.01 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0] 
+activated = res.deseq$symbol[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0] 
+repressed = res.deseq$symbol[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0] 
 ```
 
 Define the TRPS1 regulon based on our own primary gene set.
@@ -3692,7 +3692,7 @@ max = rownames(tns_both@results$regulonActivity$differential)[tns_both@results$r
 Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-pdf("RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.01.pdf", height = 3, width = 3)
+pdf("RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.1.pdf", height = 3, width = 3)
 tnsPlotGSEA2(tns_both, max, regs = "TRPS1")
 dev.off()
 ```
@@ -3702,8 +3702,312 @@ dev.off()
 Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-#Logrank p-value 8.3e-6
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.01_no_endpoint.pdf", height = 3, width = 6)
+#Logrank p-value 4.99e-4
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint.pdf", height = 3, width = 6)
 tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()
 ```
+
+## Break down patient outcomes data by ER-positivity and by intrinsic subtype (Figure S10)
+
+Here we repeat the above analyses but only plotting subsets of the patients.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Just ER positive
+data("rtni1st")
+TRPS1 = rtni1st@regulatoryElements["TRPS1"]
+ILMN_SYMBOL = rtni1st@rowAnnotation
+rtni1st@results$tn.dpi[,TRPS1] <- 0
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] <- -1
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] <- 1
+
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade")
+                           , excludeAttribs = "ER-"
+                           )
+tns1st <-tnsGSEA2(tns1st)
+
+data("rtni2nd")
+TRPS1 = rtni2nd@regulatoryElements["TRPS1"]
+ILMN_SYMBOL = rtni2nd@rowAnnotation
+rtni2nd@results$tn.dpi[,TRPS1] <- 0
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] <- -1
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] <- 1
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age", "Grade")
+                           , excludeAttribs = "ER-"
+                           )
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 3.86e-6
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_ER_positive.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+
+#Just ER negative
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = "ER+")
+tns1st <-tnsGSEA2(tns1st)
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = "ER+")
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_ER_negative.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+
+#Just Basal
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("LumA", "LumB", "Her2", "Normal"))
+tns1st <-tnsGSEA2(tns1st)
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("LumA", "LumB", "Her2", "Normal"))
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_Basal.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+#Just Normal
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("LumA", "LumB", "Her2", "Basal"))
+tns1st <-tnsGSEA2(tns1st)
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("LumA", "LumB", "Her2", "Basal"))
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_Normal.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+#Just Her2-amplified
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("LumA", "LumB", "Normal", "Basal"))
+tns1st <-tnsGSEA2(tns1st)
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("LumA", "LumB", "Normal", "Basal"))
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_HER2.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+
+#Just luminal A
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("Basal", "Her2", "Normal", "LumB"))
+tns1st <-tnsGSEA2(tns1st)
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("Basal", "Her2", "Normal", "LumB"))
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 4.23e-4
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_luminal_A.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+
+
+
+#Just luminal B
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("Basal", "Her2", "Normal", "LumA"))
+tns1st <-tnsGSEA2(tns1st)
+
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
+                           event = "event", keycovar =c("Age","Grade"), 
+                           excludeAttribs = c("Basal", "Her2", "Normal", "LumA"))
+tns2nd <-tnsGSEA2(tns2nd)
+
+#Merge
+tns_both = tns1st
+tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)
+
+#Get regulon activity and sample attributes
+regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
+sdata <-tnsGet(tns_both, "survivalData")
+attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+
+#Run KM and Cox analysis
+tns_both <-tnsKM(tns_both)
+tns_both <-tnsCox(tns_both)
+
+#Logrank p-value 2.34e-1
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_luminal_B.pdf", height = 3, width = 6)
+tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()
+```
+
+
+
+
