@@ -777,8 +777,9 @@ function toggle_visibility(id1) {
 <li><a href="#cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" id="toc-cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef"><span class="toc-section-number">10.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</a></li>
 <li><a href="#identification-of-er-target-genes-figure-s7" id="toc-identification-of-er-target-genes-figure-s7"><span class="toc-section-number">10.2</span> Identification of ER target genes (Figure S7)</a></li>
 <li><a href="#cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" id="toc-cluster-of-dynamic-er-target-genes-figure-5a-tables-s910"><span class="toc-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</a></li>
-<li><a href="#er-binding-intensity-near-dynamic-er-target-genes-figure-5b" id="toc-er-binding-intensity-near-dynamic-er-target-genes-figure-5b"><span class="toc-section-number">10.4</span> ER binding intensity near dynamic ER target genes (Figure 5B)</a></li>
-<li><a href="#er-binding-intensity-by-trps1-proximity-figure-5c" id="toc-er-binding-intensity-by-trps1-proximity-figure-5c"><span class="toc-section-number">10.5</span> ER binding intensity by TRPS1 proximity (Figure 5C)</a></li>
+<li><a href="#plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8" id="toc-plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8"><span class="toc-section-number">10.4</span> Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)</a></li>
+<li><a href="#er-binding-intensity-near-dynamic-er-target-genes-figure-5b" id="toc-er-binding-intensity-near-dynamic-er-target-genes-figure-5b"><span class="toc-section-number">10.5</span> ER binding intensity near dynamic ER target genes (Figure 5B)</a></li>
+<li><a href="#er-binding-intensity-by-trps1-proximity-figure-5c" id="toc-er-binding-intensity-by-trps1-proximity-figure-5c"><span class="toc-section-number">10.6</span> ER binding intensity by TRPS1 proximity (Figure 5C)</a></li>
 </ul></li>
 <li><a href="#outcomes-associations" id="toc-outcomes-associations"><span class="toc-section-number">11</span> Outcomes associations</a>
 <ul>
@@ -3771,8 +3772,110 @@ repressed = plot.df$genes[plot.df$Class == &quot;Repressed at 30 minutes&quot;]
 repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
 write.table(repressed, file = &quot;repressed_ER_target_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
-<div id="er-binding-intensity-near-dynamic-er-target-genes-figure-5b" class="section level2" number="10.4">
-<h2><span class="header-section-number">10.4</span> ER binding intensity near dynamic ER target genes (Figure 5B)</h2>
+<div id="plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8" class="section level2" number="10.4">
+<h2><span class="header-section-number">10.4</span> Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)</h2>
+<p>Set up in R.</p>
+<pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1/&quot;
+setwd(direc)
+
+library(DESeq2)
+library(pheatmap)
+
+categorize.deseq.df.mods &lt;- function(df, fdr = 0.05, log2fold = 0.0, treat = &#39;Estrogen&#39;) 
+{
+  df.activated = df[df$padj &lt; fdr &amp; !is.na(df$padj) &amp; df$log2FoldChange &gt; log2fold,]
+  df.repressed = df[df$padj &lt; fdr &amp; !is.na(df$padj) &amp; df$log2FoldChange &lt; -log2fold,]
+  df.unchanged = df[df$padj &gt; 0.5 &amp; !is.na(df$padj) &amp; abs(df$log2FoldChange) &lt; 0.1,]
+  df.dregs = df[!(df$padj &lt; fdr &amp; !is.na(df$padj) &amp; df$log2FoldChange &gt; log2fold) &amp;
+                  !(df$padj &lt; fdr &amp; !is.na(df$padj) &amp; df$log2FoldChange &lt; -log2fold) &amp;
+                  !(df$padj &gt; 0.5 &amp; !is.na(df$padj) &amp; abs(df$log2FoldChange) &lt; 0.1), ]
+  df.unchanged$treatment = paste(treat, &#39;Unchanged&#39;)
+  df.activated$treatment = paste(treat, &#39;Activated&#39;)
+  df.repressed$treatment = paste(treat, &#39;Repressed&#39;)
+  df.dregs$treatment = paste(treat, &#39;All Other Genes&#39;)
+  df.effects.lattice =
+    rbind(df.activated,
+          df.unchanged,
+          df.repressed,
+          df.dregs)
+  df.effects.lattice$treatment = factor(df.effects.lattice$treatment)
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, &#39;Activated&#39;))
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, &#39;Repressed&#39;))
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, &#39;Unchanged&#39;))
+  df.effects.lattice$treatment = relevel(df.effects.lattice$treatment, ref = paste(treat, &#39;All Other Genes&#39;))
+  return(df.effects.lattice)
+}
+
+rwb &lt;- colorRampPalette(colors = c(&quot;red&quot;, &quot;white&quot;, &quot;blue&quot;))
+
+#For converting gene names
+gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/Homo_sapiens.GRCh38.104.bed&quot;, sep = &#39;\t&#39;, header = FALSE)
+`%notin%` &lt;- Negate(`%in%`)
+gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
+gene.symbol = gene.file[,c(4,5)]
+colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
+<p>Identify differentially expressed genes across the three clones</p>
+<pre class="r bg-info"><code>#DESeq2
+x = read.table(&quot;TRPS1_PRO_gene_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+treatment = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3))
+clone = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 2))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(treatment, clone, rep), ~ rep + clone + treatment)
+deseq.df = DESeq(deseq.df)
+
+res.deseq.treatment = results(deseq.df, contrast = c(&quot;treatment&quot;, &quot;dTAG13&quot;, &quot;DMSO&quot;))
+res.deseq.treatment = res.deseq.treatment[rownames(res.deseq.treatment) %in% gene.symbol$gene,]
+sum(res.deseq.treatment$padj &lt; 0.1 &amp; !is.na(res.deseq.treatment$padj))
+
+#Gene classes
+df.deseq.effects.lattice = 
+  categorize.deseq.df.mods(res.deseq.treatment, fdr = 0.1, log2fold = 0.0, treat = &#39;dTAG13&#39;)</code></pre>
+<p>Get dynamic ER target genes</p>
+<pre class="r bg-info"><code>dTAG_activated_ER_targets = read.table(file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/activated_ER_target_genes.txt&quot;)$V1
+dTAG_activated_ER_targets = gene.symbol$gene[gene.symbol$symbol %in% dTAG_activated_ER_targets]
+
+dTAG_repressed_ER_targets = read.table(file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/repressed_ER_target_genes.txt&quot;)$V1
+dTAG_repressed_ER_targets = gene.symbol$gene[gene.symbol$symbol %in% dTAG_repressed_ER_targets]</code></pre>
+<p>Plot heatmaps</p>
+<pre class="r bg-info"><code>#Activated heatmap
+wide_counts = counts(deseq.df[rownames(deseq.df) %in% dTAG_activated_ER_targets,], normalized = TRUE)
+wide_counts = as.data.frame(wide_counts)
+wide_counts = cbind.data.frame(&quot;Clone28&quot; = log(rowSums(wide_counts[,5:8])/rowSums(wide_counts[,1:4]), base = 2), 
+                               &quot;Clone35&quot; = log(rowSums(wide_counts[,13:16])/rowSums(wide_counts[,9:12]), base = 2),
+                               &quot;Clone39&quot; = log(rowSums(wide_counts[,21:24])/rowSums(wide_counts[,17:20]), base = 2))
+wide_counts = merge.data.frame(wide_counts, gene.symbol, by.x = &quot;row.names&quot;, by.y = &quot;gene&quot;)
+rownames(wide_counts) = wide_counts$symbol
+wide_counts = wide_counts[,2:4]
+head(wide_counts)
+
+pdf(&quot;dTAG_activated_ER_targets_heatmap.pdf&quot;, height = 10)
+pheatmap(wide_counts, scale = &quot;none&quot;, angle_col = 0,
+         color = rev(rwb(100)),
+         breaks = seq(-.6, .6, 1.2/100))
+dev.off()
+
+#Repressed heatmap
+wide_counts = counts(deseq.df[rownames(deseq.df) %in% dTAG_repressed_ER_targets,], normalized = TRUE)
+wide_counts = as.data.frame(wide_counts)
+wide_counts = cbind.data.frame(&quot;Clone28&quot; = log(rowSums(wide_counts[,5:8])/rowSums(wide_counts[,1:4]), base = 2), 
+                               &quot;Clone35&quot; = log(rowSums(wide_counts[,13:16])/rowSums(wide_counts[,9:12]), base = 2),
+                               &quot;Clone39&quot; = log(rowSums(wide_counts[,21:24])/rowSums(wide_counts[,17:20]), base = 2))
+wide_counts = merge.data.frame(wide_counts, gene.symbol, by.x = &quot;row.names&quot;, by.y = &quot;gene&quot;)
+rownames(wide_counts) = wide_counts$symbol
+wide_counts = wide_counts[,2:4]
+head(wide_counts)
+
+pdf(&quot;dTAG_repressed_ER_targets_heatmap.pdf&quot;, height = 10)
+pheatmap(wide_counts, scale = &quot;none&quot;, angle_col = 0,
+         color = rev(rwb(100)),
+         breaks = seq(-.6, .6, 1.2/100))
+dev.off()</code></pre>
+</div>
+<div id="er-binding-intensity-near-dynamic-er-target-genes-figure-5b" class="section level2" number="10.5">
+<h2><span class="header-section-number">10.5</span> ER binding intensity near dynamic ER target genes (Figure 5B)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -3993,8 +4096,8 @@ t.test(log(Unchanged$dTAG), log(Unchanged$DMSO), paired = T) #0.3518
 Repressed = peaks_near_genes[peaks_near_genes$Class == &quot;Repressed Genes&quot;,]
 t.test(log(Repressed$dTAG), log(Repressed$DMSO), paired = T) #0.000003224</code></pre>
 </div>
-<div id="er-binding-intensity-by-trps1-proximity-figure-5c" class="section level2" number="10.5">
-<h2><span class="header-section-number">10.5</span> ER binding intensity by TRPS1 proximity (Figure 5C)</h2>
+<div id="er-binding-intensity-by-trps1-proximity-figure-5c" class="section level2" number="10.6">
+<h2><span class="header-section-number">10.6</span> ER binding intensity by TRPS1 proximity (Figure 5C)</h2>
 <p>Get the distance from each ER peak summit to the nearest TRPS1 peak summit.</p>
 <pre class="r bg-info"><code>q = 30
 peaks = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed&quot;, sep = &quot;\t&quot;)
