@@ -33,7 +33,7 @@ pre[class] {
 
 # Introduction
 
-This is a work in progress. 
+This is an analysis vignette accompanying the manuscript entitled "TRPS1 modulates chromatin accessibility to regulate estrogen receptor alpha (ER) binding and ER target gene expression in luminal breast cancer cells" (https://doi.org/10.1101/2023.07.03.547524). The reader should be able to follow these steps to download the raw data and reproduce all the results in the manuscript.  
 
 # GWAS summary statistics processing
 
@@ -2101,7 +2101,7 @@ PeaksWithMotif(motif_overlaps, motif = "TRPS1_homer_uniprobe_jaspar_edited.txt")
 dev.off()
 ```
 
-# PRO-seq data pre-processing
+# Time course PRO-seq data pre-processing
 
 For the initial basic processing steps, we used a pipeline we have thoroughly described elsewhere (https://github.com/guertinlab/Nascent_RNA_Methods). Please see the above GitHub repository for detailed explanations of the steps, as well as software dependencies and preprocessing steps (e.g., gene annotation file downloads).
 
@@ -2117,7 +2117,7 @@ ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
 Make a directory.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-mkdir -p TRPS1_timecourse_PRO_3
+mkdir -p /scratch/ts2hx/TRPS1_timecourse_PRO_3
 ```
 
 The script used in the next code chunk (220927_tallymer_generation.sh) is below:
@@ -2139,9 +2139,6 @@ Make tallymer and table for seqOutBias (this takes a while).
 ```{r engine='bash', eval=F, echo=TRUE}
 sbatch -p largemem -A gioeli_lab -t 1-00:00:00 --job-name tallymer -o tallymer.log \
     /scratch/ts2hx/scripts/220927_tallymer_generation.sh
-
-exit
-exit
 ```
 
 ## Download the raw data from the three sequencing runs, rename the files, and combine the reads
@@ -2149,9 +2146,6 @@ exit
 We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first download the fastq’s and gzip.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-
 cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
 
 for i in {24..92}
@@ -2724,6 +2718,238 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_t
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_scaled.bedGraph.gz .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_combined_normalized.bigWig .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_all_*us_PE1.bigWig .
+``` 
+
+
+# Three clone PRO-seq data pre-processing
+
+As above, here we pre-process the raw data from the three clone PRO-seq experiment used to assess the robustness of the changes in ER target gene expression upon TRPS1 depletion.
+
+## Set up
+
+Log in to the cluster to perform the processing for each sample in parallel.
+
+```{r engine='bash', eval=F, echo=TRUE}
+ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
+```
+
+Make a directory.
+
+```{r engine='bash', eval=F, echo=TRUE}
+mkdir -p /scratch/ts2hx/TRPS1
+```
+
+Make tallymer and table for seqOutBias (this takes a while).
+
+```{r engine='bash', eval=F, echo=TRUE}
+module load genometools/1.5.10
+read_size=62
+genome=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa
+
+mkdir -p $HOME/seqOutBias
+cd $HOME/seqOutBias
+$HOME/bin/seqOutBias seqtable $genome --read-size=$read_size    
+```
+
+
+## Download the raw data
+
+Update this with the SRA numbers once available.
+
+```{r engine='bash', eval=F, echo=TRUE}
+main=/scratch/ts2hx/TRPS1
+cd $main
+
+for i in #{24..92}
+do
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    #-o logs/SRR250747${i}_fasterq_dump.log \
+    #--wrap="module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}"
+  sleep 1
+done
+```
+
+## Process the combined reads
+
+The script used in the next code chunk (220408_PROseq_analysis_on_input_file.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#! /bin/bash
+directory=/scratch/$USER/TRPS1
+annotation_prefix=$HOME/gene_annotations/Homo_sapiens.GRCh38.104 
+UMI_length=8
+read_size=62
+cores=$SLURM_CPUS_PER_TASK
+genome_index=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome
+prealign_rdna_index=$HOME/human_rDNA/human_rDNA
+tallymer=$HOME/seqOutBias/genome.tal_${read_size}.gtTxt.gz
+table=$HOME/seqOutBias/genome_${read_size}.4.2.2.tbl
+
+PATH=$HOME/bin:$PATH
+
+cd $directory 
+
+module load cutadapt/3.4
+module load intel/18.0 intelmpi/18.0 R/4.1.1
+module load gcc/9.2.0 bowtie2/2.2.9 
+module load samtools/1.12
+module load wigtobigwig/2.8
+module load bedtools/2.29.2
+
+filename=$1
+name=$(echo $filename | awk -F"_PE1.fastq" '{print $1}')
+echo $name
+echo 'removing dual adapter ligations and calculating the fraction of adapter/adapters in' $name
+cutadapt --cores=$cores -m $((UMI_length+2)) -O 1 -a TGGAATTCTCGGGTGCCAAGG ${name}_PE1.fastq \
+    -o ${name}_PE1_noadap.fastq --too-short-output ${name}_PE1_short.fastq > ${name}_PE1_cutadapt.txt
+cutadapt --cores=$cores -m $((UMI_length+10)) -O 1 -a GATCGTCGGACTGTAGAACTCTGAAC ${name}_PE2.fastq \
+    -o ${name}_PE2_noadap.fastq --too-short-output ${name}_PE2_short.fastq > ${name}_PE2_cutadapt.txt
+PE1_total=$(wc -l ${name}_PE1.fastq | awk '{print $1/4}')
+PE1_w_Adapter=$(wc -l ${name}_PE1_short.fastq | awk '{print $1/4}')
+AAligation=$(echo "scale=2 ; $PE1_w_Adapter / $PE1_total" | bc)
+echo -e  "value\texperiment\tthreshold\tmetric" > ${name}_QC_metrics.txt
+echo -e "$AAligation\t$name\t0.80\tAdapter/Adapter" >> ${name}_QC_metrics.txt
+echo 'removing short RNA insertions in' $name
+seqtk seq -L $((UMI_length+10)) ${name}_PE1_noadap.fastq > ${name}_PE1_noadap_trimmed.fastq 
+echo 'removing PCR duplicates from' $name
+fqdedup -i ${name}_PE1_noadap_trimmed.fastq -o ${name}_PE1_dedup.fastq
+PE1_noAdapter=$(wc -l ${name}_PE1_dedup.fastq | awk '{print $1/4}')
+fastq_pair -t $PE1_noAdapter ${name}_PE1_dedup.fastq ${name}_PE2_noadap.fastq
+echo 'calculating and plotting RNA insert sizes from' $name
+flash -q --compress-prog=gzip --suffix=gz ${name}_PE1_dedup.fastq.paired.fq \
+    ${name}_PE2_noadap.fastq.paired.fq -o ${name}
+insert_size.R ${name}.hist ${UMI_length}
+echo 'trimming off the UMI from' $name
+seqtk trimfq -b ${UMI_length} ${name}_PE1_dedup.fastq | seqtk seq -r - > ${name}_PE1_processed.fastq
+seqtk trimfq -e ${UMI_length} ${name}_PE2_noadap.fastq | seqtk seq -r - > ${name}_PE2_processed.fastq
+echo 'aligning' $name 'to rDNA and removing aligned reads'
+bowtie2 -p $cores -x $prealign_rdna_index -U ${name}_PE1_processed.fastq 2>${name}_bowtie2_rDNA.log | \
+    samtools sort -n - | samtools fastq -f 0x4 - > ${name}_PE1.rDNA.fastq
+reads=$(wc -l ${name}_PE1.rDNA.fastq | awk '{print $1/4}')
+fastq_pair -t $reads ${name}_PE1.rDNA.fastq ${name}_PE2_processed.fastq
+echo 'aligning' $name 'to the genome'
+bowtie2 -p $cores --maxins 1000 -x $genome_index --rf -1 ${name}_PE1.rDNA.fastq.paired.fq \
+    -2 ${name}_PE2_processed.fastq.paired.fq 2>${name}_bowtie2.log | samtools view -b - | \
+    samtools sort - -o ${name}.bam
+PE1_prior_rDNA=$(wc -l ${name}_PE1_processed.fastq | awk '{print $1/4}')
+PE1_post_rDNA=$(wc -l ${name}_PE1.rDNA.fastq | awk '{print $1/4}')
+total_rDNA=$(echo "$(($PE1_prior_rDNA-$PE1_post_rDNA))") 
+concordant_pe1=$(samtools view -c -f 0x42 ${name}.bam)
+total=$(echo "$(($concordant_pe1+$total_rDNA))")
+rDNA_alignment=$(echo "scale=2 ; $total_rDNA / $total" | bc)
+echo -e "$rDNA_alignment\t$name\t0.10\trDNA Alignment Rate" >> ${name}_QC_metrics.txt
+map_pe1=$(samtools view -c -f 0x42 ${name}.bam)
+pre_alignment=$(wc -l ${name}_PE1.rDNA.fastq.paired.fq | awk '{print $1/4}')
+alignment_rate=$(echo "scale=2 ; $map_pe1 / $pre_alignment" | bc)
+echo -e "$alignment_rate\t$name\t0.80\tAlignment Rate" >> ${name}_QC_metrics.txt
+echo 'plotting and calculating complexity for' $name
+fqComplexity -i ${name}_PE1_noadap_trimmed.fastq
+echo 'calculating and plotting theoretical sequencing depth' 
+echo 'to achieve a defined number of concordantly aligned reads for' $name
+PE1_total=$(wc -l ${name}_PE1.fastq | awk '{print $1/4}')
+PE1_noadap_trimmed=$(wc -l ${name}_PE1_noadap_trimmed.fastq | awk '{print $1/4}')
+factorX=$(echo "scale=2 ; $PE1_noadap_trimmed / $PE1_total" | bc)
+echo fraction of reads that are not adapter/adapter ligation products or below 10 base inserts
+echo $factorX 
+PE1_dedup=$(wc -l ${name}_PE1_dedup.fastq | awk '{print $1/4}')
+factorY=$(echo "scale=2 ; $concordant_pe1 / $PE1_dedup" | bc)
+fqComplexity -i ${name}_PE1_noadap_trimmed.fastq -x $factorX -y $factorY
+echo 'Separating paired end reads and creating genomic BED and bigWig intensity files for' $name
+seqOutBias scale $table ${name}.bam --no-scale --stranded --bed-stranded-positive \
+    --bw=$name.bigWig --bed=$name.bed --out-split-pairends --only-paired \
+    --tail-edge --read-size=$read_size --tallymer=$tallymer
+coverageBed -counts -s -a $annotation_prefix.pause.bed -b ${name}_not_scaled_PE1.bed | \
+    awk '$7>0' | sort -k5,5 -k7,7nr | sort -k5,5 -u > ${name}_pause.bed
+join -1 5 -2 5 ${name}_pause.bed $annotation_prefix.bed | \
+    awk '{OFS="\t";} $2==$8 && $6==$12 {print $2, $3, $4, $1, $6, $7, $9, $10}' | \
+    awk '{OFS="\t";} $5 == "+" {print $1,$2+480,$8,$4,$6,$5} $5 == "-" {print $1,$7,$2 - 380,$4,$6,$5}' | \
+    awk  '{OFS="\t";} $3>$2 {print $1,$2,$3,$4,$5,$6}' > ${name}_pause_counts_body_coordinates.bed
+coverageBed -counts -s -a ${name}_pause_counts_body_coordinates.bed \
+    -b ${name}_not_scaled_PE1.bed | awk '$7>0' | \
+    awk '{OFS="\t";} {print $1,$2,$3,$4,$5,$6,$7,$5/100,$7/($3 - $2)}' | \
+    awk '{OFS="\t";} {print $1,$2,$3,$4,$5,$6,$7,$8,$9,$8/$9}' > ${name}_pause_body.bed
+pause_index.R ${name}_pause_body.bed
+echo 'Calculating exon density / intron density as a metric for nascent RNA purity for' $name
+coverageBed -counts -s -a $annotation_prefix.introns.bed \
+    -b ${name}_not_scaled_PE1.bed | awk '$7>0' | \
+    awk '{OFS="\t";} {print $1,$2,$3,$5,$5,$6,$7,($3 - $2)}' > ${name}_intron_counts.bed
+coverageBed -counts -s -a $annotation_prefix.no.first.exons.named.bed \
+    -b ${name}_not_scaled_PE1.bed | awk '$7>0' | \
+    awk '{OFS="\t";} {print $1,$2,$3,$4,$4,$6,$7,($3 - $2)}' > ${name}_exon_counts.bed
+exon_intron_ratio.R ${name}_exon_counts.bed ${name}_intron_counts.bed
+echo 'Counting reads in genes for' $name
+echo -e  "\t${name}" > ${name}_gene_counts.txt
+coverageBed -counts -s -a $annotation_prefix.bed -b ${name}_not_scaled_PE1.bed | \
+    awk '{OFS="\t";} {print $4,$7}' >> ${name}_gene_counts.txt
+rm ${name}_PE1_short.fastq
+rm ${name}_PE2_short.fastq
+rm ${name}_PE1_noadap.fastq
+rm ${name}_PE2_noadap.fastq
+rm ${name}_PE1_noadap_trimmed.fastq
+rm ${name}_PE1_dedup.fastq
+rm ${name}_PE1_processed.fastq
+rm ${name}_PE2_processed.fastq
+rm ${name}_PE1_dedup.fastq.paired.fq   
+rm ${name}_PE2_noadap.fastq.paired.fq
+rm ${name}_PE1_dedup.fastq.single.fq
+rm ${name}_PE2_noadap.fastq.single.fq
+rm ${name}_PE1.rDNA.fastq.paired.fq
+rm ${name}_PE1.rDNA.fastq.single.fq
+rm ${name}_PE2_processed.fastq.paired.fq
+rm ${name}_PE2_processed.fastq.single.fq
+rm ${name}.extendedFrags.fastq.gz
+rm ${name}.notCombined_1.fastq.gz
+rm ${name}.notCombined_2.fastq.gz
+gzip ${name}_PE1.fastq
+gzip ${name}_PE2.fastq
+```
+
+The script used in the next code chunk (220408_PROseq_analysis_on_all_files_for_slurm.sh) is below:
+
+```{r engine='bash', eval=F, echo=TRUE}
+#! /bin/bash
+
+#Change this variable as well as the wrapped string
+main=/scratch/ts2hx/TRPS1
+cd $main
+
+for filename in *_PE1.fastq
+do
+name=`basename $filename _PE1.fastq`
+sbatch -p standard -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --cpus-per-task=4 --job-name proseq-analysis -o ${main}/${name}_proseq.log  --wrap="sh /scratch/ts2hx/TRPS1/220408_PROseq_analysis_on_input_file.sh $filename"
+sleep 1	    # wait 1 second between each job submission
+done
+```
+
+Run the above script to process each sample in parallel.
+
+```{r engine='bash', eval=F, echo=TRUE}
+./220408_PROseq_analysis_on_all_files_for_slurm.sh
+```
+
+Plot QC metrics and combine the reads into one file.
+
+```{r engine='bash', eval=F, echo=TRUE}
+cat *_QC_metrics.txt | awk '!x[$0]++' > TRPS1_QC_metrics.txt 
+
+module load intel/18.0  intelmpi/18.0 R/4.1.1
+plot_all_metrics.R TRPS1_QC_metrics.txt TRPS1_PRO
+paste -d'\t' *_gene_counts.txt > TRPS1_PRO_gene_counts.txt
+```
+
+## Leave the cluster environment, and copy files to your local computer
+
+```{r engine='bash', eval=F, echo=TRUE}
+exit
+exit
+
+mkdir -p ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1
+
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1/*_QC_metrics.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1/*_gene_counts.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1/*.pdf .
 ``` 
 
 # PRO-seq analysis
@@ -3360,7 +3586,7 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
 ```
 
-I used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: https://github.com/guertinlab/Nascent_RNA_Methods. Run DESeq2 with these counts.
+We used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: https://github.com/guertinlab/Nascent_RNA_Methods. Run DESeq2 with these counts.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 x = read.table("Estrogen_treatment_PRO_gene_counts.txt", sep = '\t', header = TRUE)
