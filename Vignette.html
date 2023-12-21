@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 22 September 2023</h4>
+<h4 class="date">Last compiled on 21 December 2023</h4>
 
 </div>
 
@@ -3110,6 +3110,24 @@ exit
 
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
 scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .</code></pre>
+<p>Calculate the PRO read density in each TRPS1 peak between DMSO and dTAG conditions</p>
+<pre class="bash"><code>cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps
+gzcat matrix_PRO_TRPS1_peaks.gz | awk &#39;{print NF}&#39; | sort -nu | tail -n 1
+gzcat matrix_PRO_TRPS1_peaks.gz | \
+  awk &#39;NR&gt;1 { sum1=0; sum2=0; for(i=7;i&lt;=206;i++) sum1+=$i; for(i=207;i&lt;=406;i++) sum2+=$i; print sum1, sum2 }&#39; \
+  &gt; PRO_signal_DMSO_dTAG.txt</code></pre>
+<p>Perform a paired t-test on the log-normalized PRO read density across TRPS1 peaks</p>
+<pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps/&quot;
+setwd(direc)
+
+signal = read.table(&quot;PRO_signal_DMSO_dTAG.txt&quot;, sep = &#39; &#39;, header = FALSE)
+
+#Find the minimum non-zero signal
+min(signal$V2[signal$V2 != 0]) #0.002522
+
+#Add a value much smaller than the above number before log normalizing (to avoid zeros)
+t.test(log(signal$V1[signal$V1 != 0 &amp; signal$V2 != 0], 10), 
+       log(signal$V2[signal$V1 != 0 &amp; signal$V2 != 0], 10), paired = T) #&lt; 0.00000000000000022</code></pre>
 </div>
 <div id="cluster-dynamic-genes-figure-4ab" class="section level2" number="9.2">
 <h2><span class="header-section-number">9.2</span> Cluster dynamic genes (Figure 4A,B)</h2>
