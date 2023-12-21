@@ -2773,6 +2773,32 @@ cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
 scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .
 ```
 
+Calculate the PRO read density in each TRPS1 peak between DMSO and dTAG conditions
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps
+gzcat matrix_PRO_TRPS1_peaks.gz | awk '{print NF}' | sort -nu | tail -n 1
+gzcat matrix_PRO_TRPS1_peaks.gz | \
+  awk 'NR>1 { sum1=0; sum2=0; for(i=7;i<=206;i++) sum1+=$i; for(i=207;i<=406;i++) sum2+=$i; print sum1, sum2 }' \
+  > PRO_signal_DMSO_dTAG.txt
+```
+
+Perform a paired t-test on the log-normalized PRO read density across TRPS1 peaks
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = "~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps/"
+setwd(direc)
+
+signal = read.table("PRO_signal_DMSO_dTAG.txt", sep = ' ', header = FALSE)
+
+#Find the minimum non-zero signal
+min(signal$V2[signal$V2 != 0]) #0.002522
+
+#Add a value much smaller than the above number before log normalizing (to avoid zeros)
+t.test(log(signal$V1[signal$V1 != 0 & signal$V2 != 0], 10), 
+       log(signal$V2[signal$V1 != 0 & signal$V2 != 0], 10), paired = T) #< 0.00000000000000022
+```
+
 ## Cluster dynamic genes (Figure 4A,B)
 
 Set up in R.
