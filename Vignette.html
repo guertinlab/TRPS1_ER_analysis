@@ -756,7 +756,7 @@ function toggle_visibility(id1) {
 <li><a href="#cluster-dynamic-peaks-and-plot-the-heatmap-figure-3e" id="toc-cluster-dynamic-peaks-and-plot-the-heatmap-figure-3e"><span class="toc-section-number">7.5</span> Cluster dynamic peaks and plot the heatmap (Figure 3E)</a></li>
 <li><a href="#count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f" id="toc-count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f"><span class="toc-section-number">7.6</span> Count GATA motif instances in dynamic peaks across time points (Figure 3F)</a></li>
 </ul></li>
-<li><a href="#pro-seq-data-pre-processing" id="toc-pro-seq-data-pre-processing"><span class="toc-section-number">8</span> PRO-seq data pre-processing</a>
+<li><a href="#time-course-pro-seq-data-pre-processing" id="toc-time-course-pro-seq-data-pre-processing"><span class="toc-section-number">8</span> Time course PRO-seq data pre-processing</a>
 <ul>
 <li><a href="#set-up-2" id="toc-set-up-2"><span class="toc-section-number">8.1</span> Set up</a></li>
 <li><a href="#download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads" id="toc-download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads"><span class="toc-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</a></li>
@@ -766,30 +766,37 @@ function toggle_visibility(id1) {
 <li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-1"><span class="toc-section-number">8.6</span> Scale and merge bigWigs for use in the genome browser</a></li>
 <li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-2"><span class="toc-section-number">8.7</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
-<li><a href="#pro-seq-analysis" id="toc-pro-seq-analysis"><span class="toc-section-number">9</span> PRO-seq analysis</a>
+<li><a href="#three-clone-pro-seq-data-pre-processing" id="toc-three-clone-pro-seq-data-pre-processing"><span class="toc-section-number">9</span> Three clone PRO-seq data pre-processing</a>
 <ul>
-<li><a href="#composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" id="toc-composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g"><span class="toc-section-number">9.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</a></li>
-<li><a href="#cluster-dynamic-genes-figure-4ab" id="toc-cluster-dynamic-genes-figure-4ab"><span class="toc-section-number">9.2</span> Cluster dynamic genes (Figure 4A,B)</a></li>
-<li><a href="#over-representation-analysis-figure-4cd-tables-s5-8" id="toc-over-representation-analysis-figure-4cd-tables-s5-8"><span class="toc-section-number">9.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</a></li>
+<li><a href="#set-up-3" id="toc-set-up-3"><span class="toc-section-number">9.1</span> Set up</a></li>
+<li><a href="#download-the-raw-data" id="toc-download-the-raw-data"><span class="toc-section-number">9.2</span> Download the raw data</a></li>
+<li><a href="#process-the-combined-reads-1" id="toc-process-the-combined-reads-1"><span class="toc-section-number">9.3</span> Process the combined reads</a></li>
+<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-3" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-3"><span class="toc-section-number">9.4</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
-<li><a href="#integrative-analysis" id="toc-integrative-analysis"><span class="toc-section-number">10</span> Integrative analysis</a>
+<li><a href="#pro-seq-analysis" id="toc-pro-seq-analysis"><span class="toc-section-number">10</span> PRO-seq analysis</a>
 <ul>
-<li><a href="#cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" id="toc-cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef"><span class="toc-section-number">10.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</a></li>
-<li><a href="#identification-of-er-target-genes-figure-s7" id="toc-identification-of-er-target-genes-figure-s7"><span class="toc-section-number">10.2</span> Identification of ER target genes (Figure S7)</a></li>
-<li><a href="#cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" id="toc-cluster-of-dynamic-er-target-genes-figure-5a-tables-s910"><span class="toc-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</a></li>
-<li><a href="#plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8" id="toc-plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8"><span class="toc-section-number">10.4</span> Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)</a></li>
-<li><a href="#er-binding-intensity-near-dynamic-er-target-genes-figure-5b" id="toc-er-binding-intensity-near-dynamic-er-target-genes-figure-5b"><span class="toc-section-number">10.5</span> ER binding intensity near dynamic ER target genes (Figure 5B)</a></li>
-<li><a href="#er-binding-intensity-by-trps1-proximity-figure-5c" id="toc-er-binding-intensity-by-trps1-proximity-figure-5c"><span class="toc-section-number">10.6</span> ER binding intensity by TRPS1 proximity (Figure 5C)</a></li>
+<li><a href="#composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" id="toc-composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g"><span class="toc-section-number">10.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</a></li>
+<li><a href="#cluster-dynamic-genes-figure-4ab" id="toc-cluster-dynamic-genes-figure-4ab"><span class="toc-section-number">10.2</span> Cluster dynamic genes (Figure 4A,B)</a></li>
+<li><a href="#over-representation-analysis-figure-4cd-tables-s5-8" id="toc-over-representation-analysis-figure-4cd-tables-s5-8"><span class="toc-section-number">10.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</a></li>
 </ul></li>
-<li><a href="#outcomes-associations" id="toc-outcomes-associations"><span class="toc-section-number">11</span> Outcomes associations</a>
+<li><a href="#integrative-analysis" id="toc-integrative-analysis"><span class="toc-section-number">11</span> Integrative analysis</a>
 <ul>
-<li><a href="#ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a" id="toc-ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a"><span class="toc-section-number">11.1</span> MA plot of gene expression at 24 hours dTAG vs. DMSO (Figure 6A)</a></li>
-<li><a href="#hour-gene-set-enrichment-analysis-figure-6b" id="toc-hour-gene-set-enrichment-analysis-figure-6b"><span class="toc-section-number">11.2</span> 24 hour gene set enrichment analysis (Figure 6B)</a></li>
-<li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">11.3</span> Growth curves (Figure 6C)</a></li>
-<li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">11.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
-<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
-<li><a href="#plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" id="toc-plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10"><span class="toc-section-number">11.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</a></li>
-<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11"><span class="toc-section-number">11.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</a></li>
+<li><a href="#cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" id="toc-cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef"><span class="toc-section-number">11.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</a></li>
+<li><a href="#identification-of-er-target-genes-figure-s7" id="toc-identification-of-er-target-genes-figure-s7"><span class="toc-section-number">11.2</span> Identification of ER target genes (Figure S7)</a></li>
+<li><a href="#cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" id="toc-cluster-of-dynamic-er-target-genes-figure-5a-tables-s910"><span class="toc-section-number">11.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</a></li>
+<li><a href="#plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8" id="toc-plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8"><span class="toc-section-number">11.4</span> Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)</a></li>
+<li><a href="#er-binding-intensity-near-dynamic-er-target-genes-figure-5b" id="toc-er-binding-intensity-near-dynamic-er-target-genes-figure-5b"><span class="toc-section-number">11.5</span> ER binding intensity near dynamic ER target genes (Figure 5B)</a></li>
+<li><a href="#er-binding-intensity-by-trps1-proximity-figure-5c" id="toc-er-binding-intensity-by-trps1-proximity-figure-5c"><span class="toc-section-number">11.6</span> ER binding intensity by TRPS1 proximity (Figure 5C)</a></li>
+</ul></li>
+<li><a href="#outcomes-associations" id="toc-outcomes-associations"><span class="toc-section-number">12</span> Outcomes associations</a>
+<ul>
+<li><a href="#ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a" id="toc-ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a"><span class="toc-section-number">12.1</span> MA plot of gene expression at 24 hours dTAG vs. DMSO (Figure 6A)</a></li>
+<li><a href="#hour-gene-set-enrichment-analysis-figure-6b" id="toc-hour-gene-set-enrichment-analysis-figure-6b"><span class="toc-section-number">12.2</span> 24 hour gene set enrichment analysis (Figure 6B)</a></li>
+<li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">12.3</span> Growth curves (Figure 6C)</a></li>
+<li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">12.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">12.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
+<li><a href="#plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" id="toc-plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10"><span class="toc-section-number">12.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11"><span class="toc-section-number">12.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</a></li>
 </ul></li>
 </ul>
 </div>
@@ -812,7 +819,7 @@ max-height: 600px;
 </style>
 <div id="introduction" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>This is a work in progress.</p>
+<p>This is an analysis vignette accompanying the manuscript entitled “TRPS1 modulates chromatin accessibility to regulate estrogen receptor alpha (ER) binding and ER target gene expression in luminal breast cancer cells” (<a href="https://doi.org/10.1101/2023.07.03.547524" class="uri">https://doi.org/10.1101/2023.07.03.547524</a>). The reader should be able to follow these steps to download the raw data and reproduce all the results in the manuscript.</p>
 </div>
 <div id="gwas-summary-statistics-processing" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> GWAS summary statistics processing</h1>
@@ -2525,8 +2532,8 @@ PeaksWithMotif(motif_overlaps, motif = &quot;TRPS1_homer_uniprobe_jaspar_edited.
 dev.off()</code></pre>
 </div>
 </div>
-<div id="pro-seq-data-pre-processing" class="section level1" number="8">
-<h1><span class="header-section-number">8</span> PRO-seq data pre-processing</h1>
+<div id="time-course-pro-seq-data-pre-processing" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Time course PRO-seq data pre-processing</h1>
 <p>For the initial basic processing steps, we used a pipeline we have thoroughly described elsewhere (<a href="https://github.com/guertinlab/Nascent_RNA_Methods" class="uri">https://github.com/guertinlab/Nascent_RNA_Methods</a>). Please see the above GitHub repository for detailed explanations of the steps, as well as software dependencies and preprocessing steps (e.g., gene annotation file downloads).</p>
 <div id="set-up-2" class="section level2" number="8.1">
 <h2><span class="header-section-number">8.1</span> Set up</h2>
@@ -2534,7 +2541,7 @@ dev.off()</code></pre>
 <pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00</code></pre>
 <p>Make a directory.</p>
-<pre class="bash"><code>mkdir -p TRPS1_timecourse_PRO_3</code></pre>
+<pre class="bash"><code>mkdir -p /scratch/ts2hx/TRPS1_timecourse_PRO_3</code></pre>
 <p>The script used in the next code chunk (220927_tallymer_generation.sh) is below:</p>
 <pre class="bash"><code>#! /bin/bash
 
@@ -2547,18 +2554,12 @@ cd $HOME/seqOutBias
 $HOME/bin/seqOutBias seqtable $genome --read-size=$read_size</code></pre>
 <p>Make tallymer and table for seqOutBias (this takes a while).</p>
 <pre class="bash"><code>sbatch -p largemem -A gioeli_lab -t 1-00:00:00 --job-name tallymer -o tallymer.log \
-    /scratch/ts2hx/scripts/220927_tallymer_generation.sh
-
-exit
-exit</code></pre>
+    /scratch/ts2hx/scripts/220927_tallymer_generation.sh</code></pre>
 </div>
 <div id="download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads" class="section level2" number="8.2">
 <h2><span class="header-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</h2>
 <p>We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first download the fastq’s and gzip.</p>
-<pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-
-cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
+<pre class="bash"><code>cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
 
 for i in {24..92}
 do
@@ -3081,10 +3082,209 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_com
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_all_*us_PE1.bigWig .</code></pre>
 </div>
 </div>
-<div id="pro-seq-analysis" class="section level1" number="9">
-<h1><span class="header-section-number">9</span> PRO-seq analysis</h1>
-<div id="composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" class="section level2" number="9.1">
-<h2><span class="header-section-number">9.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</h2>
+<div id="three-clone-pro-seq-data-pre-processing" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Three clone PRO-seq data pre-processing</h1>
+<p>As above, here we pre-process the raw data from the three clone PRO-seq experiment used to assess the robustness of the changes in ER target gene expression upon TRPS1 depletion.</p>
+<div id="set-up-3" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Set up</h2>
+<p>Log in to the cluster to perform the processing for each sample in parallel.</p>
+<pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00</code></pre>
+<p>Make a directory.</p>
+<pre class="bash"><code>mkdir -p /scratch/ts2hx/TRPS1</code></pre>
+<p>Make tallymer and table for seqOutBias (this takes a while).</p>
+<pre class="bash"><code>module load genometools/1.5.10
+read_size=62
+genome=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa
+
+mkdir -p $HOME/seqOutBias
+cd $HOME/seqOutBias
+$HOME/bin/seqOutBias seqtable $genome --read-size=$read_size    </code></pre>
+</div>
+<div id="download-the-raw-data" class="section level2" number="9.2">
+<h2><span class="header-section-number">9.2</span> Download the raw data</h2>
+<p>Update this with the SRA numbers once available.</p>
+<pre class="bash"><code>main=/scratch/ts2hx/TRPS1
+cd $main
+
+for i in #{24..92}
+do
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    #-o logs/SRR250747${i}_fasterq_dump.log \
+    #--wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}&quot;
+  sleep 1
+done</code></pre>
+</div>
+<div id="process-the-combined-reads-1" class="section level2" number="9.3">
+<h2><span class="header-section-number">9.3</span> Process the combined reads</h2>
+<p>The script used in the next code chunk (220408_PROseq_analysis_on_input_file.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+directory=/scratch/$USER/TRPS1
+annotation_prefix=$HOME/gene_annotations/Homo_sapiens.GRCh38.104 
+UMI_length=8
+read_size=62
+cores=$SLURM_CPUS_PER_TASK
+genome_index=/project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Index/genome
+prealign_rdna_index=$HOME/human_rDNA/human_rDNA
+tallymer=$HOME/seqOutBias/genome.tal_${read_size}.gtTxt.gz
+table=$HOME/seqOutBias/genome_${read_size}.4.2.2.tbl
+
+PATH=$HOME/bin:$PATH
+
+cd $directory 
+
+module load cutadapt/3.4
+module load intel/18.0 intelmpi/18.0 R/4.1.1
+module load gcc/9.2.0 bowtie2/2.2.9 
+module load samtools/1.12
+module load wigtobigwig/2.8
+module load bedtools/2.29.2
+
+filename=$1
+name=$(echo $filename | awk -F&quot;_PE1.fastq&quot; &#39;{print $1}&#39;)
+echo $name
+echo &#39;removing dual adapter ligations and calculating the fraction of adapter/adapters in&#39; $name
+cutadapt --cores=$cores -m $((UMI_length+2)) -O 1 -a TGGAATTCTCGGGTGCCAAGG ${name}_PE1.fastq \
+    -o ${name}_PE1_noadap.fastq --too-short-output ${name}_PE1_short.fastq &gt; ${name}_PE1_cutadapt.txt
+cutadapt --cores=$cores -m $((UMI_length+10)) -O 1 -a GATCGTCGGACTGTAGAACTCTGAAC ${name}_PE2.fastq \
+    -o ${name}_PE2_noadap.fastq --too-short-output ${name}_PE2_short.fastq &gt; ${name}_PE2_cutadapt.txt
+PE1_total=$(wc -l ${name}_PE1.fastq | awk &#39;{print $1/4}&#39;)
+PE1_w_Adapter=$(wc -l ${name}_PE1_short.fastq | awk &#39;{print $1/4}&#39;)
+AAligation=$(echo &quot;scale=2 ; $PE1_w_Adapter / $PE1_total&quot; | bc)
+echo -e  &quot;value\texperiment\tthreshold\tmetric&quot; &gt; ${name}_QC_metrics.txt
+echo -e &quot;$AAligation\t$name\t0.80\tAdapter/Adapter&quot; &gt;&gt; ${name}_QC_metrics.txt
+echo &#39;removing short RNA insertions in&#39; $name
+seqtk seq -L $((UMI_length+10)) ${name}_PE1_noadap.fastq &gt; ${name}_PE1_noadap_trimmed.fastq 
+echo &#39;removing PCR duplicates from&#39; $name
+fqdedup -i ${name}_PE1_noadap_trimmed.fastq -o ${name}_PE1_dedup.fastq
+PE1_noAdapter=$(wc -l ${name}_PE1_dedup.fastq | awk &#39;{print $1/4}&#39;)
+fastq_pair -t $PE1_noAdapter ${name}_PE1_dedup.fastq ${name}_PE2_noadap.fastq
+echo &#39;calculating and plotting RNA insert sizes from&#39; $name
+flash -q --compress-prog=gzip --suffix=gz ${name}_PE1_dedup.fastq.paired.fq \
+    ${name}_PE2_noadap.fastq.paired.fq -o ${name}
+insert_size.R ${name}.hist ${UMI_length}
+echo &#39;trimming off the UMI from&#39; $name
+seqtk trimfq -b ${UMI_length} ${name}_PE1_dedup.fastq | seqtk seq -r - &gt; ${name}_PE1_processed.fastq
+seqtk trimfq -e ${UMI_length} ${name}_PE2_noadap.fastq | seqtk seq -r - &gt; ${name}_PE2_processed.fastq
+echo &#39;aligning&#39; $name &#39;to rDNA and removing aligned reads&#39;
+bowtie2 -p $cores -x $prealign_rdna_index -U ${name}_PE1_processed.fastq 2&gt;${name}_bowtie2_rDNA.log | \
+    samtools sort -n - | samtools fastq -f 0x4 - &gt; ${name}_PE1.rDNA.fastq
+reads=$(wc -l ${name}_PE1.rDNA.fastq | awk &#39;{print $1/4}&#39;)
+fastq_pair -t $reads ${name}_PE1.rDNA.fastq ${name}_PE2_processed.fastq
+echo &#39;aligning&#39; $name &#39;to the genome&#39;
+bowtie2 -p $cores --maxins 1000 -x $genome_index --rf -1 ${name}_PE1.rDNA.fastq.paired.fq \
+    -2 ${name}_PE2_processed.fastq.paired.fq 2&gt;${name}_bowtie2.log | samtools view -b - | \
+    samtools sort - -o ${name}.bam
+PE1_prior_rDNA=$(wc -l ${name}_PE1_processed.fastq | awk &#39;{print $1/4}&#39;)
+PE1_post_rDNA=$(wc -l ${name}_PE1.rDNA.fastq | awk &#39;{print $1/4}&#39;)
+total_rDNA=$(echo &quot;$(($PE1_prior_rDNA-$PE1_post_rDNA))&quot;) 
+concordant_pe1=$(samtools view -c -f 0x42 ${name}.bam)
+total=$(echo &quot;$(($concordant_pe1+$total_rDNA))&quot;)
+rDNA_alignment=$(echo &quot;scale=2 ; $total_rDNA / $total&quot; | bc)
+echo -e &quot;$rDNA_alignment\t$name\t0.10\trDNA Alignment Rate&quot; &gt;&gt; ${name}_QC_metrics.txt
+map_pe1=$(samtools view -c -f 0x42 ${name}.bam)
+pre_alignment=$(wc -l ${name}_PE1.rDNA.fastq.paired.fq | awk &#39;{print $1/4}&#39;)
+alignment_rate=$(echo &quot;scale=2 ; $map_pe1 / $pre_alignment&quot; | bc)
+echo -e &quot;$alignment_rate\t$name\t0.80\tAlignment Rate&quot; &gt;&gt; ${name}_QC_metrics.txt
+echo &#39;plotting and calculating complexity for&#39; $name
+fqComplexity -i ${name}_PE1_noadap_trimmed.fastq
+echo &#39;calculating and plotting theoretical sequencing depth&#39; 
+echo &#39;to achieve a defined number of concordantly aligned reads for&#39; $name
+PE1_total=$(wc -l ${name}_PE1.fastq | awk &#39;{print $1/4}&#39;)
+PE1_noadap_trimmed=$(wc -l ${name}_PE1_noadap_trimmed.fastq | awk &#39;{print $1/4}&#39;)
+factorX=$(echo &quot;scale=2 ; $PE1_noadap_trimmed / $PE1_total&quot; | bc)
+echo fraction of reads that are not adapter/adapter ligation products or below 10 base inserts
+echo $factorX 
+PE1_dedup=$(wc -l ${name}_PE1_dedup.fastq | awk &#39;{print $1/4}&#39;)
+factorY=$(echo &quot;scale=2 ; $concordant_pe1 / $PE1_dedup&quot; | bc)
+fqComplexity -i ${name}_PE1_noadap_trimmed.fastq -x $factorX -y $factorY
+echo &#39;Separating paired end reads and creating genomic BED and bigWig intensity files for&#39; $name
+seqOutBias scale $table ${name}.bam --no-scale --stranded --bed-stranded-positive \
+    --bw=$name.bigWig --bed=$name.bed --out-split-pairends --only-paired \
+    --tail-edge --read-size=$read_size --tallymer=$tallymer
+coverageBed -counts -s -a $annotation_prefix.pause.bed -b ${name}_not_scaled_PE1.bed | \
+    awk &#39;$7&gt;0&#39; | sort -k5,5 -k7,7nr | sort -k5,5 -u &gt; ${name}_pause.bed
+join -1 5 -2 5 ${name}_pause.bed $annotation_prefix.bed | \
+    awk &#39;{OFS=&quot;\t&quot;;} $2==$8 &amp;&amp; $6==$12 {print $2, $3, $4, $1, $6, $7, $9, $10}&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} $5 == &quot;+&quot; {print $1,$2+480,$8,$4,$6,$5} $5 == &quot;-&quot; {print $1,$7,$2 - 380,$4,$6,$5}&#39; | \
+    awk  &#39;{OFS=&quot;\t&quot;;} $3&gt;$2 {print $1,$2,$3,$4,$5,$6}&#39; &gt; ${name}_pause_counts_body_coordinates.bed
+coverageBed -counts -s -a ${name}_pause_counts_body_coordinates.bed \
+    -b ${name}_not_scaled_PE1.bed | awk &#39;$7&gt;0&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$4,$5,$6,$7,$5/100,$7/($3 - $2)}&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$4,$5,$6,$7,$8,$9,$8/$9}&#39; &gt; ${name}_pause_body.bed
+pause_index.R ${name}_pause_body.bed
+echo &#39;Calculating exon density / intron density as a metric for nascent RNA purity for&#39; $name
+coverageBed -counts -s -a $annotation_prefix.introns.bed \
+    -b ${name}_not_scaled_PE1.bed | awk &#39;$7&gt;0&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$5,$5,$6,$7,($3 - $2)}&#39; &gt; ${name}_intron_counts.bed
+coverageBed -counts -s -a $annotation_prefix.no.first.exons.named.bed \
+    -b ${name}_not_scaled_PE1.bed | awk &#39;$7&gt;0&#39; | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $1,$2,$3,$4,$4,$6,$7,($3 - $2)}&#39; &gt; ${name}_exon_counts.bed
+exon_intron_ratio.R ${name}_exon_counts.bed ${name}_intron_counts.bed
+echo &#39;Counting reads in genes for&#39; $name
+echo -e  &quot;\t${name}&quot; &gt; ${name}_gene_counts.txt
+coverageBed -counts -s -a $annotation_prefix.bed -b ${name}_not_scaled_PE1.bed | \
+    awk &#39;{OFS=&quot;\t&quot;;} {print $4,$7}&#39; &gt;&gt; ${name}_gene_counts.txt
+rm ${name}_PE1_short.fastq
+rm ${name}_PE2_short.fastq
+rm ${name}_PE1_noadap.fastq
+rm ${name}_PE2_noadap.fastq
+rm ${name}_PE1_noadap_trimmed.fastq
+rm ${name}_PE1_dedup.fastq
+rm ${name}_PE1_processed.fastq
+rm ${name}_PE2_processed.fastq
+rm ${name}_PE1_dedup.fastq.paired.fq   
+rm ${name}_PE2_noadap.fastq.paired.fq
+rm ${name}_PE1_dedup.fastq.single.fq
+rm ${name}_PE2_noadap.fastq.single.fq
+rm ${name}_PE1.rDNA.fastq.paired.fq
+rm ${name}_PE1.rDNA.fastq.single.fq
+rm ${name}_PE2_processed.fastq.paired.fq
+rm ${name}_PE2_processed.fastq.single.fq
+rm ${name}.extendedFrags.fastq.gz
+rm ${name}.notCombined_1.fastq.gz
+rm ${name}.notCombined_2.fastq.gz
+gzip ${name}_PE1.fastq
+gzip ${name}_PE2.fastq</code></pre>
+<p>The script used in the next code chunk (220408_PROseq_analysis_on_all_files_for_slurm.sh) is below:</p>
+<pre class="bash"><code>#! /bin/bash
+
+#Change this variable as well as the wrapped string
+main=/scratch/ts2hx/TRPS1
+cd $main
+
+for filename in *_PE1.fastq
+do
+name=`basename $filename _PE1.fastq`
+sbatch -p standard -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --cpus-per-task=4 --job-name proseq-analysis -o ${main}/${name}_proseq.log  --wrap=&quot;sh /scratch/ts2hx/TRPS1/220408_PROseq_analysis_on_input_file.sh $filename&quot;
+sleep 1     # wait 1 second between each job submission
+done</code></pre>
+<p>Run the above script to process each sample in parallel.</p>
+<pre class="bash"><code>./220408_PROseq_analysis_on_all_files_for_slurm.sh</code></pre>
+<p>Plot QC metrics and combine the reads into one file.</p>
+<pre class="bash"><code>cat *_QC_metrics.txt | awk &#39;!x[$0]++&#39; &gt; TRPS1_QC_metrics.txt 
+
+module load intel/18.0  intelmpi/18.0 R/4.1.1
+plot_all_metrics.R TRPS1_QC_metrics.txt TRPS1_PRO
+paste -d&#39;\t&#39; *_gene_counts.txt &gt; TRPS1_PRO_gene_counts.txt</code></pre>
+</div>
+<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer-3" class="section level2" number="9.4">
+<h2><span class="header-section-number">9.4</span> Leave the cluster environment, and copy files to your local computer</h2>
+<pre class="bash"><code>exit
+exit
+
+mkdir -p ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1
+
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1/*_QC_metrics.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1/*_gene_counts.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1/*.pdf .</code></pre>
+</div>
+</div>
+<div id="pro-seq-analysis" class="section level1" number="10">
+<h1><span class="header-section-number">10</span> PRO-seq analysis</h1>
+<div id="composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" class="section level2" number="10.1">
+<h2><span class="header-section-number">10.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</h2>
 <p>Set up.</p>
 <pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --cpus-per-task=20 --time=12:00:00
@@ -3131,8 +3331,8 @@ min(signal$V2[signal$V2 != 0]) #0.002522
 t.test(log(signal$V1[signal$V1 != 0 &amp; signal$V2 != 0], 10), 
        log(signal$V2[signal$V1 != 0 &amp; signal$V2 != 0], 10), paired = T) #&lt; 0.00000000000000022</code></pre>
 </div>
-<div id="cluster-dynamic-genes-figure-4ab" class="section level2" number="9.2">
-<h2><span class="header-section-number">9.2</span> Cluster dynamic genes (Figure 4A,B)</h2>
+<div id="cluster-dynamic-genes-figure-4ab" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Cluster dynamic genes (Figure 4A,B)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -3366,8 +3566,8 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 )
 dev.off()</code></pre>
 </div>
-<div id="over-representation-analysis-figure-4cd-tables-s5-8" class="section level2" number="9.3">
-<h2><span class="header-section-number">9.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</h2>
+<div id="over-representation-analysis-figure-4cd-tables-s5-8" class="section level2" number="10.3">
+<h2><span class="header-section-number">10.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</h2>
 <p>Activated genes.</p>
 <pre class="r bg-info"><code>genes = plot.df.pro$genes[(plot.df.pro$supercluster == &quot;Gradual Increase&quot; | plot.df.pro$supercluster == &quot;Transient Increase&quot;) &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
 m_t2g &lt;- msigdbr(species = &quot;Homo sapiens&quot;, category = &quot;H&quot;) %&gt;% 
@@ -3444,10 +3644,10 @@ names = gene.symbol$symbol[gene.symbol$gene %in% genes]
 write.table(names, file = &quot;transiently_repressed_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
 </div>
-<div id="integrative-analysis" class="section level1" number="10">
-<h1><span class="header-section-number">10</span> Integrative analysis</h1>
-<div id="cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" class="section level2" number="10.1">
-<h2><span class="header-section-number">10.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</h2>
+<div id="integrative-analysis" class="section level1" number="11">
+<h1><span class="header-section-number">11</span> Integrative analysis</h1>
+<div id="cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" class="section level2" number="11.1">
+<h2><span class="header-section-number">11.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</h2>
 <p>Make a data frame with dynamic genes and unchanged genes.</p>
 <pre class="r bg-info"><code>#CDFs separated by TRPS1 peaks overlapping increased vs decreased ATAC peaks 
 genes = plot.df.pro$genes[(plot.df.pro$supercluster == &quot;Gradual Increase&quot; | plot.df.pro$supercluster == &quot;Transient Increase&quot;) &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
@@ -3523,8 +3723,8 @@ ecdfplot(~log(abs(dis), base = 10), groups = status, data = df.all,
          })
 dev.off()</code></pre>
 </div>
-<div id="identification-of-er-target-genes-figure-s7" class="section level2" number="10.2">
-<h2><span class="header-section-number">10.2</span> Identification of ER target genes (Figure S7)</h2>
+<div id="identification-of-er-target-genes-figure-s7" class="section level2" number="11.2">
+<h2><span class="header-section-number">11.2</span> Identification of ER target genes (Figure S7)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>setwd(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R&quot;)
 
@@ -3620,7 +3820,7 @@ gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antago
 gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
-<p>I used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: <a href="https://github.com/guertinlab/Nascent_RNA_Methods" class="uri">https://github.com/guertinlab/Nascent_RNA_Methods</a>. Run DESeq2 with these counts.</p>
+<p>We used the counts table (Estrogen_treatment_PRO_gene_counts.txt) generated from a previous analysis, extensively described here: <a href="https://github.com/guertinlab/Nascent_RNA_Methods" class="uri">https://github.com/guertinlab/Nascent_RNA_Methods</a>. Run DESeq2 with these counts.</p>
 <pre class="r bg-info"><code>x = read.table(&quot;Estrogen_treatment_PRO_gene_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
@@ -3641,8 +3841,8 @@ print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
              par.settings=list(par.xlab.text=list(cex=1.1,font=2), par.ylab.text=list(cex=1.1,font=2))))
 dev.off()</code></pre>
 </div>
-<div id="cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" class="section level2" number="10.3">
-<h2><span class="header-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</h2>
+<div id="cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" class="section level2" number="11.3">
+<h2><span class="header-section-number">11.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -3772,8 +3972,8 @@ repressed = plot.df$genes[plot.df$Class == &quot;Repressed at 30 minutes&quot;]
 repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
 write.table(repressed, file = &quot;repressed_ER_target_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
-<div id="plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8" class="section level2" number="10.4">
-<h2><span class="header-section-number">10.4</span> Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)</h2>
+<div id="plot-fold-changes-for-these-dynamic-er-target-genes-across-three-independent-clones-figure-s8" class="section level2" number="11.4">
+<h2><span class="header-section-number">11.4</span> Plot fold changes for these dynamic ER target genes across three independent clones (Figure S8)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1/&quot;
 setwd(direc)
@@ -3874,8 +4074,8 @@ pheatmap(wide_counts, scale = &quot;none&quot;, angle_col = 0,
          breaks = seq(-.6, .6, 1.2/100))
 dev.off()</code></pre>
 </div>
-<div id="er-binding-intensity-near-dynamic-er-target-genes-figure-5b" class="section level2" number="10.5">
-<h2><span class="header-section-number">10.5</span> ER binding intensity near dynamic ER target genes (Figure 5B)</h2>
+<div id="er-binding-intensity-near-dynamic-er-target-genes-figure-5b" class="section level2" number="11.5">
+<h2><span class="header-section-number">11.5</span> ER binding intensity near dynamic ER target genes (Figure 5B)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -4096,8 +4296,8 @@ t.test(log(Unchanged$dTAG), log(Unchanged$DMSO), paired = T) #0.3518
 Repressed = peaks_near_genes[peaks_near_genes$Class == &quot;Repressed Genes&quot;,]
 t.test(log(Repressed$dTAG), log(Repressed$DMSO), paired = T) #0.000003224</code></pre>
 </div>
-<div id="er-binding-intensity-by-trps1-proximity-figure-5c" class="section level2" number="10.6">
-<h2><span class="header-section-number">10.6</span> ER binding intensity by TRPS1 proximity (Figure 5C)</h2>
+<div id="er-binding-intensity-by-trps1-proximity-figure-5c" class="section level2" number="11.6">
+<h2><span class="header-section-number">11.6</span> ER binding intensity by TRPS1 proximity (Figure 5C)</h2>
 <p>Get the distance from each ER peak summit to the nearest TRPS1 peak summit.</p>
 <pre class="r bg-info"><code>q = 30
 peaks = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/macs2/HA_DMSO_vs_dTAG_summits.bed&quot;, sep = &quot;\t&quot;)
@@ -4140,10 +4340,10 @@ Far = peaks[peaks$Class == &quot;&gt; 500bp&quot;,]
 t.test(log(Far$dTAG), log(Far$DMSO), paired = T) #0.00001017</code></pre>
 </div>
 </div>
-<div id="outcomes-associations" class="section level1" number="11">
-<h1><span class="header-section-number">11</span> Outcomes associations</h1>
-<div id="ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a" class="section level2" number="11.1">
-<h2><span class="header-section-number">11.1</span> MA plot of gene expression at 24 hours dTAG vs. DMSO (Figure 6A)</h2>
+<div id="outcomes-associations" class="section level1" number="12">
+<h1><span class="header-section-number">12</span> Outcomes associations</h1>
+<div id="ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a" class="section level2" number="12.1">
+<h2><span class="header-section-number">12.1</span> MA plot of gene expression at 24 hours dTAG vs. DMSO (Figure 6A)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -4259,8 +4459,8 @@ ggplot(as.data.frame(df.deseq.effects.lattice) %&gt;% arrange(status), aes(x = l
   labs(color=NULL)
 dev.off()</code></pre>
 </div>
-<div id="hour-gene-set-enrichment-analysis-figure-6b" class="section level2" number="11.2">
-<h2><span class="header-section-number">11.2</span> 24 hour gene set enrichment analysis (Figure 6B)</h2>
+<div id="hour-gene-set-enrichment-analysis-figure-6b" class="section level2" number="12.2">
+<h2><span class="header-section-number">12.2</span> 24 hour gene set enrichment analysis (Figure 6B)</h2>
 <p>Rank genes based on shrunken fold change.</p>
 <pre class="r bg-info"><code>original_gene_list &lt;- res.deseq.shrink$log2FoldChange
 names(original_gene_list) &lt;- rownames(res.deseq.shrink)
@@ -4286,8 +4486,8 @@ plotEnrichment(msigdbr_list[[&quot;HALLMARK_E2F_TARGETS&quot;]], gene_list) +
   labs(title=&quot;Hallmark E2F Targets&quot;)
 dev.off()</code></pre>
 </div>
-<div id="growth-curves-figure-6c" class="section level2" number="11.3">
-<h2><span class="header-section-number">11.3</span> Growth curves (Figure 6C)</h2>
+<div id="growth-curves-figure-6c" class="section level2" number="12.3">
+<h2><span class="header-section-number">12.3</span> Growth curves (Figure 6C)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/Cell_Counts/&quot;
 setwd(direc)
@@ -4369,8 +4569,8 @@ ggplot(Cell_Counts, aes(x=Day, y=Count, colour=Condition, fill = Condition)) +
         axis.title=element_text(size=24,face=&quot;bold&quot;))      
 dev.off()</code></pre>
 </div>
-<div id="plot-example-patient-with-high-trps1-activity-score-figure-6d" class="section level2" number="11.4">
-<h2><span class="header-section-number">11.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</h2>
+<div id="plot-example-patient-with-high-trps1-activity-score-figure-6d" class="section level2" number="12.4">
+<h2><span class="header-section-number">12.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -4444,16 +4644,16 @@ attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot
 tnsPlotGSEA2(tns_both, max, regs = &quot;TRPS1&quot;)
 dev.off()</code></pre>
 </div>
-<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" class="section level2" number="11.5">
-<h2><span class="header-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</h2>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" class="section level2" number="12.5">
+<h2><span class="header-section-number">12.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</h2>
 <p>Plot.</p>
 <pre class="r bg-info"><code>#Logrank p-value 8.3e-6
 pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint.pdf&quot;, height = 3, width = 6)
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
-<div id="plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" class="section level2" number="11.6">
-<h2><span class="header-section-number">11.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</h2>
+<div id="plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" class="section level2" number="12.6">
+<h2><span class="header-section-number">12.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</h2>
 <pre class="r bg-info"><code>#Just ER positive
 data(&quot;rtni1st&quot;)
 TRPS1 = rtni1st@regulatoryElements[&quot;TRPS1&quot;]
@@ -4746,8 +4946,8 @@ pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
-<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" class="section level2" number="11.7">
-<h2><span class="header-section-number">11.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</h2>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" class="section level2" number="12.7">
+<h2><span class="header-section-number">12.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</h2>
 <p>Identify TRPS1-responsive genes.</p>
 <pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
