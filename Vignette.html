@@ -51,7 +51,7 @@ h4 {font-size: 18px;}
 h5 {font-size: 16px;}
 h6 {font-size: 12px;}
 code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
-pre:not([class]) { background-color: white }</style>
+</style>
 <script>
 
 /**
@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 02 July 2023</h4>
+<h4 class="date">Last compiled on 21 December 2023</h4>
 
 </div>
 
@@ -725,8 +725,10 @@ function toggle_visibility(id1) {
 <li><a href="#call-peaks" id="toc-call-peaks"><span class="toc-section-number">4.4</span> Call peaks</a></li>
 <li><a href="#count-reads-in-peaks" id="toc-count-reads-in-peaks"><span class="toc-section-number">4.5</span> Count reads in peaks</a></li>
 <li><a href="#call-trps1-peaks-with-the-dtag-samples-as-a-control" id="toc-call-trps1-peaks-with-the-dtag-samples-as-a-control"><span class="toc-section-number">4.6</span> Call TRPS1 peaks with the dTAG samples as a control</a></li>
-<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser"><span class="toc-section-number">4.7</span> Scale and merge bigWigs for use in the genome browser</a></li>
-<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer"><span class="toc-section-number">4.8</span> Leave the cluster environment, and copy files to your local computer</a></li>
+<li><a href="#generate-the-chipqc-object-for-plotting-qc-metrics" id="toc-generate-the-chipqc-object-for-plotting-qc-metrics"><span class="toc-section-number">4.7</span> Generate the ChIPQC object for plotting QC metrics</a></li>
+<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser"><span class="toc-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</a></li>
+<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer"><span class="toc-section-number">4.9</span> Leave the cluster environment, and copy files to your local computer</a></li>
+<li><a href="#chipqc-figures-s12" id="toc-chipqc-figures-s12"><span class="toc-section-number">4.10</span> ChIPQC (Figures S1,2)</a></li>
 </ul></li>
 <li><a href="#trps1-chip-seq-analysis" id="toc-trps1-chip-seq-analysis"><span class="toc-section-number">5</span> TRPS1 ChIP-seq analysis</a>
 <ul>
@@ -743,12 +745,13 @@ function toggle_visibility(id1) {
 <li><a href="#make-size-factors-for-deseq2-based-on-total-mapped-reads" id="toc-make-size-factors-for-deseq2-based-on-total-mapped-reads"><span class="toc-section-number">6.6</span> Make size factors for DESeq2 based on total mapped reads</a></li>
 <li><a href="#merge-scaled-bigwigs-for-use-in-the-genome-browser" id="toc-merge-scaled-bigwigs-for-use-in-the-genome-browser"><span class="toc-section-number">6.7</span> Merge scaled bigWigs for use in the genome browser</a></li>
 <li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-1" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-1"><span class="toc-section-number">6.8</span> Leave the cluster environment, and copy files to your local computer</a></li>
+<li><a href="#atacseqqc-figures-s34" id="toc-atacseqqc-figures-s34"><span class="toc-section-number">6.9</span> ATACseqQC (Figures S3,4)</a></li>
 </ul></li>
 <li><a href="#atac-seq-analysis" id="toc-atac-seq-analysis"><span class="toc-section-number">7</span> ATAC-seq analysis</a>
 <ul>
-<li><a href="#ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a" id="toc-ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a"><span class="toc-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)</a></li>
+<li><a href="#ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figures-3as6-and-tables-s12" id="toc-ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figures-3as6-and-tables-s12"><span class="toc-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figures 3A,S6 and Tables S1,2)</a></li>
 <li><a href="#de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b" id="toc-de-novo-identification-of-enriched-motifs-in-increased-or-decreased-peaks-using-meme-figure-3b"><span class="toc-section-number">7.2</span> de novo identification of enriched motifs in increased or decreased peaks using MEME (Figure 3B)</a></li>
-<li><a href="#identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" id="toc-identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2"><span class="toc-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</a></li>
+<li><a href="#identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s34" id="toc-identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s34"><span class="toc-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S3,4)</a></li>
 <li><a href="#count-individual-motif-instances-in-dynamic-peaks-at-30-minutes-figure-3cd" id="toc-count-individual-motif-instances-in-dynamic-peaks-at-30-minutes-figure-3cd"><span class="toc-section-number">7.4</span> Count individual motif instances in dynamic peaks at 30 minutes (Figure 3C,D)</a></li>
 <li><a href="#cluster-dynamic-peaks-and-plot-the-heatmap-figure-3e" id="toc-cluster-dynamic-peaks-and-plot-the-heatmap-figure-3e"><span class="toc-section-number">7.5</span> Cluster dynamic peaks and plot the heatmap (Figure 3E)</a></li>
 <li><a href="#count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f" id="toc-count-gata-motif-instances-in-dynamic-peaks-across-time-points-figure-3f"><span class="toc-section-number">7.6</span> Count GATA motif instances in dynamic peaks across time points (Figure 3F)</a></li>
@@ -757,22 +760,23 @@ function toggle_visibility(id1) {
 <ul>
 <li><a href="#set-up-2" id="toc-set-up-2"><span class="toc-section-number">8.1</span> Set up</a></li>
 <li><a href="#download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads" id="toc-download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads"><span class="toc-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</a></li>
-<li><a href="#generate-a-plot-of-quality-control-metrics-figure-s1" id="toc-generate-a-plot-of-quality-control-metrics-figure-s1"><span class="toc-section-number">8.3</span> Generate a plot of quality control metrics (Figure S1)</a></li>
+<li><a href="#generate-a-plot-of-quality-control-metrics-figure-s5" id="toc-generate-a-plot-of-quality-control-metrics-figure-s5"><span class="toc-section-number">8.3</span> Generate a plot of quality control metrics (Figure S5)</a></li>
 <li><a href="#process-the-combined-reads" id="toc-process-the-combined-reads"><span class="toc-section-number">8.4</span> Process the combined reads</a></li>
-<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-1"><span class="toc-section-number">8.5</span> Scale and merge bigWigs for use in the genome browser</a></li>
-<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-2"><span class="toc-section-number">8.6</span> Leave the cluster environment, and copy files to your local computer</a></li>
+<li><a href="#merge-bigwigs-to-upload-to-dreg" id="toc-merge-bigwigs-to-upload-to-dreg"><span class="toc-section-number">8.5</span> Merge bigWigs to upload to dREG</a></li>
+<li><a href="#scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" id="toc-scale-and-merge-bigwigs-for-use-in-the-genome-browser-1"><span class="toc-section-number">8.6</span> Scale and merge bigWigs for use in the genome browser</a></li>
+<li><a href="#leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" id="toc-leave-the-cluster-environment-and-copy-files-to-your-local-computer-2"><span class="toc-section-number">8.7</span> Leave the cluster environment, and copy files to your local computer</a></li>
 </ul></li>
 <li><a href="#pro-seq-analysis" id="toc-pro-seq-analysis"><span class="toc-section-number">9</span> PRO-seq analysis</a>
 <ul>
 <li><a href="#composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" id="toc-composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g"><span class="toc-section-number">9.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</a></li>
 <li><a href="#cluster-dynamic-genes-figure-4ab" id="toc-cluster-dynamic-genes-figure-4ab"><span class="toc-section-number">9.2</span> Cluster dynamic genes (Figure 4A,B)</a></li>
-<li><a href="#over-representation-analysis-figure-4cd" id="toc-over-representation-analysis-figure-4cd"><span class="toc-section-number">9.3</span> Over-representation analysis (Figure 4C,D)</a></li>
+<li><a href="#over-representation-analysis-figure-4cd-tables-s5-8" id="toc-over-representation-analysis-figure-4cd-tables-s5-8"><span class="toc-section-number">9.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</a></li>
 </ul></li>
 <li><a href="#integrative-analysis" id="toc-integrative-analysis"><span class="toc-section-number">10</span> Integrative analysis</a>
 <ul>
 <li><a href="#cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef" id="toc-cdfs-of-distance-between-dynamic-genes-and-dynamic-trps1-proximal-atac-peaks-figure-4ef"><span class="toc-section-number">10.1</span> CDFs of distance between dynamic genes and dynamic TRPS1-proximal ATAC peaks (Figure 4E,F)</a></li>
-<li><a href="#identification-of-er-target-genes-figure-s2" id="toc-identification-of-er-target-genes-figure-s2"><span class="toc-section-number">10.2</span> Identification of ER target genes (Figure S2)</a></li>
-<li><a href="#cluster-of-dynamic-er-target-genes-figure-5a" id="toc-cluster-of-dynamic-er-target-genes-figure-5a"><span class="toc-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A)</a></li>
+<li><a href="#identification-of-er-target-genes-figure-s7" id="toc-identification-of-er-target-genes-figure-s7"><span class="toc-section-number">10.2</span> Identification of ER target genes (Figure S7)</a></li>
+<li><a href="#cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" id="toc-cluster-of-dynamic-er-target-genes-figure-5a-tables-s910"><span class="toc-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</a></li>
 <li><a href="#er-binding-intensity-near-dynamic-er-target-genes-figure-5b" id="toc-er-binding-intensity-near-dynamic-er-target-genes-figure-5b"><span class="toc-section-number">10.4</span> ER binding intensity near dynamic ER target genes (Figure 5B)</a></li>
 <li><a href="#er-binding-intensity-by-trps1-proximity-figure-5c" id="toc-er-binding-intensity-by-trps1-proximity-figure-5c"><span class="toc-section-number">10.5</span> ER binding intensity by TRPS1 proximity (Figure 5C)</a></li>
 </ul></li>
@@ -782,7 +786,8 @@ function toggle_visibility(id1) {
 <li><a href="#hour-gene-set-enrichment-analysis-figure-6b" id="toc-hour-gene-set-enrichment-analysis-figure-6b"><span class="toc-section-number">11.2</span> 24 hour gene set enrichment analysis (Figure 6B)</a></li>
 <li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">11.3</span> Growth curves (Figure 6C)</a></li>
 <li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">11.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
-<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-scorefigure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-scorefigure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
+<li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8"><span class="toc-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)</a></li>
 </ul></li>
 </ul>
 </div>
@@ -914,63 +919,84 @@ mv $HOME/hg38/hg38-blacklist.v2.bed $HOME/hg38/hg38.blacklist.bed</code></pre>
 </div>
 <div id="download-the-raw-data-from-both-sequencing-runs-rename-the-files-and-combine-the-reads" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Download the raw data from both sequencing runs, rename the files, and combine the reads</h2>
-<p>Download the first run.</p>
+<p>Download the fastq’s and gzip.</p>
 <pre class="bash"><code>cd /scratch/ts2hx/${title}/raw_data
 
-wget http://guertinlab.cam.uchc.edu/230302_tgs_pool1.zip
-md5sum 230302_tgs_pool1.zip
-unzip 230302_tgs_pool1.zip
+for i in {76..99}
+do
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o /scratch/ts2hx/${title}/logs/SRR250766${i}_fasterq_dump.log \
+    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250766${i}; gzip SRR250766${i}_*.fastq&quot;
+  sleep 1
+done
 
-wget http://guertinlab.cam.uchc.edu/230306_tgs_pool2.zip
-md5sum 230306_tgs_pool2.zip
-unzip 230306_tgs_pool2.zip
-#There are no &quot;x&quot; samples in this pool
-rm -r *_x_*</code></pre>
-<p>Rename files to remove the excess.</p>
-<pre class="bash"><code>for i in *_R1_001.fastq.gz
+for i in {00..61}
 do
-  name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
-  echo $name
-  mv ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz
-  mv ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o /scratch/ts2hx/${title}/logs/SRR250767${i}_fasterq_dump.log \
+    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250767${i}; gzip SRR250767${i}_*.fastq&quot;
+  sleep 1
 done</code></pre>
-<p>Download the second run.</p>
-<pre class="bash"><code>wget http://guertinlab.cam.uchc.edu/230320_tgs_ChIP_pool1.zip
-md5sum 230320_tgs_ChIP_pool1.zip
-unzip 230320_tgs_ChIP_pool1.zip
-wget http://guertinlab.cam.uchc.edu/230321_TGS_ChIP_pool2.zip
-md5sum 230321_TGS_ChIP_pool2.zip
-unzip 230321_TGS_ChIP_pool2.zip
-#There are no &quot;x&quot; samples in this pool
-rm -r *_x_*</code></pre>
-<p>Combine the reads.</p>
-<pre class="bash"><code>for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
-  echo $name
-  cat ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz &gt; ${name}_tmp.fastq.gz
-  mv ${name}_tmp.fastq.gz ${name}_PE1.fastq.gz
-  rm ${name}_*_R1_001.fastq.gz
-  cat ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz &gt; ${name}_tmp.fastq.gz
-  mv ${name}_tmp.fastq.gz ${name}_PE2.fastq.gz
-  rm ${name}_*_R2_001.fastq.gz
-done</code></pre>
-<p>Some HA samples got 2 indices each, so combine them.</p>
-<pre class="bash"><code>for i in *_x_*
-do
-  factor=$(echo $i | awk -F&quot;_&quot; &#39;{print $3}&#39;)
-  treatment=$(echo $i | awk -F&quot;_&quot; &#39;{print $4}&#39;)
-  pre=$(echo $i | awk -F&quot;_$factor&quot; &#39;{print $1}&#39;)
-  post=$(echo $i | awk -F&quot;_x_&quot; &#39;{print $2}&#39;)
-  echo $factor
-  echo $treatment
-  echo $pre
-  echo $post
-  mv $i ${pre}_${factor}x_${treatment}_${post}
-  mv ${pre}_${factor}_${treatment}_${post} ${pre}_${factor}y_${treatment}_${post}
-  cat ${pre}_${factor}x_${treatment}_${post} ${pre}_${factor}y_${treatment}_${post} &gt; \
-    ${pre}_${factor}_${treatment}_${post}
-done</code></pre>
+<p>Combine the reads and rename</p>
+<pre class="bash"><code>cat SRR25076713_1.fastq.gz SRR25076725_1.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep1_PE1.fastq.gz
+cat SRR25076712_1.fastq.gz SRR25076726_1.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep2_PE1.fastq.gz
+cat SRR25076703_1.fastq.gz SRR25076711_1.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep3_PE1.fastq.gz
+cat SRR25076700_1.fastq.gz SRR25076701_1.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep4_PE1.fastq.gz
+
+cat SRR25076698_1.fastq.gz SRR25076699_1.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep1_PE1.fastq.gz
+cat SRR25076696_1.fastq.gz SRR25076697_1.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep2_PE1.fastq.gz
+cat SRR25076694_1.fastq.gz SRR25076695_1.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep3_PE1.fastq.gz
+cat SRR25076692_1.fastq.gz SRR25076693_1.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep4_PE1.fastq.gz
+
+cat SRR25076752_1.fastq.gz SRR25076753_1.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep1_PE1.fastq.gz
+cat SRR25076754_1.fastq.gz SRR25076755_1.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep2_PE1.fastq.gz
+cat SRR25076751_1.fastq.gz SRR25076756_1.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep3_PE1.fastq.gz
+cat SRR25076750_1.fastq.gz SRR25076757_1.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep4_PE1.fastq.gz
+
+cat SRR25076749_1.fastq.gz SRR25076758_1.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep1_PE1.fastq.gz
+cat SRR25076748_1.fastq.gz SRR25076759_1.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep2_PE1.fastq.gz
+cat SRR25076747_1.fastq.gz SRR25076760_1.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep3_PE1.fastq.gz
+cat SRR25076738_1.fastq.gz SRR25076761_1.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep4_PE1.fastq.gz
+
+cat SRR25076743_1.fastq.gz SRR25076744_1.fastq.gz SRR25076745_1.fastq.gz SRR25076746_1.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep1_PE1.fastq.gz
+cat SRR25076739_1.fastq.gz SRR25076740_1.fastq.gz SRR25076741_1.fastq.gz SRR25076742_1.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep2_PE1.fastq.gz
+cat SRR25076736_1.fastq.gz SRR25076737_1.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep3_PE1.fastq.gz
+cat SRR25076734_1.fastq.gz SRR25076735_1.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep4_PE1.fastq.gz
+
+cat SRR25076718_1.fastq.gz SRR25076719_1.fastq.gz SRR25076720_1.fastq.gz SRR25076721_1.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep1_PE1.fastq.gz
+cat SRR25076716_1.fastq.gz SRR25076722_1.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep2_PE1.fastq.gz
+cat SRR25076713_1.fastq.gz SRR25076723_1.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep3_PE1.fastq.gz
+cat SRR25076714_1.fastq.gz SRR25076724_1.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep4_PE1.fastq.gz
+
+cat SRR25076713_2.fastq.gz SRR25076725_2.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep1_PE2.fastq.gz
+cat SRR25076712_2.fastq.gz SRR25076726_2.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep2_PE2.fastq.gz
+cat SRR25076703_2.fastq.gz SRR25076711_2.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep3_PE2.fastq.gz
+cat SRR25076700_2.fastq.gz SRR25076701_2.fastq.gz &gt; T47D_Clone28_IgG_DMSO_rep4_PE2.fastq.gz
+
+cat SRR25076698_2.fastq.gz SRR25076699_2.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep1_PE2.fastq.gz
+cat SRR25076696_2.fastq.gz SRR25076697_2.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep2_PE2.fastq.gz
+cat SRR25076694_2.fastq.gz SRR25076695_2.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep3_PE2.fastq.gz
+cat SRR25076692_2.fastq.gz SRR25076693_2.fastq.gz &gt; T47D_Clone28_IgG_dTAG_rep4_PE2.fastq.gz
+
+cat SRR25076752_2.fastq.gz SRR25076753_2.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep1_PE2.fastq.gz
+cat SRR25076754_2.fastq.gz SRR25076755_2.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep2_PE2.fastq.gz
+cat SRR25076751_2.fastq.gz SRR25076756_2.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep3_PE2.fastq.gz
+cat SRR25076750_2.fastq.gz SRR25076757_2.fastq.gz &gt; T47D_Clone28_ER_DMSO_rep4_PE2.fastq.gz
+
+cat SRR25076749_2.fastq.gz SRR25076758_2.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep1_PE2.fastq.gz
+cat SRR25076748_2.fastq.gz SRR25076759_2.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep2_PE2.fastq.gz
+cat SRR25076747_2.fastq.gz SRR25076760_2.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep3_PE2.fastq.gz
+cat SRR25076738_2.fastq.gz SRR25076761_2.fastq.gz &gt; T47D_Clone28_ER_dTAG_rep4_PE2.fastq.gz
+
+cat SRR25076743_2.fastq.gz SRR25076744_2.fastq.gz SRR25076745_2.fastq.gz SRR25076746_2.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep1_PE2.fastq.gz
+cat SRR25076739_2.fastq.gz SRR25076740_2.fastq.gz SRR25076741_2.fastq.gz SRR25076742_2.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep2_PE2.fastq.gz
+cat SRR25076736_2.fastq.gz SRR25076737_2.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep3_PE2.fastq.gz
+cat SRR25076734_2.fastq.gz SRR25076735_2.fastq.gz &gt; T47D_Clone28_HA_DMSO_rep4_PE2.fastq.gz
+
+cat SRR25076718_2.fastq.gz SRR25076719_2.fastq.gz SRR25076720_2.fastq.gz SRR25076721_2.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep1_PE2.fastq.gz
+cat SRR25076716_2.fastq.gz SRR25076722_2.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep2_PE2.fastq.gz
+cat SRR25076713_2.fastq.gz SRR25076723_2.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep3_PE2.fastq.gz
+cat SRR25076714_2.fastq.gz SRR25076724_2.fastq.gz &gt; T47D_Clone28_HA_dTAG_rep4_PE2.fastq.gz</code></pre>
 </div>
 <div id="process-each-sample" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> Process each sample</h2>
@@ -1226,8 +1252,79 @@ echo -e &quot;chr\tstart\tend\tname\tqvalue&quot; | cat - $peaks | \
   paste -d&#39;\t&#39; - *${factor}_peak_counts.txt &gt; Combined_${factor}_peak_counts.txt
 rm T47D_Clone28_*${factor}_peak_counts.txt</code></pre>
 </div>
-<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser" class="section level2" number="4.7">
-<h2><span class="header-section-number">4.7</span> Scale and merge bigWigs for use in the genome browser</h2>
+<div id="generate-the-chipqc-object-for-plotting-qc-metrics" class="section level2" number="4.7">
+<h2><span class="header-section-number">4.7</span> Generate the ChIPQC object for plotting QC metrics</h2>
+<p>I ran the following interactively to make sure I had the right samplesheet before running ChIPQC.</p>
+<pre class="bash"><code>module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
+R
+if (!require(&quot;BiocManager&quot;, quietly = TRUE))
+  install.packages(&quot;BiocManager&quot;)
+library(BiocManager)
+if (!require(&quot;ChIPQC&quot;, quietly = TRUE))
+  BiocManager::install(&quot;ChIPQC&quot;)
+library(ChIPQC)
+if (!require(&quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;, quietly = TRUE))
+  install.packages(&quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+samplesheet &lt;- data.frame(SampleID=character(),
+                          Tissue=character(),
+                          Factor=character(),
+                          Condition=character(),
+                          Replicate=integer(),
+                          bamReads=character(),
+                          ControlID=character(),
+                          bamControl=character(),
+                          Peaks=character(),
+                          PeakCaller=character(),
+                          stringsAsFactors=FALSE)
+
+path = &quot;/scratch/ts2hx/ChIP/results/bowtie2/&quot;
+samples &lt;- dir(path, pattern = &quot;.bam.bai&quot;)
+samples
+
+setwd(&quot;/scratch/ts2hx/ChIP/results/&quot;)
+for (i in 1:length(samples)) {
+  samplesheet[i,1] &lt;- strsplit(strsplit(samples[i], split = &quot;.bam&quot;)[[1]][1], split = &quot;T47D_Clone28_&quot;)[[1]][2]
+  samplesheet[i,2] &lt;- strsplit(samples[i], split = &quot;_&quot;)[[1]][1]
+  samplesheet[i,3] &lt;- strsplit(samples[i], split = &quot;_&quot;)[[1]][3]
+  samplesheet[i,4] &lt;- strsplit(samples[i], split = &quot;_&quot;)[[1]][4]
+  samplesheet[i,5] &lt;- strsplit(strsplit(samples[i], split = &quot;.bam&quot;)[[1]][1], split = &quot;_rep&quot;)[[1]][2]
+  samplesheet[i,6] &lt;- paste(&quot;chipqc/bams/&quot;, strsplit(samples[i], split = &quot;.bam&quot;)[[1]][1], &quot;_ChIPQC.bam&quot;, sep = &quot;&quot;)
+  samplesheet[i,7] &lt;- paste(&quot;T47D_Clone28_IgG_&quot;, samplesheet[i,4], &quot;_rep&quot;, samplesheet[i,5], sep = &quot;&quot;)
+  samplesheet[i,8] &lt;- paste(&quot;chipqc/bams/T47D_Clone28_IgG_&quot;, samplesheet[i,4], &quot;_rep&quot;, samplesheet[i,5], &quot;_ChIPQC.bam&quot;, sep = &quot;&quot;)
+  samplesheet[i,9] &lt;- paste(&quot;macs2/&quot;, samplesheet[i,3], &quot;_peaks.narrowPeak&quot;, sep = &quot;&quot;)
+  samplesheet[i,10] &lt;- &quot;narrow&quot;
+}
+head(samplesheet)
+samplesheet[9:16,9] &lt;- &quot;macs2/HA_DMSO_vs_dTAG_peaks.narrowPeak&quot;
+
+write.csv(samplesheet, file = &quot;/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv&quot;, row.names = FALSE)
+q()</code></pre>
+<p>The script used in the next code chunk (230313_ChIPQC.R) is below:</p>
+<pre class="r bg-info"><code>if (!require(&quot;BiocManager&quot;, quietly = TRUE))
+  install.packages(&quot;BiocManager&quot;)
+library(BiocManager)
+if (!require(&quot;ChIPQC&quot;, quietly = TRUE))
+  BiocManager::install(&quot;ChIPQC&quot;)
+library(ChIPQC)
+if (!require(&quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;, quietly = TRUE))
+  install.packages(&quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+setwd(&quot;/scratch/ts2hx/ChIP/results/&quot;)
+samples &lt;- read.csv(&quot;/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv&quot;)
+register(SerialParam())
+chipObj &lt;- ChIPQC(samples, annotation=&quot;hg38&quot;)
+save(chipObj, file = &quot;/scratch/ts2hx/ChIP/results/chipqc/chipObj.R&quot;)
+load(&quot;/scratch/ts2hx/ChIP/results/chipqc/chipObj.R&quot;)
+setwd(&quot;/scratch/ts2hx/ChIP/results/chipqc&quot;)
+ChIPQCreport(chipObj, reportName=&quot;ChIPQC&quot;, reportFolder=&quot;ChIPQCreport&quot;)</code></pre>
+<p>Run the above script to generate the ChIPQC object.</p>
+<pre class="bash"><code>sbatch -p standard -A gioeli_lab -t 2:00:00 -N 1 -n 1 --job-name chipqc -o /scratch/ts2hx/${title}/logs/chipqc.log \
+  --wrap=&quot;module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1; Rscript ${scripts}/230313_ChIPQC.R&quot;</code></pre>
+</div>
+<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser" class="section level2" number="4.8">
+<h2><span class="header-section-number">4.8</span> Scale and merge bigWigs for use in the genome browser</h2>
 <p>First make size factors based on total mapped reads (divide each by the geometric mean of all of them like in DESeq2).</p>
 <pre class="bash"><code>cd ${main}/bowtie2
 module load samtools/1.12
@@ -1355,8 +1452,8 @@ do
   sleep 1
 done</code></pre>
 </div>
-<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer" class="section level2" number="4.8">
-<h2><span class="header-section-number">4.8</span> Leave the cluster environment, and copy files to your local computer</h2>
+<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer" class="section level2" number="4.9">
+<h2><span class="header-section-number">4.9</span> Leave the cluster environment, and copy files to your local computer</h2>
 <pre class="bash"><code>exit
 exit
 
@@ -1370,7 +1467,40 @@ scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/counts/Combined* counts/
 scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*_not_scaled.bw bigWigs/
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_binned_scaled.bedGraph.gz bigWigs/
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_binned_combined_normalized.bigWig bigWigs/
-scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_sizeFactor.txt counts/</code></pre>
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_sizeFactor.txt counts/
+scp ts2hx@rivanna.hpc.virginia.edu:${main}/chipqc/chipObj.R chipqc</code></pre>
+</div>
+<div id="chipqc-figures-s12" class="section level2" number="4.10">
+<h2><span class="header-section-number">4.10</span> ChIPQC (Figures S1,2)</h2>
+<p>Here we plot the fraction of reads in peaks, as well as the peak-calling-independent metric of cross-strand correlation.</p>
+<pre class="r bg-info"><code>library(ChIPQC)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+setwd(&quot;/Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/chipqc/&quot;)
+load(&quot;chipObj.R&quot;)
+
+pdf(&quot;ChIP_CC.pdf&quot;)
+plotCC(chipObj, facetBy = c(&quot;Factor&quot;, &quot;Condition&quot;))
+dev.off()
+
+plotFrip(chipObj)
+frip = frip(chipObj)[1:16]
+Factor = sapply(strsplit(names(frip), &quot;_&quot;), &quot;[&quot;, 1)
+Condition = sapply(strsplit(names(frip), &quot;_&quot;), &quot;[&quot;, 2)
+Replicate = sapply(strsplit(names(frip), &quot;_&quot;), &quot;[&quot;, 3)
+FRiP = as.vector(frip)*100
+Sample = names(frip)
+
+frip = cbind.data.frame(Sample, FRiP, Factor, Condition, Replicate)
+
+pdf(&quot;ChIP_FRiP.pdf&quot;, height = 5)
+ggplot(frip, aes(x = Sample, y = FRiP, fill = Factor, alpha = Condition)) +
+  geom_bar(stat=&quot;identity&quot;) +
+  scale_fill_manual(values = c(&quot;grey40&quot;, &quot;darkmagenta&quot;)) +
+  scale_alpha_manual(values = c(1, 0.5)) +
+  ylab(&quot;FRiP (%)&quot;) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+dev.off()</code></pre>
 </div>
 </div>
 <div id="trps1-chip-seq-analysis" class="section level1" number="5">
@@ -1514,21 +1644,73 @@ seqOutBias seqtable /project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Inde
 </div>
 <div id="download-the-raw-data-and-rename-the-files" class="section level2" number="6.2">
 <h2><span class="header-section-number">6.2</span> Download the raw data and rename the files</h2>
-<p>Once these files are public on SRA, we can update the SRR numbers.</p>
-<pre class="bash"><code>cd $main
-fasterq-dump SRRTBD</code></pre>
-<p>This may be unnecessary if the SRA downloads are already named appropriately.</p>
-<pre class="bash"><code>for i in *_R1_001.fastq.gz
+<p>Download and gzip.</p>
+<pre class="bash"><code>module load sratoolkit/2.10.5
+
+cd $main
+
+for i in {46..69}
 do
-name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
-echo $name
-hyphenless=${name//-/_}
-echo $hyphenless
-newname=${hyphenless//05hour/0.5hour}
-echo $newname
-mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
-mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
-done</code></pre>
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o /scratch/ts2hx/${title}/logs/SRR250739${i}_fasterq_dump.log \
+    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250739${i}; gzip SRR250739${i}_*.fastq&quot;
+  sleep 1
+done
+</code></pre>
+<p>Rename.</p>
+<pre class="bash"><code>mv SRR25073969_1.fastq.gz T47D_Clone28_0hour_rep1_PE1.fastq.gz
+mv SRR25073969_2.fastq.gz T47D_Clone28_0hour_rep1_PE2.fastq.gz
+mv SRR25073968_1.fastq.gz T47D_Clone28_0hour_rep2_PE1.fastq.gz
+mv SRR25073968_2.fastq.gz T47D_Clone28_0hour_rep2_PE2.fastq.gz
+mv SRR25073967_1.fastq.gz T47D_Clone28_0hour_rep3_PE1.fastq.gz
+mv SRR25073967_2.fastq.gz T47D_Clone28_0hour_rep3_PE2.fastq.gz
+mv SRR25073966_1.fastq.gz T47D_Clone28_0hour_rep4_PE1.fastq.gz
+mv SRR25073966_2.fastq.gz T47D_Clone28_0hour_rep4_PE2.fastq.gz
+
+mv SRR25073965_1.fastq.gz T47D_Clone28_0.5hour_rep1_PE1.fastq.gz
+mv SRR25073965_2.fastq.gz T47D_Clone28_0.5hour_rep1_PE2.fastq.gz
+mv SRR25073964_1.fastq.gz T47D_Clone28_0.5hour_rep2_PE1.fastq.gz
+mv SRR25073964_2.fastq.gz T47D_Clone28_0.5hour_rep2_PE2.fastq.gz
+mv SRR25073963_1.fastq.gz T47D_Clone28_0.5hour_rep3_PE1.fastq.gz
+mv SRR25073963_2.fastq.gz T47D_Clone28_0.5hour_rep3_PE2.fastq.gz
+mv SRR25073962_1.fastq.gz T47D_Clone28_0.5hour_rep4_PE1.fastq.gz
+mv SRR25073962_2.fastq.gz T47D_Clone28_0.5hour_rep4_PE2.fastq.gz
+
+mv SRR25073961_1.fastq.gz T47D_Clone28_1hour_rep1_PE1.fastq.gz
+mv SRR25073961_2.fastq.gz T47D_Clone28_1hour_rep1_PE2.fastq.gz
+mv SRR25073960_1.fastq.gz T47D_Clone28_1hour_rep2_PE1.fastq.gz
+mv SRR25073960_2.fastq.gz T47D_Clone28_1hour_rep2_PE2.fastq.gz
+mv SRR25073959_1.fastq.gz T47D_Clone28_1hour_rep3_PE1.fastq.gz
+mv SRR25073959_2.fastq.gz T47D_Clone28_1hour_rep3_PE2.fastq.gz
+mv SRR25073958_1.fastq.gz T47D_Clone28_1hour_rep4_PE1.fastq.gz
+mv SRR25073958_2.fastq.gz T47D_Clone28_1hour_rep4_PE2.fastq.gz
+
+mv SRR25073957_1.fastq.gz T47D_Clone28_2hour_rep1_PE1.fastq.gz
+mv SRR25073957_2.fastq.gz T47D_Clone28_2hour_rep1_PE2.fastq.gz
+mv SRR25073956_1.fastq.gz T47D_Clone28_2hour_rep2_PE1.fastq.gz
+mv SRR25073956_2.fastq.gz T47D_Clone28_2hour_rep2_PE2.fastq.gz
+mv SRR25073955_1.fastq.gz T47D_Clone28_2hour_rep3_PE1.fastq.gz
+mv SRR25073955_2.fastq.gz T47D_Clone28_2hour_rep3_PE2.fastq.gz
+mv SRR25073954_1.fastq.gz T47D_Clone28_2hour_rep4_PE1.fastq.gz
+mv SRR25073954_2.fastq.gz T47D_Clone28_2hour_rep4_PE2.fastq.gz
+
+mv SRR25073953_1.fastq.gz T47D_Clone28_4hour_rep1_PE1.fastq.gz
+mv SRR25073953_2.fastq.gz T47D_Clone28_4hour_rep1_PE2.fastq.gz
+mv SRR25073952_1.fastq.gz T47D_Clone28_4hour_rep2_PE1.fastq.gz
+mv SRR25073952_2.fastq.gz T47D_Clone28_4hour_rep2_PE2.fastq.gz
+mv SRR25073951_1.fastq.gz T47D_Clone28_4hour_rep3_PE1.fastq.gz
+mv SRR25073951_2.fastq.gz T47D_Clone28_4hour_rep3_PE2.fastq.gz
+mv SRR25073950_1.fastq.gz T47D_Clone28_4hour_rep4_PE1.fastq.gz
+mv SRR25073950_2.fastq.gz T47D_Clone28_4hour_rep4_PE2.fastq.gz
+
+mv SRR25073949_1.fastq.gz T47D_Clone28_24hour_rep1_PE1.fastq.gz
+mv SRR25073949_2.fastq.gz T47D_Clone28_24hour_rep1_PE2.fastq.gz
+mv SRR25073948_1.fastq.gz T47D_Clone28_24hour_rep2_PE1.fastq.gz
+mv SRR25073948_2.fastq.gz T47D_Clone28_24hour_rep2_PE2.fastq.gz
+mv SRR25073947_1.fastq.gz T47D_Clone28_24hour_rep3_PE1.fastq.gz
+mv SRR25073947_2.fastq.gz T47D_Clone28_24hour_rep3_PE2.fastq.gz
+mv SRR25073946_1.fastq.gz T47D_Clone28_24hour_rep4_PE1.fastq.gz
+mv SRR25073946_2.fastq.gz T47D_Clone28_24hour_rep4_PE2.fastq.gz</code></pre>
 </div>
 <div id="process-each-sample-1" class="section level2" number="6.3">
 <h2><span class="header-section-number">6.3</span> Process each sample</h2>
@@ -1601,6 +1783,15 @@ name=`basename $filename _PE1.fastq.gz`
 sbatch -p standard -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name ${name}_atacseq_analysis \
   -o ${name}_atacseq.log  --wrap=&quot;sh /scratch/ts2hx/scripts/230417_ATACseq_analysis_on_input_file.sh $filename&quot;
 sleep 1 # wait 1 second between each job submission
+done
+
+#Should include this indexing step in the above script
+for i in *.hg38.bam
+do
+  name=`basename $filename .hg38.bam`
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name ${name}_index \
+    -o ${name}_index.log  --wrap=&quot;module load samtools/1.12; samtools index $i&quot;
+  sleep 1
 done</code></pre>
 </div>
 <div id="call-peaks-1" class="section level2" number="6.4">
@@ -1728,13 +1919,164 @@ exit
 #Copy files
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Combined_ATAC_peak_counts.txt .
-scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt .</code></pre>
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/T47D_Clone28_*.hg38.bam* \
+  /Volumes/External/Users/TScott/TRPS1_timecourse_ATAC_bams</code></pre>
+</div>
+<div id="atacseqqc-figures-s34" class="section level2" number="6.9">
+<h2><span class="header-section-number">6.9</span> ATACseqQC (Figures S3,4)</h2>
+<p>Here we plot the distribution of fragment lengths, as well as the enrichment of signal around transcription start sites.</p>
+<pre class="r bg-info"><code>direc = &#39;/Volumes/External/Users/TScott/TRPS1_timecourse_ATAC_bams&#39;
+setwd(direc)
+
+library(BiocManager)
+BiocManager::install(c(&quot;ATACseqQC&quot;, &quot;ChIPpeakAnno&quot;, &quot;MotifDb&quot;, &quot;GenomicAlignments&quot;,
+                       &quot;BSgenome.Hsapiens.UCSC.hg38&quot;, &quot;TxDb.Hsapiens.UCSC.hg38.knownGene&quot;,
+                       &quot;phastCons100way.UCSC.hg38&quot;))
+library(ATACseqQC)
+library(Rsamtools)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(GenomicAlignments)
+
+#input the bamFiles
+bamfile &lt;- list.files(path = &quot;.&quot;, pattern = &quot;*.hg38.bam$&quot;, all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+#change the order to reflect the time points
+bamfile = bamfile[c(5:8, 1:4, 9:12, 17:24, 13:16)]
+#change names to remove excess
+bamfile.labels &lt;- gsub(&quot;.hg38.bam&quot;, &quot;&quot;, basename(bamfile))
+
+#get TSS&#39;s
+txs &lt;- transcripts(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+#get tags
+possibleTag &lt;- list(&quot;integer&quot;=c(&quot;AM&quot;, &quot;AS&quot;, &quot;CM&quot;, &quot;CP&quot;, &quot;FI&quot;, &quot;H0&quot;, &quot;H1&quot;, &quot;H2&quot;, 
+                                &quot;HI&quot;, &quot;IH&quot;, &quot;MQ&quot;, &quot;NH&quot;, &quot;NM&quot;, &quot;OP&quot;, &quot;PQ&quot;, &quot;SM&quot;,
+                                &quot;TC&quot;, &quot;UQ&quot;), 
+                    &quot;character&quot;=c(&quot;BC&quot;, &quot;BQ&quot;, &quot;BZ&quot;, &quot;CB&quot;, &quot;CC&quot;, &quot;CO&quot;, &quot;CQ&quot;, &quot;CR&quot;,
+                                  &quot;CS&quot;, &quot;CT&quot;, &quot;CY&quot;, &quot;E2&quot;, &quot;FS&quot;, &quot;LB&quot;, &quot;MC&quot;, &quot;MD&quot;,
+                                  &quot;MI&quot;, &quot;OA&quot;, &quot;OC&quot;, &quot;OQ&quot;, &quot;OX&quot;, &quot;PG&quot;, &quot;PT&quot;, &quot;PU&quot;,
+                                  &quot;Q2&quot;, &quot;QT&quot;, &quot;QX&quot;, &quot;R2&quot;, &quot;RG&quot;, &quot;RX&quot;, &quot;SA&quot;, &quot;TS&quot;,
+                                  &quot;U2&quot;))
+
+#get fragment size distributions (modified from ATACseqQC for easier plotting)
+bamFiles = bamfile
+bamFiles.labels = bamfile.labels
+index = bamFiles
+ylim = NULL
+pe &lt;- mapply(testPairedEndBam, bamFiles, index)
+if (any(!pe)) {
+  stop(paste(bamFiles[!pe], collapse = &quot;, &quot;), &quot;is not Paired-End file.&quot;)
+}
+summaryFunction &lt;- function(seqname, seqlength, bamFile, ind, ...) {
+  param &lt;- ScanBamParam(what = c(&quot;isize&quot;), which = GRanges(seqname, IRanges(1, seqlength)), flag = scanBamFlag(isSecondaryAlignment = FALSE, isUnmappedQuery = FALSE, isNotPassingQualityControls = FALSE)) table(abs(unlist(sapply(scanBam(bamFile, index = ind, ..., param = param), `[[`, &quot;isize&quot;), use.names = FALSE)))
+}
+idxstats &lt;- unique(do.call(rbind, mapply(function(.ele, .ind) idxstatsBam(.ele, index = .ind)[, c(&quot;seqnames&quot;, &quot;seqlength&quot;)], bamFiles, index, SIMPLIFY = FALSE)))
+idxstats &lt;- idxstats[idxstats[, &quot;seqnames&quot;] != &quot;*&quot;, , drop = FALSE]
+seqnames &lt;- as.character(idxstats[, &quot;seqnames&quot;])
+seqlen &lt;- as.numeric(idxstats[, &quot;seqlength&quot;])
+seqlen &lt;- checkMaxChrLength(seqlen)
+fragment.len &lt;- mapply(function(bamFile, ind) summaryFunction(seqname = seqnames, seqlength = seqlen, bamFile, ind), bamFiles, index, SIMPLIFY = FALSE)
+names(fragment.len) &lt;- bamFiles.labels
+minor.ticks.axis &lt;- function(ax, n = 9, t.ratio = 0.5, mn, mx, ...) {
+  lims &lt;- par(&quot;usr&quot;)
+  lims &lt;- if (ax %in% c(1, 3)) 
+    lims[1:2]
+  else lims[3:4]
+  major.ticks &lt;- pretty(lims, n = 5)
+  if (missing(mn)) 
+    mn &lt;- min(major.ticks)
+  if (missing(mx)) 
+    mx &lt;- max(major.ticks)
+  major.ticks &lt;- major.ticks[major.ticks &gt;= mn &amp; major.ticks &lt;=  mx]
+  labels &lt;- sapply(major.ticks, function(i) as.expression(bquote(10^.(i))))
+  axis(ax, at = major.ticks, labels = labels, las = ifelse(ax %in%  c(2, 4), 2, 1), ...)
+  n &lt;- n + 2
+  minors &lt;- log10(pretty(10^major.ticks[1:2], n)) - major.ticks[1]
+  minors &lt;- minors[-c(1, n)]
+  minor.ticks = c(outer(minors, major.ticks, `+`))
+  minor.ticks &lt;- minor.ticks[minor.ticks &gt; mn &amp; minor.ticks &lt; mx]
+  axis(ax, at = minor.ticks, tcl = par(&quot;tcl&quot;) * t.ratio, labels = FALSE)
+}
+
+#save for future use
+save(fragment.len, file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragment_lengths.RData&quot;)
+
+#plot
+pdf(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragSize.pdf&quot;, height = 10, width = 15)
+par(mfcol=c(4,6))
+null &lt;- mapply(function(frag.len, frag.name) {
+  x &lt;- 1:1010
+  frag.len &lt;- frag.len[match(x, names(frag.len))]
+  frag.len[is.na(frag.len)] &lt;- 0
+  y &lt;- frag.len/sum(frag.len)
+  y &lt;- as.numeric(y)
+  names(y) &lt;- x
+  plot(x, y * 10^3, main = frag.name, 
+       xlim = c(0, 1010), ylim = c(0,13), xlab = &quot;Fragment length (bp)&quot;, 
+       ylab = expression(Normalized ~ read ~ density ~ x ~ 10^-3), type = &quot;l&quot;)
+}, fragment.len, sapply(strsplit(names(fragment.len), &quot;T47D_Clone28_&quot;), &quot;[&quot;, 2))
+dev.off()
+
+#get TSS enrichments
+#initialize
+seqlev &lt;- &quot;chr1&quot; ## subsample data for quick run
+seqinformation &lt;- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
+which &lt;- as(seqinformation[seqlev], &quot;GRanges&quot;)
+
+#make an empty list to fill with each sample
+TSSEs &lt;- sapply(bamfile.labels,function(x) NULL)
+
+for (i in 1:length(bamfile)) {
+  
+  print(bamfile[i])
+  
+  #get reads with tags
+  bamTop100 &lt;- scanBam(BamFile(bamfile[i], yieldSize = 100), 
+                       param = ScanBamParam(tag=unlist(possibleTag)))[[1]]$tag
+  tags &lt;- names(bamTop100)[lengths(bamTop100)&gt;0]
+  tags
+  
+  #shift the coordinates of 5&#39;ends of alignments in the bam file
+  gal &lt;- readBamFile(bamfile[i], tag=tags, which=which, asMates=TRUE, bigFile=TRUE)
+  rm(gal1)
+  gal1 &lt;- shiftGAlignmentsList(gal)
+  
+  #calculate TSS enrichment and append to the list
+  tsse &lt;- TSSEscore(gal1, txs)
+  TSSEs[[i]] = tsse$values
+  save(TSSEs, file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData&quot;)
+  print(tsse$values)
+  
+  #plot enrichment around TSS&#39;s
+  plot(100*(-9:10-.5), tsse$values, type=&quot;b&quot;, 
+       xlim=c(-1000, 1000),
+       xlab=&quot;distance to TSS&quot;,
+       ylab=&quot;aggregate TSS score&quot;,
+       main=sapply(strsplit(sapply(strsplit(bamfile[i], &quot;T47D_Clone28_&quot;), &quot;[&quot;, 2), &quot;.hg38.bam&quot;), &quot;[&quot;, 1))
+}
+
+#save for future use
+save(TSSEs, file = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData&quot;)
+load(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData&quot;)
+
+#plot
+pdf(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSS_enrichment.pdf&quot;, height = 10, width = 15)
+par(mfcol=c(4,6))
+for (i in 1:length(TSSEs)) {
+plot(100*(-9:10-.5), TSSEs[[i]], type=&quot;b&quot;, 
+     xlim=c(-1000, 1000),
+     ylim=c(0,75),
+     xlab=&quot;distance to TSS&quot;,
+     ylab=&quot;aggregate TSS score&quot;,
+     main=sapply(strsplit(names(TSSEs)[i], &quot;T47D_Clone28_&quot;), &quot;[&quot;, 2))
+}
+dev.off()</code></pre>
 </div>
 </div>
 <div id="atac-seq-analysis" class="section level1" number="7">
 <h1><span class="header-section-number">7</span> ATAC-seq analysis</h1>
-<div id="ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figure-3a" class="section level2" number="7.1">
-<h2><span class="header-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)</h2>
+<div id="ma-plot-of-chromatin-accessibility-at-30-minutes-dtag-vs.-dmso-figures-3as6-and-tables-s12" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figures 3A,S6 and Tables S1,2)</h2>
 <p>Set up libraries and functions in R.</p>
 <pre class="r bg-info"><code>direc = &#39;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/&#39;
 setwd(direc)
@@ -1780,7 +2122,8 @@ load(&quot;deseq.df.ATAC.Rdata&quot;)</code></pre>
 <p>Identify differentially accessible peaks.</p>
 <pre class="r bg-info"><code>i = &quot;0.5hour&quot;
 res.deseq = results(deseq.df[peak_qvalue &gt; 100,], contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
-sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj))</code></pre>
+sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0) #472
+sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0) #36</code></pre>
 <p>Match the unchanged peaks to activated peaks based on accessibility.</p>
 <pre class="r bg-info"><code>activated = res.deseq[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0,]
 unchanged = res.deseq[!is.na(res.deseq$padj) &amp; res.deseq$padj &gt; 0.1 &amp; abs(res.deseq$log2FoldChange) &lt; 0.01,]
@@ -1808,6 +2151,66 @@ ggplot(as.data.frame(df.deseq.effects.lattice) %&gt;% arrange(status), aes(x = l
   ylab(expression(&quot;log&quot;[2]~&quot;(fold change in ATAC signal)&quot;)) +
   xlab(expression(&quot;log&quot;[10]~&quot;(mean of normalized intensity)&quot;)) +
   ggtitle(&quot;Change in chromatin accessibility upon TRPS1 depletion&quot;) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(color=NULL)
+dev.off()</code></pre>
+<p>Write regions as tables.</p>
+<pre class="r bg-info"><code>increased = as.data.frame(activated)
+increased$region = rownames(increased)
+increased$chr = sapply(strsplit(increased$region, &quot;:&quot;), &quot;[&quot;, 1)
+increased$start = sapply(strsplit(sapply(strsplit(increased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 1)
+increased$end = sapply(strsplit(sapply(strsplit(increased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 2)
+write.table(increased[,c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;)], file = &quot;increased_ATAC_30min_summits.bed&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+decreased = as.data.frame(repressed)
+decreased$region = rownames(decreased)
+decreased$chr = sapply(strsplit(decreased$region, &quot;:&quot;), &quot;[&quot;, 1)
+decreased$start = sapply(strsplit(sapply(strsplit(decreased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 1)
+decreased$end = sapply(strsplit(sapply(strsplit(decreased$region, &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 2)
+write.table(decreased[,c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;)], file = &quot;decreased_ATAC_30min_summits.bed&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
+<p>Repeat above with ATAC-seq peaks that are distal to sites of bidirectional transcription. The dREG elements are generated below in this vignette in the PRO-seq data pre-processing section.</p>
+<pre class="r bg-info"><code>#Get dREG elements
+dREG = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/dTAG_TRPS1_timecourse_dREG/dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed&quot;)
+
+#Get distal peaks
+res.deseq$chr = sapply(strsplit(rownames(res.deseq), &quot;:&quot;), &quot;[&quot;, 1)
+res.deseq$start = sapply(strsplit(sapply(strsplit(rownames(res.deseq), &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 1)
+res.deseq$end = sapply(strsplit(sapply(strsplit(rownames(res.deseq), &quot;:&quot;), &quot;[&quot;, 2), &quot;-&quot;), &quot;[&quot;, 2)
+res.deseq = res.deseq[, c(7:9,1:6)]
+res.deseq$start = as.numeric(res.deseq$start) + 100
+res.deseq$end = as.numeric(res.deseq$end) - 100
+dREG_distal_ATAC_peaks = bedTools.intersect(bed1 = res.deseq, bed2 = dREG, opt.string = &quot;-v&quot;)
+res.deseq = dREG_distal_ATAC_peaks
+
+#Match the unchanged peaks to activated peaks based on accessibility.
+activated = res.deseq[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0,]
+unchanged = res.deseq[!is.na(res.deseq$padj) &amp; res.deseq$padj &gt; 0.1 &amp; abs(res.deseq$log2FoldChange) &lt; 0.01,]
+unchanged$treatment = 0
+activated$treatment = 1
+df.deseq.effects.lattice = rbind(unchanged, activated)
+out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = &quot;optimal&quot;, ratio = 1)
+unchanged = df.deseq.effects.lattice[rownames(df.deseq.effects.lattice) %in% out$match.matrix,]
+repressed = res.deseq[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0,]
+
+df.deseq.effects.lattice = res.deseq
+df.deseq.effects.lattice$status = &quot;Other&quot;
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(activated)] = &quot;Increased&quot;
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(unchanged)] = &quot;Unchanged&quot;
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(repressed)] = &quot;Decreased&quot;
+df.deseq.effects.lattice$status = factor(df.deseq.effects.lattice$status, levels = c(&quot;Other&quot;, &quot;Increased&quot;, &quot;Unchanged&quot;, &quot;Decreased&quot;))
+
+#Plot
+pdf(&quot;MA_dREG_distal_ATAC_peaks.pdf&quot;, width = 7, height = 3.5)
+ggplot(as.data.frame(df.deseq.effects.lattice) %&gt;% arrange(status), aes(x = log(baseMean, 10), y = log2FoldChange, color = status)) +
+  geom_point() +
+  scale_color_manual(values = c(&quot;grey90&quot;, &quot;red&quot;, &quot;grey60&quot;, &quot;blue&quot;)) +
+  geom_hline(yintercept = 0, linetype=&quot;dashed&quot;) +
+  ylim(-1.2, 1.2) +
+  xlim(1.5, 3.5) +
+  ylab(expression(&quot;log&quot;[2]~&quot;(fold change in ATAC signal)&quot;)) +
+  xlab(expression(&quot;log&quot;[10]~&quot;(mean of normalized intensity)&quot;)) +
+  ggtitle(&quot;Change in chromatin accessibility upon TRPS1 depletion distal to dREG elements&quot;) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(color=NULL)
@@ -1865,8 +2268,8 @@ do
     ${name}.fasta
 done</code></pre>
 </div>
-<div id="identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s1-and-s2" class="section level2" number="7.3">
-<h2><span class="header-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)</h2>
+<div id="identify-differentially-enriched-motifs-in-increased-or-decreased-peaks-relative-to-unchanged-peaks-using-ame-tables-s34" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S3,4)</h2>
 <p>Report results at FDR 0.1 (1401 total in the above database).</p>
 <pre class="bash"><code>cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/
 motifs=~/Library/CloudStorage/Box-Box/GuertinLab/Motif_databases/tomtom_db/homer_uniprobe_jaspar_edited.txt
@@ -2128,10 +2531,8 @@ dev.off()</code></pre>
 <p>Log in to the cluster to perform the processing for each sample in parallel.</p>
 <pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00</code></pre>
-<p>Make a directory for each sequencing run.</p>
-<pre class="bash"><code>mkdir -p TRPS1_timecourse_PRO
-mkdir -p TRPS1_timecourse_PRO_2
-mkdir -p TRPS1_timecourse_PRO_3</code></pre>
+<p>Make a directory.</p>
+<pre class="bash"><code>mkdir -p TRPS1_timecourse_PRO_3</code></pre>
 <p>The script used in the next code chunk (220927_tallymer_generation.sh) is below:</p>
 <pre class="bash"><code>#! /bin/bash
 
@@ -2151,68 +2552,140 @@ exit</code></pre>
 </div>
 <div id="download-the-raw-data-from-the-three-sequencing-runs-rename-the-files-and-combine-the-reads" class="section level2" number="8.2">
 <h2><span class="header-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</h2>
-<p>We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first put each sequencing run into its own folder.</p>
-<pre class="bash"><code>cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO/
-
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00</code></pre>
-<p>Rename files to remove the excess.</p>
-<pre class="bash"><code>cd /scratch/ts2hx/TRPS1_timecourse_PRO/
-
-for i in *_R1_001.fastq.gz
-do
-name=$(echo $i | awk -F&quot;_S[0-9]&quot; &#39;{print $1}&#39;)
-echo $name
-hyphenless=${name//-/_}
-echo $hyphenless
-newname=${hyphenless//05hour/0.5hour}
-echo $newname
-mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
-mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
-done
-
-exit
-exit</code></pre>
-<p>Run 2:</p>
-<pre class="bash"><code>cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_2/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_2</code></pre>
-<p>Run 3:</p>
-<pre class="bash"><code>scp /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_3.zip ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/
-
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
+<p>We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first download the fastq’s and gzip.</p>
+<pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
 
-cd /scratch/ts2hx/
-unzip TRPS1_timecourse_PRO_3.zip
-mv *.fastq.gz TRPS1_timecourse_PRO_3/
-rm TRPS1_timecourse_PRO_3.zip</code></pre>
-<p>Rename files to remove the excess.</p>
-<pre class="bash"><code>cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
+cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
 
-for i in *05hour*
+for i in {24..92}
 do
-  prefix=$(echo $i | awk -F&quot;_05hour_&quot; &#39;{print $1}&#39;)
-  suffix=$(echo $i | awk -F&quot;_05hour_&quot; &#39;{print $2}&#39;)
-  mv $i ${prefix}_0.5hour_${suffix}
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o logs/SRR250747${i}_fasterq_dump.log \
+    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}; gzip SRR250747${i}_*.fastq&quot;
+  sleep 1
 done</code></pre>
 <p>Combine the NextSeq550 reads to generate representative quality control metrics.</p>
-<pre class="bash"><code>for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F&quot;_S&quot; &#39;{print $1}&#39;)
-  cat ../TRPS1_timecourse_PRO_2/${name}_PE1.fastq.gz $i &gt; ${name}_NextSeq550_PE1.fastq.gz
-  cat ../TRPS1_timecourse_PRO_2/${name}_PE2.fastq.gz ${name}_*_R2_001.fastq.gz &gt; ${name}_NextSeq550_PE2.fastq.gz
-done</code></pre>
+<pre class="bash"><code>cat SRR25074724_1.fastq.gz SRR25074726_1.fastq.gz &gt; T47D_Clone28_24hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074727_1.fastq.gz SRR25074729_1.fastq.gz &gt; T47D_Clone28_24hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074730_1.fastq.gz SRR25074732_1.fastq.gz &gt; T47D_Clone28_24hour_rep2_NextSeq550_PE1.fastq.gz
+
+cat SRR25074733_1.fastq.gz SRR25074735_1.fastq.gz &gt; T47D_Clone28_4hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074736_1.fastq.gz SRR25074738_1.fastq.gz &gt; T47D_Clone28_4hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074739_1.fastq.gz SRR25074741_1.fastq.gz &gt; T47D_Clone28_4hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074742_1.fastq.gz SRR25074744_1.fastq.gz &gt; T47D_Clone28_4hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074745_1.fastq.gz SRR25074747_1.fastq.gz &gt; T47D_Clone28_2hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074748_1.fastq.gz SRR25074750_1.fastq.gz &gt; T47D_Clone28_2hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074751_1.fastq.gz SRR25074753_1.fastq.gz &gt; T47D_Clone28_2hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074754_1.fastq.gz SRR25074756_1.fastq.gz &gt; T47D_Clone28_2hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074757_1.fastq.gz SRR25074759_1.fastq.gz &gt; T47D_Clone28_1hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074760_1.fastq.gz SRR25074762_1.fastq.gz &gt; T47D_Clone28_1hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074763_1.fastq.gz SRR25074765_1.fastq.gz &gt; T47D_Clone28_1hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074766_1.fastq.gz SRR25074768_1.fastq.gz &gt; T47D_Clone28_1hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074769_1.fastq.gz SRR25074771_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074772_1.fastq.gz SRR25074774_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074775_1.fastq.gz SRR25074777_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074778_1.fastq.gz SRR25074780_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074781_1.fastq.gz SRR25074783_1.fastq.gz &gt; T47D_Clone28_0hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074784_1.fastq.gz SRR25074786_1.fastq.gz &gt; T47D_Clone28_0hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074787_1.fastq.gz SRR25074789_1.fastq.gz &gt; T47D_Clone28_0hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074790_1.fastq.gz SRR25074792_1.fastq.gz &gt; T47D_Clone28_0hour_rep1_NextSeq550_PE1.fastq.gz
+
+
+cat SRR25074724_2.fastq.gz SRR25074726_2.fastq.gz &gt; T47D_Clone28_24hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074727_2.fastq.gz SRR25074729_2.fastq.gz &gt; T47D_Clone28_24hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074730_2.fastq.gz SRR25074732_2.fastq.gz &gt; T47D_Clone28_24hour_rep2_NextSeq550_PE2.fastq.gz
+
+cat SRR25074733_2.fastq.gz SRR25074735_2.fastq.gz &gt; T47D_Clone28_4hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074736_2.fastq.gz SRR25074738_2.fastq.gz &gt; T47D_Clone28_4hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074739_2.fastq.gz SRR25074741_2.fastq.gz &gt; T47D_Clone28_4hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074742_2.fastq.gz SRR25074744_2.fastq.gz &gt; T47D_Clone28_4hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074745_2.fastq.gz SRR25074747_2.fastq.gz &gt; T47D_Clone28_2hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074748_2.fastq.gz SRR25074750_2.fastq.gz &gt; T47D_Clone28_2hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074751_2.fastq.gz SRR25074753_2.fastq.gz &gt; T47D_Clone28_2hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074754_2.fastq.gz SRR25074756_2.fastq.gz &gt; T47D_Clone28_2hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074757_2.fastq.gz SRR25074759_2.fastq.gz &gt; T47D_Clone28_1hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074760_2.fastq.gz SRR25074762_2.fastq.gz &gt; T47D_Clone28_1hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074763_2.fastq.gz SRR25074765_2.fastq.gz &gt; T47D_Clone28_1hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074766_2.fastq.gz SRR25074768_2.fastq.gz &gt; T47D_Clone28_1hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074769_2.fastq.gz SRR25074771_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074772_2.fastq.gz SRR25074774_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074775_2.fastq.gz SRR25074777_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074778_2.fastq.gz SRR25074780_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074781_2.fastq.gz SRR25074783_2.fastq.gz &gt; T47D_Clone28_0hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074784_2.fastq.gz SRR25074786_2.fastq.gz &gt; T47D_Clone28_0hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074787_2.fastq.gz SRR25074789_2.fastq.gz &gt; T47D_Clone28_0hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074790_2.fastq.gz SRR25074792_2.fastq.gz &gt; T47D_Clone28_0hour_rep1_NextSeq550_PE2.fastq.gz</code></pre>
 <p>Combine all reads for use in downstream analysis.</p>
-<pre class="bash"><code>for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F&quot;_S&quot; &#39;{print $1}&#39;)
-  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE1.fastq.gz $i &gt; ${name}_combined_PE1.fastq.gz
-  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE2.fastq.gz ${name}_*_R2_001.fastq.gz &gt; ${name}_combined_PE2.fastq.gz
-done</code></pre>
+<pre class="bash"><code>cat SRR25074724_1.fastq.gz SRR25074725_1.fastq.gz SRR25074726_1.fastq.gz &gt; T47D_Clone28_24hour_rep4_combined_PE1.fastq.gz
+cat SRR25074727_1.fastq.gz SRR25074728_1.fastq.gz SRR25074729_1.fastq.gz &gt; T47D_Clone28_24hour_rep3_combined_PE1.fastq.gz
+cat SRR25074730_1.fastq.gz SRR25074731_1.fastq.gz SRR25074732_1.fastq.gz &gt; T47D_Clone28_24hour_rep2_combined_PE1.fastq.gz
+
+cat SRR25074733_1.fastq.gz SRR25074734_1.fastq.gz SRR25074735_1.fastq.gz &gt; T47D_Clone28_4hour_rep4_combined_PE1.fastq.gz
+cat SRR25074736_1.fastq.gz SRR25074737_1.fastq.gz SRR25074738_1.fastq.gz &gt; T47D_Clone28_4hour_rep3_combined_PE1.fastq.gz
+cat SRR25074739_1.fastq.gz SRR25074740_1.fastq.gz SRR25074741_1.fastq.gz &gt; T47D_Clone28_4hour_rep2_combined_PE1.fastq.gz
+cat SRR25074742_1.fastq.gz SRR25074743_1.fastq.gz SRR25074744_1.fastq.gz &gt; T47D_Clone28_4hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074745_1.fastq.gz SRR25074746_1.fastq.gz SRR25074747_1.fastq.gz &gt; T47D_Clone28_2hour_rep4_combined_PE1.fastq.gz
+cat SRR25074748_1.fastq.gz SRR25074749_1.fastq.gz SRR25074750_1.fastq.gz &gt; T47D_Clone28_2hour_rep3_combined_PE1.fastq.gz
+cat SRR25074751_1.fastq.gz SRR25074752_1.fastq.gz SRR25074753_1.fastq.gz &gt; T47D_Clone28_2hour_rep2_combined_PE1.fastq.gz
+cat SRR25074754_1.fastq.gz SRR25074755_1.fastq.gz SRR25074756_1.fastq.gz &gt; T47D_Clone28_2hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074757_1.fastq.gz SRR25074758_1.fastq.gz SRR25074759_1.fastq.gz &gt; T47D_Clone28_1hour_rep4_combined_PE1.fastq.gz
+cat SRR25074760_1.fastq.gz SRR25074761_1.fastq.gz SRR25074762_1.fastq.gz &gt; T47D_Clone28_1hour_rep3_combined_PE1.fastq.gz
+cat SRR25074763_1.fastq.gz SRR25074764_1.fastq.gz SRR25074765_1.fastq.gz &gt; T47D_Clone28_1hour_rep2_combined_PE1.fastq.gz
+cat SRR25074766_1.fastq.gz SRR25074767_1.fastq.gz SRR25074768_1.fastq.gz &gt; T47D_Clone28_1hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074769_1.fastq.gz SRR25074770_1.fastq.gz SRR25074771_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep4_combined_PE1.fastq.gz
+cat SRR25074772_1.fastq.gz SRR25074773_1.fastq.gz SRR25074774_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep3_combined_PE1.fastq.gz
+cat SRR25074775_1.fastq.gz SRR25074776_1.fastq.gz SRR25074777_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep2_combined_PE1.fastq.gz
+cat SRR25074778_1.fastq.gz SRR25074779_1.fastq.gz SRR25074780_1.fastq.gz &gt; T47D_Clone28_0.5hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074781_1.fastq.gz SRR25074782_1.fastq.gz SRR25074783_1.fastq.gz &gt; T47D_Clone28_0hour_rep4_combined_PE1.fastq.gz
+cat SRR25074784_1.fastq.gz SRR25074785_1.fastq.gz SRR25074786_1.fastq.gz &gt; T47D_Clone28_0hour_rep3_combined_PE1.fastq.gz
+cat SRR25074787_1.fastq.gz SRR25074788_1.fastq.gz SRR25074789_1.fastq.gz &gt; T47D_Clone28_0hour_rep2_combined_PE1.fastq.gz
+cat SRR25074790_1.fastq.gz SRR25074791_1.fastq.gz SRR25074792_1.fastq.gz &gt; T47D_Clone28_0hour_rep1_combined_PE1.fastq.gz
+
+
+cat SRR25074724_2.fastq.gz SRR25074725_2.fastq.gz SRR25074726_2.fastq.gz &gt; T47D_Clone28_24hour_rep4_combined_PE2.fastq.gz
+cat SRR25074727_2.fastq.gz SRR25074728_2.fastq.gz SRR25074729_2.fastq.gz &gt; T47D_Clone28_24hour_rep3_combined_PE2.fastq.gz
+cat SRR25074730_2.fastq.gz SRR25074731_2.fastq.gz SRR25074732_2.fastq.gz &gt; T47D_Clone28_24hour_rep2_combined_PE2.fastq.gz
+
+cat SRR25074733_2.fastq.gz SRR25074734_2.fastq.gz SRR25074735_2.fastq.gz &gt; T47D_Clone28_4hour_rep4_combined_PE2.fastq.gz
+cat SRR25074736_2.fastq.gz SRR25074737_2.fastq.gz SRR25074738_2.fastq.gz &gt; T47D_Clone28_4hour_rep3_combined_PE2.fastq.gz
+cat SRR25074739_2.fastq.gz SRR25074740_2.fastq.gz SRR25074741_2.fastq.gz &gt; T47D_Clone28_4hour_rep2_combined_PE2.fastq.gz
+cat SRR25074742_2.fastq.gz SRR25074743_2.fastq.gz SRR25074744_2.fastq.gz &gt; T47D_Clone28_4hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074745_2.fastq.gz SRR25074746_2.fastq.gz SRR25074747_2.fastq.gz &gt; T47D_Clone28_2hour_rep4_combined_PE2.fastq.gz
+cat SRR25074748_2.fastq.gz SRR25074749_2.fastq.gz SRR25074750_2.fastq.gz &gt; T47D_Clone28_2hour_rep3_combined_PE2.fastq.gz
+cat SRR25074751_2.fastq.gz SRR25074752_2.fastq.gz SRR25074753_2.fastq.gz &gt; T47D_Clone28_2hour_rep2_combined_PE2.fastq.gz
+cat SRR25074754_2.fastq.gz SRR25074755_2.fastq.gz SRR25074756_2.fastq.gz &gt; T47D_Clone28_2hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074757_2.fastq.gz SRR25074758_2.fastq.gz SRR25074759_2.fastq.gz &gt; T47D_Clone28_1hour_rep4_combined_PE2.fastq.gz
+cat SRR25074760_2.fastq.gz SRR25074761_2.fastq.gz SRR25074762_2.fastq.gz &gt; T47D_Clone28_1hour_rep3_combined_PE2.fastq.gz
+cat SRR25074763_2.fastq.gz SRR25074764_2.fastq.gz SRR25074765_2.fastq.gz &gt; T47D_Clone28_1hour_rep2_combined_PE2.fastq.gz
+cat SRR25074766_2.fastq.gz SRR25074767_2.fastq.gz SRR25074768_2.fastq.gz &gt; T47D_Clone28_1hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074769_2.fastq.gz SRR25074770_2.fastq.gz SRR25074771_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep4_combined_PE2.fastq.gz
+cat SRR25074772_2.fastq.gz SRR25074773_2.fastq.gz SRR25074774_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep3_combined_PE2.fastq.gz
+cat SRR25074775_2.fastq.gz SRR25074776_2.fastq.gz SRR25074777_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep2_combined_PE2.fastq.gz
+cat SRR25074778_2.fastq.gz SRR25074779_2.fastq.gz SRR25074780_2.fastq.gz &gt; T47D_Clone28_0.5hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074781_2.fastq.gz SRR25074782_2.fastq.gz SRR25074783_2.fastq.gz &gt; T47D_Clone28_0hour_rep4_combined_PE2.fastq.gz
+cat SRR25074784_2.fastq.gz SRR25074785_2.fastq.gz SRR25074786_2.fastq.gz &gt; T47D_Clone28_0hour_rep3_combined_PE2.fastq.gz
+cat SRR25074787_2.fastq.gz SRR25074788_2.fastq.gz SRR25074789_2.fastq.gz &gt; T47D_Clone28_0hour_rep2_combined_PE2.fastq.gz
+cat SRR25074790_2.fastq.gz SRR25074791_2.fastq.gz SRR25074792_2.fastq.gz &gt; T47D_Clone28_0hour_rep1_combined_PE2.fastq.gz</code></pre>
 </div>
-<div id="generate-a-plot-of-quality-control-metrics-figure-s1" class="section level2" number="8.3">
-<h2><span class="header-section-number">8.3</span> Generate a plot of quality control metrics (Figure S1)</h2>
+<div id="generate-a-plot-of-quality-control-metrics-figure-s5" class="section level2" number="8.3">
+<h2><span class="header-section-number">8.3</span> Generate a plot of quality control metrics (Figure S5)</h2>
 <p>The script used in the next code chunk (220927_PROseq_analysis_on_input_file.sh) is below:</p>
 <pre class="bash"><code>#! /bin/bash
 UMI_length=8
@@ -2444,8 +2917,46 @@ done</code></pre>
 <p>Combine the reads into one file.</p>
 <pre class="bash"><code>paste -d&#39;\t&#39; *combined_gene_counts.txt &gt; TRPS1_timecourse_PRO_gene_counts_combined.txt</code></pre>
 </div>
-<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" class="section level2" number="8.5">
-<h2><span class="header-section-number">8.5</span> Scale and merge bigWigs for use in the genome browser</h2>
+<div id="merge-bigwigs-to-upload-to-dreg" class="section level2" number="8.5">
+<h2><span class="header-section-number">8.5</span> Merge bigWigs to upload to dREG</h2>
+<p>Here we merge the bigWigs to create T47D_all_plus_PE1.bigWig and T47D_all_minus_PE1.bigWig to upload to the dREG portal (<a href="https://dreg.dnasequence.org/" class="uri">https://dreg.dnasequence.org/</a>). The output includes a dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed file that represents the genomic coordinates of each bidirectionally transcribed putative regulatory element. We use this output above in this vignette to separate ATAC-seq peaks that are distal to bidirectional transcription.</p>
+<pre class="bash"><code>#This only worked for the positive strand because the counts are positive
+for i in T47D_Clone28_0hour_rep1_combined_*_PE1.bigWig
+do
+  strand=$(echo $i | awk -F&quot;T47D_Clone28_0hour_rep1_combined_&quot; &#39;{print $2}&#39; | awk -F&quot;_PE1.bigWig&quot; &#39;{print $1}&#39;)
+  echo $strand
+  files=$(ls T47D_Clone28_*combined*_${strand}_PE1.bigWig)
+  echo $files
+  bigWigMerge $files tmp.bg
+  LC_COLLATE=C sort -k1,1 -k2,2n tmp.bg &gt; tmp_sorted.bg
+  bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_${strand}_PE1.bigWig
+  rm tmp.bg
+  rm tmp_sorted.bg
+done
+
+#For minus strand
+#Could have done this for loop as independent jobs
+for i in T47D_*_combined_minus_PE1.bigWig
+do
+  name=$(echo $i | awk -F&quot;_PE1.bigWig&quot; &#39;{print $1}&#39;)
+  echo $name
+  bigWigToBedGraph $i tmp.bg
+  echo normalizing
+  normalize_bedGraph.py -i tmp.bg -s -1 -o tmp2.bg
+  bedGraphToBigWig tmp2.bg hg38.chrom.sizes ${name}_positive_PE1.bigWig
+  rm tmp.bg
+  rm tmp2.bg
+done
+files=$(ls T47D_*_minus_positive_PE1.bigWig)
+echo $files
+bigWigMerge $files tmp.bg
+LC_COLLATE=C sort -k1,1 -k2,2n tmp.bg &gt; tmp_sorted.bg
+bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_minus_PE1.bigWig
+rm tmp.bg
+rm tmp_sorted.bg</code></pre>
+</div>
+<div id="scale-and-merge-bigwigs-for-use-in-the-genome-browser-1" class="section level2" number="8.6">
+<h2><span class="header-section-number">8.6</span> Scale and merge bigWigs for use in the genome browser</h2>
 <p>The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below. It scales each bigWig based on the read depth, broken down by strand.</p>
 <pre class="bash"><code>#! /bin/bash
 module load samtools/1.12 deeptools/3.5.1 
@@ -2551,8 +3062,8 @@ do
   sleep 1
 done</code></pre>
 </div>
-<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" class="section level2" number="8.6">
-<h2><span class="header-section-number">8.6</span> Leave the cluster environment, and copy files to your local computer</h2>
+<div id="leave-the-cluster-environment-and-copy-files-to-your-local-computer-2" class="section level2" number="8.7">
+<h2><span class="header-section-number">8.7</span> Leave the cluster environment, and copy files to your local computer</h2>
 <pre class="bash"><code>exit
 exit
 
@@ -2564,7 +3075,8 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_t
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_NextSeq550.txt .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_combined.txt .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_scaled.bedGraph.gz .
-scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_combined_normalized.bigWig .</code></pre>
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_combined_normalized.bigWig .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_all_*us_PE1.bigWig .</code></pre>
 </div>
 </div>
 <div id="pro-seq-analysis" class="section level1" number="9">
@@ -2598,6 +3110,24 @@ exit
 
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
 scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .</code></pre>
+<p>Calculate the PRO read density in each TRPS1 peak between DMSO and dTAG conditions</p>
+<pre class="bash"><code>cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps
+gzcat matrix_PRO_TRPS1_peaks.gz | awk &#39;{print NF}&#39; | sort -nu | tail -n 1
+gzcat matrix_PRO_TRPS1_peaks.gz | \
+  awk &#39;NR&gt;1 { sum1=0; sum2=0; for(i=7;i&lt;=206;i++) sum1+=$i; for(i=207;i&lt;=406;i++) sum2+=$i; print sum1, sum2 }&#39; \
+  &gt; PRO_signal_DMSO_dTAG.txt</code></pre>
+<p>Perform a paired t-test on the log-normalized PRO read density across TRPS1 peaks</p>
+<pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps/&quot;
+setwd(direc)
+
+signal = read.table(&quot;PRO_signal_DMSO_dTAG.txt&quot;, sep = &#39; &#39;, header = FALSE)
+
+#Find the minimum non-zero signal
+min(signal$V2[signal$V2 != 0]) #0.002522
+
+#Add a value much smaller than the above number before log normalizing (to avoid zeros)
+t.test(log(signal$V1[signal$V1 != 0 &amp; signal$V2 != 0], 10), 
+       log(signal$V2[signal$V1 != 0 &amp; signal$V2 != 0], 10), paired = T) #&lt; 0.00000000000000022</code></pre>
 </div>
 <div id="cluster-dynamic-genes-figure-4ab" class="section level2" number="9.2">
 <h2><span class="header-section-number">9.2</span> Cluster dynamic genes (Figure 4A,B)</h2>
@@ -2706,7 +3236,7 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Read in the counts table and change the column names. Here we focus on the early time points.</p>
 <pre class="r bg-info"><code>#DESeq
-x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_Combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 x = x[,!grepl(&quot;24hour&quot;, colnames(x))]</code></pre>
@@ -2714,7 +3244,8 @@ x = x[,!grepl(&quot;24hour&quot;, colnames(x))]</code></pre>
 <pre class="r bg-info"><code>time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;))
 rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
-deseq.df = DESeq(deseq.df)</code></pre>
+deseq.df = DESeq(deseq.df)
+save(deseq.df, file = &quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)</code></pre>
 <p>Run the likelihood ratio test to identify dynamic peaks over the time course.</p>
 <pre class="r bg-info"><code>dds.lrt = DESeq(deseq.df, test=&quot;LRT&quot;, reduced = ~ rep)
 res.lrt = results(dds.lrt)
@@ -2723,6 +3254,7 @@ sum(res.lrt$padj &lt; 0.1 &amp; !is.na(res.lrt$padj))</code></pre>
 <pre class="r bg-info"><code>rld = rlogTransformation(dds.lrt)
 rld_mat &lt;- assay(rld)
 siglrt.re = res.lrt[res.lrt$padj &lt; 0.1 &amp; !is.na(res.lrt$padj),]
+nrow(siglrt.re) #1425
 cluster_rlog = rld_mat[rownames(siglrt.re),]
 meta = cbind.data.frame(time, rep)
 rownames(meta) = colnames(cluster_rlog)
@@ -2832,8 +3364,8 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 )
 dev.off()</code></pre>
 </div>
-<div id="over-representation-analysis-figure-4cd" class="section level2" number="9.3">
-<h2><span class="header-section-number">9.3</span> Over-representation analysis (Figure 4C,D)</h2>
+<div id="over-representation-analysis-figure-4cd-tables-s5-8" class="section level2" number="9.3">
+<h2><span class="header-section-number">9.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</h2>
 <p>Activated genes.</p>
 <pre class="r bg-info"><code>genes = plot.df.pro$genes[(plot.df.pro$supercluster == &quot;Gradual Increase&quot; | plot.df.pro$supercluster == &quot;Transient Increase&quot;) &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
 m_t2g &lt;- msigdbr(species = &quot;Homo sapiens&quot;, category = &quot;H&quot;) %&gt;% 
@@ -2892,6 +3424,22 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
   theme(text = element_text(size = 20),
         axis.text.x= element_text(size = 30)) 
 dev.off()</code></pre>
+<p>Write the gene names as tables.</p>
+<pre class="r bg-info"><code>genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Gradual Increase&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;gradually_activated_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Transient Increase&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;transiently_activated_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Gradual Decrease&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;gradually_repressed_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == &quot;Transient Decrease&quot; &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = &quot;transiently_repressed_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
 </div>
 <div id="integrative-analysis" class="section level1" number="10">
@@ -2973,8 +3521,8 @@ ecdfplot(~log(abs(dis), base = 10), groups = status, data = df.all,
          })
 dev.off()</code></pre>
 </div>
-<div id="identification-of-er-target-genes-figure-s2" class="section level2" number="10.2">
-<h2><span class="header-section-number">10.2</span> Identification of ER target genes (Figure S2)</h2>
+<div id="identification-of-er-target-genes-figure-s7" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Identification of ER target genes (Figure S7)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>setwd(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R&quot;)
 
@@ -3091,8 +3639,8 @@ print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
              par.settings=list(par.xlab.text=list(cex=1.1,font=2), par.ylab.text=list(cex=1.1,font=2))))
 dev.off()</code></pre>
 </div>
-<div id="cluster-of-dynamic-er-target-genes-figure-5a" class="section level2" number="10.3">
-<h2><span class="header-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A)</h2>
+<div id="cluster-of-dynamic-er-target-genes-figure-5a-tables-s910" class="section level2" number="10.3">
+<h2><span class="header-section-number">10.3</span> Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -3128,15 +3676,16 @@ gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antago
 gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
-<p>Read in the counts table and change the column names.</p>
-<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_60kb_gene_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+<p>Load the DESeq2 object and the counts table to get the variable names.</p>
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
+
+x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
 rownames(x) = x[,1]
-x = x[,seq(2,to=ncol(x),by=2)]</code></pre>
-<p>Run DESeq2.</p>
-<pre class="r bg-info"><code>time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;, &quot;24hour&quot;))
-rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
-deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
-deseq.df = DESeq(deseq.df)</code></pre>
+x = x[,seq(2,to=ncol(x),by=2)]
+x = x[,!grepl(&quot;24hour&quot;, colnames(x))]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))</code></pre>
 <p>Run the likelihood ratio test to identify dynamic peaks over the time course.</p>
 <pre class="r bg-info"><code>dds.lrt = DESeq(deseq.df, test=&quot;LRT&quot;, reduced = ~ rep)
 res.lrt = results(dds.lrt)
@@ -3179,15 +3728,15 @@ plot.df = plot.df[order(plot.df$time),]
 plot.df$cluster = paste(&#39;cluster&#39;, as.character(plot.df$cluster), sep = &#39;&#39;)
 head(plot.df)
 
-save(plot.df, file = &quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData&quot;)
-load(&quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData&quot;)</code></pre>
+save(plot.df, file = &quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData&quot;)
+load(&quot;LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData&quot;)</code></pre>
 <p>Assign the colors.</p>
 <pre class="r bg-info"><code>cat.colours = plot.df
 cat.colours$colour[plot.df$Class == &quot;Activated at 30 minutes&quot;] &lt;- &#39;#FF000064&#39;
 cat.colours$colour[plot.df$Class == &quot;Repressed at 30 minutes&quot;] &lt;- &#39;#0000FF64&#39;
 cat.colours$colour &lt;- as.factor(cat.colours$colour)
-sum(plot.df$Class == &quot;Activated at 30 minutes&quot; &amp; plot.df$time == 0) #37
-sum(plot.df$Class == &quot;Repressed at 30 minutes&quot; &amp; plot.df$time == 0) #57</code></pre>
+sum(plot.df$Class == &quot;Activated at 30 minutes&quot; &amp; plot.df$time == 0) #65
+sum(plot.df$Class == &quot;Repressed at 30 minutes&quot; &amp; plot.df$time == 0) #58</code></pre>
 <p>Plot.</p>
 <pre class="r bg-info"><code>pdf(&#39;Normalized_counts_estrogen_response_gene_set_significant_at_30min_red_blue.pdf&#39;) 
 trellis.par.set(box.umbrella = list(lty = 1, col=&quot;black&quot;, lwd=1),
@@ -3212,6 +3761,14 @@ print(
          })
 )
 dev.off()</code></pre>
+<p>Write the gene names as tables.</p>
+<pre class="r bg-info"><code>activated = plot.df$genes[plot.df$Class == &quot;Activated at 30 minutes&quot;]
+activated = gene.symbol$symbol[gene.symbol$gene %in% activated]
+write.table(activated, file = &quot;activated_ER_target_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+repressed = plot.df$genes[plot.df$Class == &quot;Repressed at 30 minutes&quot;]
+repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
+write.table(repressed, file = &quot;repressed_ER_target_genes.txt&quot;, sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE, quote = FALSE)</code></pre>
 </div>
 <div id="er-binding-intensity-near-dynamic-er-target-genes-figure-5b" class="section level2" number="10.4">
 <h2><span class="header-section-number">10.4</span> ER binding intensity near dynamic ER target genes (Figure 5B)</h2>
@@ -3366,7 +3923,7 @@ counts$dTAG = rowMeans(counts[,grep(&quot;dTAG&quot;, colnames(counts))])
 counts = counts[,9:13]
 rownames(counts) = NULL</code></pre>
 <p>Get dynamic ER target genes.</p>
-<pre class="r bg-info"><code>load(&quot;deseq.df_all_reads.RData&quot;)
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, &quot;0.5hour&quot;, &quot;0hour&quot;))
 estrogen_response_genes = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/estrogen_activated_gene_names.txt&quot;, header = FALSE)$V1
 estrogen_response_genes = gene.symbol$gene[gene.symbol$symbol %in% estrogen_response_genes]
@@ -3559,7 +4116,15 @@ gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_ta
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
 <p>Identify differentially expressed genes at 24 hours, shrinking the fold changes.</p>
-<pre class="r bg-info"><code>load(&quot;deseq.df_all_reads.RData&quot;)
+<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;, &quot;24hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
 i = &quot;24hour&quot;
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
@@ -3718,8 +4283,8 @@ gene.file = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antago
 gene.file = gene.file[gene.file$V5 %notin% c(&quot;havana&quot;, &quot;havana_tagene&quot;, &quot;ensembl_havana&quot;),]
 gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c(&quot;gene&quot;, &quot;symbol&quot;)</code></pre>
-<p>Identify primary TRPS1-reponsive genes.</p>
-<pre class="r bg-info"><code>load(&quot;deseq.df_all_reads.RData&quot;)
+<p>Identify primary TRPS1-responsive genes.</p>
+<pre class="r bg-info"><code>load(&quot;TRPS1_timecourse_PRO_deseq.df.RData&quot;)
 i = &quot;0.5hour&quot;
 res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
@@ -3766,9 +4331,8 @@ tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$s
 <pre class="r bg-info"><code>regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
 sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
 attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)</code></pre>
-<p>Run KM and Cox analysis.</p>
-<pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)
-tns_both &lt;-tnsCox(tns_both)</code></pre>
+<p>Run Kaplan-Meier analysis.</p>
+<pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)</code></pre>
 <p>Identify the patient with the highest TRPS1 activity score.</p>
 <pre class="r bg-info"><code>max = rownames(tns_both@results$regulonActivity$differential)[tns_both@results$regulonActivity$differential == max(tns_both@results$regulonActivity$differential)]</code></pre>
 <p>Plot.</p>
@@ -3776,11 +4340,74 @@ tns_both &lt;-tnsCox(tns_both)</code></pre>
 tnsPlotGSEA2(tns_both, max, regs = &quot;TRPS1&quot;)
 dev.off()</code></pre>
 </div>
-<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-scorefigure-6ef" class="section level2" number="11.5">
-<h2><span class="header-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)</h2>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" class="section level2" number="11.5">
+<h2><span class="header-section-number">11.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</h2>
 <p>Plot.</p>
 <pre class="r bg-info"><code>#Logrank p-value 8.3e-6
 pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.01_no_endpoint.pdf&quot;, height = 3, width = 6)
+tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
+dev.off()</code></pre>
+</div>
+<div id="plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s8" class="section level2" number="11.6">
+<h2><span class="header-section-number">11.6</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)</h2>
+<p>Identify TRPS1-responsive genes.</p>
+<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;, &quot;1hour&quot;, &quot;2hour&quot;, &quot;4hour&quot;, &quot;24hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
+i = &quot;24hour&quot;
+res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, i, &quot;0hour&quot;))
+res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
+res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = &quot;gene&quot;)</code></pre>
+<p>Define the TRPS1 regulon based on this gene set.</p>
+<pre class="r bg-info"><code>data(&quot;rtni1st&quot;)
+TRPS1 = rtni1st@regulatoryElements[&quot;TRPS1&quot;]
+ILMN_SYMBOL = rtni1st@rowAnnotation
+rtni1st@results$tn.dpi[,TRPS1] &lt;- 0
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] &lt;- -1
+rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] &lt;- 1
+
+tns1st &lt;-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, event = &quot;event&quot;, keycovar =c(&quot;Age&quot;,&quot;Grade&quot;))
+tns1st &lt;-tnsGSEA2(tns1st)
+
+data(&quot;rtni2nd&quot;)
+TRPS1 = rtni2nd@regulatoryElements[&quot;TRPS1&quot;]
+ILMN_SYMBOL = rtni2nd@rowAnnotation
+rtni2nd@results$tn.dpi[,TRPS1] &lt;- 0
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% activated]] &lt;- -1
+rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
+                                 ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] &lt;- 1
+
+tns2nd &lt;-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c(&quot;TRPS1&quot;), time = &quot;time&quot;, event = &quot;event&quot;, keycovar =c(&quot;Age&quot;, &quot;Grade&quot;))
+tns2nd &lt;-tnsGSEA2(tns2nd)</code></pre>
+<p>Merge the two halves of the cohort.</p>
+<pre class="r bg-info"><code>tns_both = tns1st
+tns_both@survivalData &lt;- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
+tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
+                                                      tns2nd@results$regulonActivity$differential)
+tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
+                                                  tns2nd@results$regulonActivity$positive)
+tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
+                                                  tns2nd@results$regulonActivity$negative)
+tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
+                                                tns2nd@results$regulonActivity$status)</code></pre>
+<p>Get regulon activity and sample attributes.</p>
+<pre class="r bg-info"><code>regact_gsea &lt;-tnsGet(tns_both, &quot;regulonActivity&quot;)$dif
+sdata &lt;-tnsGet(tns_both, &quot;survivalData&quot;)
+attribs &lt;-c(&quot;ER+&quot;, &quot;ER-&quot;,&quot;LumA&quot;,&quot;LumB&quot;,&quot;Basal&quot;,&quot;Her2&quot;,&quot;Normal&quot;)</code></pre>
+<p>Run Kaplan-Meier analysis.</p>
+<pre class="r bg-info"><code>tns_both &lt;-tnsKM(tns_both)</code></pre>
+<p>Plot.</p>
+<pre class="r bg-info"><code>#Logrank p-value 8.3e-6
+pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.01_no_endpoint.pdf&quot;, height = 3, width = 6)
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>

@@ -173,81 +173,90 @@ mv $HOME/hg38/hg38-blacklist.v2.bed $HOME/hg38/hg38.blacklist.bed
 
 ## Download the raw data from both sequencing runs, rename the files, and combine the reads
 
-Download the first run.
+Download the fastq's and gzip.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 cd /scratch/ts2hx/${title}/raw_data
 
-wget http://guertinlab.cam.uchc.edu/230302_tgs_pool1.zip
-md5sum 230302_tgs_pool1.zip
-unzip 230302_tgs_pool1.zip
-
-wget http://guertinlab.cam.uchc.edu/230306_tgs_pool2.zip
-md5sum 230306_tgs_pool2.zip
-unzip 230306_tgs_pool2.zip
-#There are no "x" samples in this pool
-rm -r *_x_*
-```
-
-Rename files to remove the excess.
-
-```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
+for i in {76..99}
 do
-  name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
-  echo $name
-  mv ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz
-  mv ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o /scratch/ts2hx/${title}/logs/SRR250766${i}_fasterq_dump.log \
+    --wrap="module load sratoolkit/2.10.5; fasterq-dump SRR250766${i}; gzip SRR250766${i}_*.fastq"
+  sleep 1
+done
+
+for i in {00..61}
+do
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o /scratch/ts2hx/${title}/logs/SRR250767${i}_fasterq_dump.log \
+    --wrap="module load sratoolkit/2.10.5; fasterq-dump SRR250767${i}; gzip SRR250767${i}_*.fastq"
+  sleep 1
 done
 ```
 
-Download the second run.
+Combine the reads and rename
 
 ```{r engine='bash', eval=F, echo=TRUE}
-wget http://guertinlab.cam.uchc.edu/230320_tgs_ChIP_pool1.zip
-md5sum 230320_tgs_ChIP_pool1.zip
-unzip 230320_tgs_ChIP_pool1.zip
-wget http://guertinlab.cam.uchc.edu/230321_TGS_ChIP_pool2.zip
-md5sum 230321_TGS_ChIP_pool2.zip
-unzip 230321_TGS_ChIP_pool2.zip
-#There are no "x" samples in this pool
-rm -r *_x_*
-```
+cat SRR25076713_1.fastq.gz SRR25076725_1.fastq.gz > T47D_Clone28_IgG_DMSO_rep1_PE1.fastq.gz
+cat SRR25076712_1.fastq.gz SRR25076726_1.fastq.gz > T47D_Clone28_IgG_DMSO_rep2_PE1.fastq.gz
+cat SRR25076703_1.fastq.gz SRR25076711_1.fastq.gz > T47D_Clone28_IgG_DMSO_rep3_PE1.fastq.gz
+cat SRR25076700_1.fastq.gz SRR25076701_1.fastq.gz > T47D_Clone28_IgG_DMSO_rep4_PE1.fastq.gz
 
-Combine the reads.
+cat SRR25076698_1.fastq.gz SRR25076699_1.fastq.gz > T47D_Clone28_IgG_dTAG_rep1_PE1.fastq.gz
+cat SRR25076696_1.fastq.gz SRR25076697_1.fastq.gz > T47D_Clone28_IgG_dTAG_rep2_PE1.fastq.gz
+cat SRR25076694_1.fastq.gz SRR25076695_1.fastq.gz > T47D_Clone28_IgG_dTAG_rep3_PE1.fastq.gz
+cat SRR25076692_1.fastq.gz SRR25076693_1.fastq.gz > T47D_Clone28_IgG_dTAG_rep4_PE1.fastq.gz
 
-```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
-  echo $name
-  cat ${name}_*_R1_001.fastq.gz ${name}_PE1.fastq.gz > ${name}_tmp.fastq.gz
-  mv ${name}_tmp.fastq.gz ${name}_PE1.fastq.gz
-  rm ${name}_*_R1_001.fastq.gz
-  cat ${name}_*_R2_001.fastq.gz ${name}_PE2.fastq.gz > ${name}_tmp.fastq.gz
-  mv ${name}_tmp.fastq.gz ${name}_PE2.fastq.gz
-  rm ${name}_*_R2_001.fastq.gz
-done
-```
+cat SRR25076752_1.fastq.gz SRR25076753_1.fastq.gz > T47D_Clone28_ER_DMSO_rep1_PE1.fastq.gz
+cat SRR25076754_1.fastq.gz SRR25076755_1.fastq.gz > T47D_Clone28_ER_DMSO_rep2_PE1.fastq.gz
+cat SRR25076751_1.fastq.gz SRR25076756_1.fastq.gz > T47D_Clone28_ER_DMSO_rep3_PE1.fastq.gz
+cat SRR25076750_1.fastq.gz SRR25076757_1.fastq.gz > T47D_Clone28_ER_DMSO_rep4_PE1.fastq.gz
 
-Some HA samples got 2 indices each, so combine them.
+cat SRR25076749_1.fastq.gz SRR25076758_1.fastq.gz > T47D_Clone28_ER_dTAG_rep1_PE1.fastq.gz
+cat SRR25076748_1.fastq.gz SRR25076759_1.fastq.gz > T47D_Clone28_ER_dTAG_rep2_PE1.fastq.gz
+cat SRR25076747_1.fastq.gz SRR25076760_1.fastq.gz > T47D_Clone28_ER_dTAG_rep3_PE1.fastq.gz
+cat SRR25076738_1.fastq.gz SRR25076761_1.fastq.gz > T47D_Clone28_ER_dTAG_rep4_PE1.fastq.gz
 
-```{r engine='bash', eval=F, echo=TRUE}
-for i in *_x_*
-do
-  factor=$(echo $i | awk -F"_" '{print $3}')
-  treatment=$(echo $i | awk -F"_" '{print $4}')
-  pre=$(echo $i | awk -F"_$factor" '{print $1}')
-  post=$(echo $i | awk -F"_x_" '{print $2}')
-  echo $factor
-  echo $treatment
-  echo $pre
-  echo $post
-  mv $i ${pre}_${factor}x_${treatment}_${post}
-  mv ${pre}_${factor}_${treatment}_${post} ${pre}_${factor}y_${treatment}_${post}
-  cat ${pre}_${factor}x_${treatment}_${post} ${pre}_${factor}y_${treatment}_${post} > \
-    ${pre}_${factor}_${treatment}_${post}
-done
+cat SRR25076743_1.fastq.gz SRR25076744_1.fastq.gz SRR25076745_1.fastq.gz SRR25076746_1.fastq.gz > T47D_Clone28_HA_DMSO_rep1_PE1.fastq.gz
+cat SRR25076739_1.fastq.gz SRR25076740_1.fastq.gz SRR25076741_1.fastq.gz SRR25076742_1.fastq.gz > T47D_Clone28_HA_DMSO_rep2_PE1.fastq.gz
+cat SRR25076736_1.fastq.gz SRR25076737_1.fastq.gz > T47D_Clone28_HA_DMSO_rep3_PE1.fastq.gz
+cat SRR25076734_1.fastq.gz SRR25076735_1.fastq.gz > T47D_Clone28_HA_DMSO_rep4_PE1.fastq.gz
+
+cat SRR25076718_1.fastq.gz SRR25076719_1.fastq.gz SRR25076720_1.fastq.gz SRR25076721_1.fastq.gz > T47D_Clone28_HA_dTAG_rep1_PE1.fastq.gz
+cat SRR25076716_1.fastq.gz SRR25076722_1.fastq.gz > T47D_Clone28_HA_dTAG_rep2_PE1.fastq.gz
+cat SRR25076713_1.fastq.gz SRR25076723_1.fastq.gz > T47D_Clone28_HA_dTAG_rep3_PE1.fastq.gz
+cat SRR25076714_1.fastq.gz SRR25076724_1.fastq.gz > T47D_Clone28_HA_dTAG_rep4_PE1.fastq.gz
+
+cat SRR25076713_2.fastq.gz SRR25076725_2.fastq.gz > T47D_Clone28_IgG_DMSO_rep1_PE2.fastq.gz
+cat SRR25076712_2.fastq.gz SRR25076726_2.fastq.gz > T47D_Clone28_IgG_DMSO_rep2_PE2.fastq.gz
+cat SRR25076703_2.fastq.gz SRR25076711_2.fastq.gz > T47D_Clone28_IgG_DMSO_rep3_PE2.fastq.gz
+cat SRR25076700_2.fastq.gz SRR25076701_2.fastq.gz > T47D_Clone28_IgG_DMSO_rep4_PE2.fastq.gz
+
+cat SRR25076698_2.fastq.gz SRR25076699_2.fastq.gz > T47D_Clone28_IgG_dTAG_rep1_PE2.fastq.gz
+cat SRR25076696_2.fastq.gz SRR25076697_2.fastq.gz > T47D_Clone28_IgG_dTAG_rep2_PE2.fastq.gz
+cat SRR25076694_2.fastq.gz SRR25076695_2.fastq.gz > T47D_Clone28_IgG_dTAG_rep3_PE2.fastq.gz
+cat SRR25076692_2.fastq.gz SRR25076693_2.fastq.gz > T47D_Clone28_IgG_dTAG_rep4_PE2.fastq.gz
+
+cat SRR25076752_2.fastq.gz SRR25076753_2.fastq.gz > T47D_Clone28_ER_DMSO_rep1_PE2.fastq.gz
+cat SRR25076754_2.fastq.gz SRR25076755_2.fastq.gz > T47D_Clone28_ER_DMSO_rep2_PE2.fastq.gz
+cat SRR25076751_2.fastq.gz SRR25076756_2.fastq.gz > T47D_Clone28_ER_DMSO_rep3_PE2.fastq.gz
+cat SRR25076750_2.fastq.gz SRR25076757_2.fastq.gz > T47D_Clone28_ER_DMSO_rep4_PE2.fastq.gz
+
+cat SRR25076749_2.fastq.gz SRR25076758_2.fastq.gz > T47D_Clone28_ER_dTAG_rep1_PE2.fastq.gz
+cat SRR25076748_2.fastq.gz SRR25076759_2.fastq.gz > T47D_Clone28_ER_dTAG_rep2_PE2.fastq.gz
+cat SRR25076747_2.fastq.gz SRR25076760_2.fastq.gz > T47D_Clone28_ER_dTAG_rep3_PE2.fastq.gz
+cat SRR25076738_2.fastq.gz SRR25076761_2.fastq.gz > T47D_Clone28_ER_dTAG_rep4_PE2.fastq.gz
+
+cat SRR25076743_2.fastq.gz SRR25076744_2.fastq.gz SRR25076745_2.fastq.gz SRR25076746_2.fastq.gz > T47D_Clone28_HA_DMSO_rep1_PE2.fastq.gz
+cat SRR25076739_2.fastq.gz SRR25076740_2.fastq.gz SRR25076741_2.fastq.gz SRR25076742_2.fastq.gz > T47D_Clone28_HA_DMSO_rep2_PE2.fastq.gz
+cat SRR25076736_2.fastq.gz SRR25076737_2.fastq.gz > T47D_Clone28_HA_DMSO_rep3_PE2.fastq.gz
+cat SRR25076734_2.fastq.gz SRR25076735_2.fastq.gz > T47D_Clone28_HA_DMSO_rep4_PE2.fastq.gz
+
+cat SRR25076718_2.fastq.gz SRR25076719_2.fastq.gz SRR25076720_2.fastq.gz SRR25076721_2.fastq.gz > T47D_Clone28_HA_dTAG_rep1_PE2.fastq.gz
+cat SRR25076716_2.fastq.gz SRR25076722_2.fastq.gz > T47D_Clone28_HA_dTAG_rep2_PE2.fastq.gz
+cat SRR25076713_2.fastq.gz SRR25076723_2.fastq.gz > T47D_Clone28_HA_dTAG_rep3_PE2.fastq.gz
+cat SRR25076714_2.fastq.gz SRR25076724_2.fastq.gz > T47D_Clone28_HA_dTAG_rep4_PE2.fastq.gz
 ```
 
 ## Process each sample
@@ -548,6 +557,88 @@ echo -e "chr\tstart\tend\tname\tqvalue" | cat - $peaks | \
 rm T47D_Clone28_*${factor}_peak_counts.txt
 ```
 
+## Generate the ChIPQC object for plotting QC metrics
+
+I ran the following interactively to make sure I had the right samplesheet before running ChIPQC.
+
+```{r engine='bash', eval=F, echo=TRUE}
+module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1
+R
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+library(BiocManager)
+if (!require("ChIPQC", quietly = TRUE))
+  BiocManager::install("ChIPQC")
+library(ChIPQC)
+if (!require("TxDb.Hsapiens.UCSC.hg38.knownGene", quietly = TRUE))
+  install.packages("TxDb.Hsapiens.UCSC.hg38.knownGene")
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+samplesheet <- data.frame(SampleID=character(),
+                          Tissue=character(),
+                          Factor=character(),
+                          Condition=character(),
+                          Replicate=integer(),
+                          bamReads=character(),
+                          ControlID=character(),
+                          bamControl=character(),
+                          Peaks=character(),
+                          PeakCaller=character(),
+                          stringsAsFactors=FALSE)
+
+path = "/scratch/ts2hx/ChIP/results/bowtie2/"
+samples <- dir(path, pattern = ".bam.bai")
+samples
+
+setwd("/scratch/ts2hx/ChIP/results/")
+for (i in 1:length(samples)) {
+  samplesheet[i,1] <- strsplit(strsplit(samples[i], split = ".bam")[[1]][1], split = "T47D_Clone28_")[[1]][2]
+  samplesheet[i,2] <- strsplit(samples[i], split = "_")[[1]][1]
+  samplesheet[i,3] <- strsplit(samples[i], split = "_")[[1]][3]
+  samplesheet[i,4] <- strsplit(samples[i], split = "_")[[1]][4]
+  samplesheet[i,5] <- strsplit(strsplit(samples[i], split = ".bam")[[1]][1], split = "_rep")[[1]][2]
+  samplesheet[i,6] <- paste("chipqc/bams/", strsplit(samples[i], split = ".bam")[[1]][1], "_ChIPQC.bam", sep = "")
+  samplesheet[i,7] <- paste("T47D_Clone28_IgG_", samplesheet[i,4], "_rep", samplesheet[i,5], sep = "")
+  samplesheet[i,8] <- paste("chipqc/bams/T47D_Clone28_IgG_", samplesheet[i,4], "_rep", samplesheet[i,5], "_ChIPQC.bam", sep = "")
+  samplesheet[i,9] <- paste("macs2/", samplesheet[i,3], "_peaks.narrowPeak", sep = "")
+  samplesheet[i,10] <- "narrow"
+}
+head(samplesheet)
+samplesheet[9:16,9] <- "macs2/HA_DMSO_vs_dTAG_peaks.narrowPeak"
+
+write.csv(samplesheet, file = "/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv", row.names = FALSE)
+q()
+```
+
+The script used in the next code chunk (230313_ChIPQC.R) is below:
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+library(BiocManager)
+if (!require("ChIPQC", quietly = TRUE))
+  BiocManager::install("ChIPQC")
+library(ChIPQC)
+if (!require("TxDb.Hsapiens.UCSC.hg38.knownGene", quietly = TRUE))
+  install.packages("TxDb.Hsapiens.UCSC.hg38.knownGene")
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+setwd("/scratch/ts2hx/ChIP/results/")
+samples <- read.csv("/scratch/ts2hx/ChIP/results/chipqc/meta/samplesheet.csv")
+register(SerialParam())
+chipObj <- ChIPQC(samples, annotation="hg38")
+save(chipObj, file = "/scratch/ts2hx/ChIP/results/chipqc/chipObj.R")
+load("/scratch/ts2hx/ChIP/results/chipqc/chipObj.R")
+setwd("/scratch/ts2hx/ChIP/results/chipqc")
+ChIPQCreport(chipObj, reportName="ChIPQC", reportFolder="ChIPQCreport")
+```
+
+Run the above script to generate the ChIPQC object.
+
+```{r engine='bash', eval=F, echo=TRUE}
+sbatch -p standard -A gioeli_lab -t 2:00:00 -N 1 -n 1 --job-name chipqc -o /scratch/ts2hx/${title}/logs/chipqc.log \
+  --wrap="module load gcc/9.2.0  openmpi/3.1.6 R/4.2.1; Rscript ${scripts}/230313_ChIPQC.R"
+```
+
 ## Scale and merge bigWigs for use in the genome browser
 
 First make size factors based on total mapped reads (divide each by the geometric mean of all of them like in DESeq2).
@@ -721,6 +812,42 @@ scp -r ts2hx@rivanna.hpc.virginia.edu:${main}/bigWigs/*_not_scaled.bw bigWigs/
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_binned_scaled.bedGraph.gz bigWigs/
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_binned_combined_normalized.bigWig bigWigs/
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/bigWigs/*_sizeFactor.txt counts/
+scp ts2hx@rivanna.hpc.virginia.edu:${main}/chipqc/chipObj.R chipqc
+```
+
+## ChIPQC (Figures S1,2)
+
+Here we plot the fraction of reads in peaks, as well as the peak-calling-independent metric of cross-strand correlation.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+library(ChIPQC)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+setwd("/Users/TScott/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/chipqc/")
+load("chipObj.R")
+
+pdf("ChIP_CC.pdf")
+plotCC(chipObj, facetBy = c("Factor", "Condition"))
+dev.off()
+
+plotFrip(chipObj)
+frip = frip(chipObj)[1:16]
+Factor = sapply(strsplit(names(frip), "_"), "[", 1)
+Condition = sapply(strsplit(names(frip), "_"), "[", 2)
+Replicate = sapply(strsplit(names(frip), "_"), "[", 3)
+FRiP = as.vector(frip)*100
+Sample = names(frip)
+
+frip = cbind.data.frame(Sample, FRiP, Factor, Condition, Replicate)
+
+pdf("ChIP_FRiP.pdf", height = 5)
+ggplot(frip, aes(x = Sample, y = FRiP, fill = Factor, alpha = Condition)) +
+  geom_bar(stat="identity") +
+  scale_fill_manual(values = c("grey40", "darkmagenta")) +
+  scale_alpha_manual(values = c(1, 0.5)) +
+  ylab("FRiP (%)") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+dev.off()
 ```
 
 # TRPS1 ChIP-seq analysis
@@ -932,27 +1059,79 @@ seqOutBias seqtable /project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Inde
 
 ## Download the raw data and rename the files
 
-Once these files are public on SRA, we can update the SRR numbers.
+Download and gzip.
 
 ```{r engine='bash', eval=F, echo=TRUE}
+module load sratoolkit/2.10.5
+
 cd $main
-fasterq-dump SRRTBD
+
+for i in {46..69}
+do
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o /scratch/ts2hx/${title}/logs/SRR250739${i}_fasterq_dump.log \
+    --wrap="module load sratoolkit/2.10.5; fasterq-dump SRR250739${i}; gzip SRR250739${i}_*.fastq"
+  sleep 1
+done
+
 ```
 
-This may be unnecessary if the SRA downloads are already named appropriately. 
+Rename.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
-do
-name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
-echo $name
-hyphenless=${name//-/_}
-echo $hyphenless
-newname=${hyphenless//05hour/0.5hour}
-echo $newname
-mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
-mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
-done
+mv SRR25073969_1.fastq.gz T47D_Clone28_0hour_rep1_PE1.fastq.gz
+mv SRR25073969_2.fastq.gz T47D_Clone28_0hour_rep1_PE2.fastq.gz
+mv SRR25073968_1.fastq.gz T47D_Clone28_0hour_rep2_PE1.fastq.gz
+mv SRR25073968_2.fastq.gz T47D_Clone28_0hour_rep2_PE2.fastq.gz
+mv SRR25073967_1.fastq.gz T47D_Clone28_0hour_rep3_PE1.fastq.gz
+mv SRR25073967_2.fastq.gz T47D_Clone28_0hour_rep3_PE2.fastq.gz
+mv SRR25073966_1.fastq.gz T47D_Clone28_0hour_rep4_PE1.fastq.gz
+mv SRR25073966_2.fastq.gz T47D_Clone28_0hour_rep4_PE2.fastq.gz
+
+mv SRR25073965_1.fastq.gz T47D_Clone28_0.5hour_rep1_PE1.fastq.gz
+mv SRR25073965_2.fastq.gz T47D_Clone28_0.5hour_rep1_PE2.fastq.gz
+mv SRR25073964_1.fastq.gz T47D_Clone28_0.5hour_rep2_PE1.fastq.gz
+mv SRR25073964_2.fastq.gz T47D_Clone28_0.5hour_rep2_PE2.fastq.gz
+mv SRR25073963_1.fastq.gz T47D_Clone28_0.5hour_rep3_PE1.fastq.gz
+mv SRR25073963_2.fastq.gz T47D_Clone28_0.5hour_rep3_PE2.fastq.gz
+mv SRR25073962_1.fastq.gz T47D_Clone28_0.5hour_rep4_PE1.fastq.gz
+mv SRR25073962_2.fastq.gz T47D_Clone28_0.5hour_rep4_PE2.fastq.gz
+
+mv SRR25073961_1.fastq.gz T47D_Clone28_1hour_rep1_PE1.fastq.gz
+mv SRR25073961_2.fastq.gz T47D_Clone28_1hour_rep1_PE2.fastq.gz
+mv SRR25073960_1.fastq.gz T47D_Clone28_1hour_rep2_PE1.fastq.gz
+mv SRR25073960_2.fastq.gz T47D_Clone28_1hour_rep2_PE2.fastq.gz
+mv SRR25073959_1.fastq.gz T47D_Clone28_1hour_rep3_PE1.fastq.gz
+mv SRR25073959_2.fastq.gz T47D_Clone28_1hour_rep3_PE2.fastq.gz
+mv SRR25073958_1.fastq.gz T47D_Clone28_1hour_rep4_PE1.fastq.gz
+mv SRR25073958_2.fastq.gz T47D_Clone28_1hour_rep4_PE2.fastq.gz
+
+mv SRR25073957_1.fastq.gz T47D_Clone28_2hour_rep1_PE1.fastq.gz
+mv SRR25073957_2.fastq.gz T47D_Clone28_2hour_rep1_PE2.fastq.gz
+mv SRR25073956_1.fastq.gz T47D_Clone28_2hour_rep2_PE1.fastq.gz
+mv SRR25073956_2.fastq.gz T47D_Clone28_2hour_rep2_PE2.fastq.gz
+mv SRR25073955_1.fastq.gz T47D_Clone28_2hour_rep3_PE1.fastq.gz
+mv SRR25073955_2.fastq.gz T47D_Clone28_2hour_rep3_PE2.fastq.gz
+mv SRR25073954_1.fastq.gz T47D_Clone28_2hour_rep4_PE1.fastq.gz
+mv SRR25073954_2.fastq.gz T47D_Clone28_2hour_rep4_PE2.fastq.gz
+
+mv SRR25073953_1.fastq.gz T47D_Clone28_4hour_rep1_PE1.fastq.gz
+mv SRR25073953_2.fastq.gz T47D_Clone28_4hour_rep1_PE2.fastq.gz
+mv SRR25073952_1.fastq.gz T47D_Clone28_4hour_rep2_PE1.fastq.gz
+mv SRR25073952_2.fastq.gz T47D_Clone28_4hour_rep2_PE2.fastq.gz
+mv SRR25073951_1.fastq.gz T47D_Clone28_4hour_rep3_PE1.fastq.gz
+mv SRR25073951_2.fastq.gz T47D_Clone28_4hour_rep3_PE2.fastq.gz
+mv SRR25073950_1.fastq.gz T47D_Clone28_4hour_rep4_PE1.fastq.gz
+mv SRR25073950_2.fastq.gz T47D_Clone28_4hour_rep4_PE2.fastq.gz
+
+mv SRR25073949_1.fastq.gz T47D_Clone28_24hour_rep1_PE1.fastq.gz
+mv SRR25073949_2.fastq.gz T47D_Clone28_24hour_rep1_PE2.fastq.gz
+mv SRR25073948_1.fastq.gz T47D_Clone28_24hour_rep2_PE1.fastq.gz
+mv SRR25073948_2.fastq.gz T47D_Clone28_24hour_rep2_PE2.fastq.gz
+mv SRR25073947_1.fastq.gz T47D_Clone28_24hour_rep3_PE1.fastq.gz
+mv SRR25073947_2.fastq.gz T47D_Clone28_24hour_rep3_PE2.fastq.gz
+mv SRR25073946_1.fastq.gz T47D_Clone28_24hour_rep4_PE1.fastq.gz
+mv SRR25073946_2.fastq.gz T47D_Clone28_24hour_rep4_PE2.fastq.gz
 ```
 
 ## Process each sample
@@ -1032,6 +1211,15 @@ name=`basename $filename _PE1.fastq.gz`
 sbatch -p standard -A gioeli_lab -t 1-00:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name ${name}_atacseq_analysis \
   -o ${name}_atacseq.log  --wrap="sh /scratch/ts2hx/scripts/230417_ATACseq_analysis_on_input_file.sh $filename"
 sleep 1	# wait 1 second between each job submission
+done
+
+#Should include this indexing step in the above script
+for i in *.hg38.bam
+do
+  name=`basename $filename .hg38.bam`
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name ${name}_index \
+    -o ${name}_index.log  --wrap="module load samtools/1.12; samtools index $i"
+  sleep 1
 done
 ```
 
@@ -1198,11 +1386,165 @@ exit
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/Combined_ATAC_peak_counts.txt .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/ATAC_sizeFactor.txt .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_ATAC/T47D_Clone28_*.hg38.bam* \
+  /Volumes/External/Users/TScott/TRPS1_timecourse_ATAC_bams
+```
+
+## ATACseqQC (Figures S3,4)
+
+Here we plot the distribution of fragment lengths, as well as the enrichment of signal around transcription start sites. 
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = '/Volumes/External/Users/TScott/TRPS1_timecourse_ATAC_bams'
+setwd(direc)
+
+library(BiocManager)
+BiocManager::install(c("ATACseqQC", "ChIPpeakAnno", "MotifDb", "GenomicAlignments",
+                       "BSgenome.Hsapiens.UCSC.hg38", "TxDb.Hsapiens.UCSC.hg38.knownGene",
+                       "phastCons100way.UCSC.hg38"))
+library(ATACseqQC)
+library(Rsamtools)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(GenomicAlignments)
+
+#input the bamFiles
+bamfile <- list.files(path = ".", pattern = "*.hg38.bam$", all.files = FALSE, full.names = FALSE, recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+#change the order to reflect the time points
+bamfile = bamfile[c(5:8, 1:4, 9:12, 17:24, 13:16)]
+#change names to remove excess
+bamfile.labels <- gsub(".hg38.bam", "", basename(bamfile))
+
+#get TSS's
+txs <- transcripts(TxDb.Hsapiens.UCSC.hg38.knownGene)
+
+#get tags
+possibleTag <- list("integer"=c("AM", "AS", "CM", "CP", "FI", "H0", "H1", "H2", 
+                                "HI", "IH", "MQ", "NH", "NM", "OP", "PQ", "SM",
+                                "TC", "UQ"), 
+                    "character"=c("BC", "BQ", "BZ", "CB", "CC", "CO", "CQ", "CR",
+                                  "CS", "CT", "CY", "E2", "FS", "LB", "MC", "MD",
+                                  "MI", "OA", "OC", "OQ", "OX", "PG", "PT", "PU",
+                                  "Q2", "QT", "QX", "R2", "RG", "RX", "SA", "TS",
+                                  "U2"))
+
+#get fragment size distributions (modified from ATACseqQC for easier plotting)
+bamFiles = bamfile
+bamFiles.labels = bamfile.labels
+index = bamFiles
+ylim = NULL
+pe <- mapply(testPairedEndBam, bamFiles, index)
+if (any(!pe)) {
+  stop(paste(bamFiles[!pe], collapse = ", "), "is not Paired-End file.")
+}
+summaryFunction <- function(seqname, seqlength, bamFile, ind, ...) {
+  param <- ScanBamParam(what = c("isize"), which = GRanges(seqname, IRanges(1, seqlength)), flag = scanBamFlag(isSecondaryAlignment = FALSE, isUnmappedQuery = FALSE, isNotPassingQualityControls = FALSE)) table(abs(unlist(sapply(scanBam(bamFile, index = ind, ..., param = param), `[[`, "isize"), use.names = FALSE)))
+}
+idxstats <- unique(do.call(rbind, mapply(function(.ele, .ind) idxstatsBam(.ele, index = .ind)[, c("seqnames", "seqlength")], bamFiles, index, SIMPLIFY = FALSE)))
+idxstats <- idxstats[idxstats[, "seqnames"] != "*", , drop = FALSE]
+seqnames <- as.character(idxstats[, "seqnames"])
+seqlen <- as.numeric(idxstats[, "seqlength"])
+seqlen <- checkMaxChrLength(seqlen)
+fragment.len <- mapply(function(bamFile, ind) summaryFunction(seqname = seqnames, seqlength = seqlen, bamFile, ind), bamFiles, index, SIMPLIFY = FALSE)
+names(fragment.len) <- bamFiles.labels
+minor.ticks.axis <- function(ax, n = 9, t.ratio = 0.5, mn, mx, ...) {
+  lims <- par("usr")
+  lims <- if (ax %in% c(1, 3)) 
+    lims[1:2]
+  else lims[3:4]
+  major.ticks <- pretty(lims, n = 5)
+  if (missing(mn)) 
+    mn <- min(major.ticks)
+  if (missing(mx)) 
+    mx <- max(major.ticks)
+  major.ticks <- major.ticks[major.ticks >= mn & major.ticks <=  mx]
+  labels <- sapply(major.ticks, function(i) as.expression(bquote(10^.(i))))
+  axis(ax, at = major.ticks, labels = labels, las = ifelse(ax %in%  c(2, 4), 2, 1), ...)
+  n <- n + 2
+  minors <- log10(pretty(10^major.ticks[1:2], n)) - major.ticks[1]
+  minors <- minors[-c(1, n)]
+  minor.ticks = c(outer(minors, major.ticks, `+`))
+  minor.ticks <- minor.ticks[minor.ticks > mn & minor.ticks < mx]
+  axis(ax, at = minor.ticks, tcl = par("tcl") * t.ratio, labels = FALSE)
+}
+
+#save for future use
+save(fragment.len, file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragment_lengths.RData")
+
+#plot
+pdf("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_fragSize.pdf", height = 10, width = 15)
+par(mfcol=c(4,6))
+null <- mapply(function(frag.len, frag.name) {
+  x <- 1:1010
+  frag.len <- frag.len[match(x, names(frag.len))]
+  frag.len[is.na(frag.len)] <- 0
+  y <- frag.len/sum(frag.len)
+  y <- as.numeric(y)
+  names(y) <- x
+  plot(x, y * 10^3, main = frag.name, 
+       xlim = c(0, 1010), ylim = c(0,13), xlab = "Fragment length (bp)", 
+       ylab = expression(Normalized ~ read ~ density ~ x ~ 10^-3), type = "l")
+}, fragment.len, sapply(strsplit(names(fragment.len), "T47D_Clone28_"), "[", 2))
+dev.off()
+
+#get TSS enrichments
+#initialize
+seqlev <- "chr1" ## subsample data for quick run
+seqinformation <- seqinfo(TxDb.Hsapiens.UCSC.hg38.knownGene)
+which <- as(seqinformation[seqlev], "GRanges")
+
+#make an empty list to fill with each sample
+TSSEs <- sapply(bamfile.labels,function(x) NULL)
+
+for (i in 1:length(bamfile)) {
+  
+  print(bamfile[i])
+  
+  #get reads with tags
+  bamTop100 <- scanBam(BamFile(bamfile[i], yieldSize = 100), 
+                       param = ScanBamParam(tag=unlist(possibleTag)))[[1]]$tag
+  tags <- names(bamTop100)[lengths(bamTop100)>0]
+  tags
+  
+  #shift the coordinates of 5'ends of alignments in the bam file
+  gal <- readBamFile(bamfile[i], tag=tags, which=which, asMates=TRUE, bigFile=TRUE)
+  rm(gal1)
+  gal1 <- shiftGAlignmentsList(gal)
+  
+  #calculate TSS enrichment and append to the list
+  tsse <- TSSEscore(gal1, txs)
+  TSSEs[[i]] = tsse$values
+  save(TSSEs, file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData")
+  print(tsse$values)
+  
+  #plot enrichment around TSS's
+  plot(100*(-9:10-.5), tsse$values, type="b", 
+       xlim=c(-1000, 1000),
+       xlab="distance to TSS",
+       ylab="aggregate TSS score",
+       main=sapply(strsplit(sapply(strsplit(bamfile[i], "T47D_Clone28_"), "[", 2), ".hg38.bam"), "[", 1))
+}
+
+#save for future use
+save(TSSEs, file = "~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData")
+load("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSSEs.RData")
+
+#plot
+pdf("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_ATAC/ATAC_TSS_enrichment.pdf", height = 10, width = 15)
+par(mfcol=c(4,6))
+for (i in 1:length(TSSEs)) {
+plot(100*(-9:10-.5), TSSEs[[i]], type="b", 
+     xlim=c(-1000, 1000),
+     ylim=c(0,75),
+     xlab="distance to TSS",
+     ylab="aggregate TSS score",
+     main=sapply(strsplit(names(TSSEs)[i], "T47D_Clone28_"), "[", 2))
+}
+dev.off()
 ```
 
 # ATAC-seq analysis
 
-## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figure 3A)
+## MA plot of chromatin accessibility at 30 minutes dTAG vs. DMSO (Figures 3A,S6 and Tables S1,2)
 
 Set up libraries and functions in R.
 
@@ -1263,7 +1605,8 @@ Identify differentially accessible peaks.
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 i = "0.5hour"
 res.deseq = results(deseq.df[peak_qvalue > 100,], contrast = c("time", i, "0hour"))
-sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj))
+sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0) #472
+sum(res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0) #36
 ```
 
 Match the unchanged peaks to activated peaks based on accessibility.
@@ -1299,6 +1642,74 @@ ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(
   ylab(expression("log"[2]~"(fold change in ATAC signal)")) +
   xlab(expression("log"[10]~"(mean of normalized intensity)")) +
   ggtitle("Change in chromatin accessibility upon TRPS1 depletion") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(color=NULL)
+dev.off()
+```
+
+Write regions as tables.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+increased = as.data.frame(activated)
+increased$region = rownames(increased)
+increased$chr = sapply(strsplit(increased$region, ":"), "[", 1)
+increased$start = sapply(strsplit(sapply(strsplit(increased$region, ":"), "[", 2), "-"), "[", 1)
+increased$end = sapply(strsplit(sapply(strsplit(increased$region, ":"), "[", 2), "-"), "[", 2)
+write.table(increased[,c("chr", "start", "end")], file = "increased_ATAC_30min_summits.bed", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+decreased = as.data.frame(repressed)
+decreased$region = rownames(decreased)
+decreased$chr = sapply(strsplit(decreased$region, ":"), "[", 1)
+decreased$start = sapply(strsplit(sapply(strsplit(decreased$region, ":"), "[", 2), "-"), "[", 1)
+decreased$end = sapply(strsplit(sapply(strsplit(decreased$region, ":"), "[", 2), "-"), "[", 2)
+write.table(decreased[,c("chr", "start", "end")], file = "decreased_ATAC_30min_summits.bed", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+```
+
+Repeat above with ATAC-seq peaks that are distal to sites of bidirectional transcription. The dREG elements are generated below in this vignette in the PRO-seq data pre-processing section.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Get dREG elements
+dREG = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/dTAG_TRPS1_timecourse_dREG/dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed")
+
+#Get distal peaks
+res.deseq$chr = sapply(strsplit(rownames(res.deseq), ":"), "[", 1)
+res.deseq$start = sapply(strsplit(sapply(strsplit(rownames(res.deseq), ":"), "[", 2), "-"), "[", 1)
+res.deseq$end = sapply(strsplit(sapply(strsplit(rownames(res.deseq), ":"), "[", 2), "-"), "[", 2)
+res.deseq = res.deseq[, c(7:9,1:6)]
+res.deseq$start = as.numeric(res.deseq$start) + 100
+res.deseq$end = as.numeric(res.deseq$end) - 100
+dREG_distal_ATAC_peaks = bedTools.intersect(bed1 = res.deseq, bed2 = dREG, opt.string = "-v")
+res.deseq = dREG_distal_ATAC_peaks
+
+#Match the unchanged peaks to activated peaks based on accessibility.
+activated = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0,]
+unchanged = res.deseq[!is.na(res.deseq$padj) & res.deseq$padj > 0.1 & abs(res.deseq$log2FoldChange) < 0.01,]
+unchanged$treatment = 0
+activated$treatment = 1
+df.deseq.effects.lattice = rbind(unchanged, activated)
+out = matchit(treatment ~ baseMean, data = df.deseq.effects.lattice, method = "optimal", ratio = 1)
+unchanged = df.deseq.effects.lattice[rownames(df.deseq.effects.lattice) %in% out$match.matrix,]
+repressed = res.deseq[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0,]
+
+df.deseq.effects.lattice = res.deseq
+df.deseq.effects.lattice$status = "Other"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(activated)] = "Increased"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(unchanged)] = "Unchanged"
+df.deseq.effects.lattice$status[rownames(df.deseq.effects.lattice) %in% rownames(repressed)] = "Decreased"
+df.deseq.effects.lattice$status = factor(df.deseq.effects.lattice$status, levels = c("Other", "Increased", "Unchanged", "Decreased"))
+
+#Plot
+pdf("MA_dREG_distal_ATAC_peaks.pdf", width = 7, height = 3.5)
+ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(baseMean, 10), y = log2FoldChange, color = status)) +
+  geom_point() +
+  scale_color_manual(values = c("grey90", "red", "grey60", "blue")) +
+  geom_hline(yintercept = 0, linetype="dashed") +
+  ylim(-1.2, 1.2) +
+  xlim(1.5, 3.5) +
+  ylab(expression("log"[2]~"(fold change in ATAC signal)")) +
+  xlab(expression("log"[10]~"(mean of normalized intensity)")) +
+  ggtitle("Change in chromatin accessibility upon TRPS1 depletion distal to dREG elements") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(color=NULL)
@@ -1364,7 +1775,7 @@ do
 done
 ```
 
-## Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S1 and S2)
+## Identify differentially enriched motifs in increased or decreased peaks relative to unchanged peaks using AME (Tables S3,4)
 
 Report results at FDR 0.1 (1401 total in the above database).
 
@@ -1703,11 +2114,9 @@ ssh -Y ts2hx@rivanna.hpc.virginia.edu
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
 ```
 
-Make a directory for each sequencing run.
+Make a directory.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-mkdir -p TRPS1_timecourse_PRO
-mkdir -p TRPS1_timecourse_PRO_2
 mkdir -p TRPS1_timecourse_PRO_3
 ```
 
@@ -1737,94 +2146,150 @@ exit
 
 ## Download the raw data from the three sequencing runs, rename the files, and combine the reads
 
-We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first put each sequencing run into its own folder.
+We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first download the fastq’s and gzip.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO/
-
-ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
-```
-
-Rename files to remove the excess.
-
-```{r engine='bash', eval=F, echo=TRUE}
-cd /scratch/ts2hx/TRPS1_timecourse_PRO/
-
-for i in *_R1_001.fastq.gz
-do
-name=$(echo $i | awk -F"_S[0-9]" '{print $1}')
-echo $name
-hyphenless=${name//-/_}
-echo $hyphenless
-newname=${hyphenless//05hour/0.5hour}
-echo $newname
-mv ${name}_*_R1_001.fastq.gz ${newname}_PE1.fastq.gz
-mv ${name}_*_R2_001.fastq.gz ${newname}_PE2.fastq.gz
-done
-
-exit
-exit
-```
-
-Run 2:
-
-```{r engine='bash', eval=F, echo=TRUE}
-cd /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_2/
-scp *.fastq.gz ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_2
-```
-
-Run 3:
-
-```{r engine='bash', eval=F, echo=TRUE}
-scp /Volumes/External/Users/TScott/TRPS1_timecourse_PRO_3.zip ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/
-
 ssh -Y ts2hx@rivanna.hpc.virginia.edu 
 ijob -c 1 -A gioeli_lab -p standard --time=1-00:00:00
 
-cd /scratch/ts2hx/
-unzip TRPS1_timecourse_PRO_3.zip
-mv *.fastq.gz TRPS1_timecourse_PRO_3/
-rm TRPS1_timecourse_PRO_3.zip
-```
-
-Rename files to remove the excess.
-
-```{r engine='bash', eval=F, echo=TRUE}
 cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
 
-for i in *05hour*
+for i in {24..92}
 do
-  prefix=$(echo $i | awk -F"_05hour_" '{print $1}')
-  suffix=$(echo $i | awk -F"_05hour_" '{print $2}')
-  mv $i ${prefix}_0.5hour_${suffix}
+  sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
+    -o logs/SRR250747${i}_fasterq_dump.log \
+    --wrap="module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}; gzip SRR250747${i}_*.fastq"
+  sleep 1
 done
 ```
 
 Combine the NextSeq550 reads to generate representative quality control metrics.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F"_S" '{print $1}')
-  cat ../TRPS1_timecourse_PRO_2/${name}_PE1.fastq.gz $i > ${name}_NextSeq550_PE1.fastq.gz
-  cat ../TRPS1_timecourse_PRO_2/${name}_PE2.fastq.gz ${name}_*_R2_001.fastq.gz > ${name}_NextSeq550_PE2.fastq.gz
-done
+cat SRR25074724_1.fastq.gz SRR25074726_1.fastq.gz > T47D_Clone28_24hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074727_1.fastq.gz SRR25074729_1.fastq.gz > T47D_Clone28_24hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074730_1.fastq.gz SRR25074732_1.fastq.gz > T47D_Clone28_24hour_rep2_NextSeq550_PE1.fastq.gz
+
+cat SRR25074733_1.fastq.gz SRR25074735_1.fastq.gz > T47D_Clone28_4hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074736_1.fastq.gz SRR25074738_1.fastq.gz > T47D_Clone28_4hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074739_1.fastq.gz SRR25074741_1.fastq.gz > T47D_Clone28_4hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074742_1.fastq.gz SRR25074744_1.fastq.gz > T47D_Clone28_4hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074745_1.fastq.gz SRR25074747_1.fastq.gz > T47D_Clone28_2hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074748_1.fastq.gz SRR25074750_1.fastq.gz > T47D_Clone28_2hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074751_1.fastq.gz SRR25074753_1.fastq.gz > T47D_Clone28_2hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074754_1.fastq.gz SRR25074756_1.fastq.gz > T47D_Clone28_2hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074757_1.fastq.gz SRR25074759_1.fastq.gz > T47D_Clone28_1hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074760_1.fastq.gz SRR25074762_1.fastq.gz > T47D_Clone28_1hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074763_1.fastq.gz SRR25074765_1.fastq.gz > T47D_Clone28_1hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074766_1.fastq.gz SRR25074768_1.fastq.gz > T47D_Clone28_1hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074769_1.fastq.gz SRR25074771_1.fastq.gz > T47D_Clone28_0.5hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074772_1.fastq.gz SRR25074774_1.fastq.gz > T47D_Clone28_0.5hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074775_1.fastq.gz SRR25074777_1.fastq.gz > T47D_Clone28_0.5hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074778_1.fastq.gz SRR25074780_1.fastq.gz > T47D_Clone28_0.5hour_rep1_NextSeq550_PE1.fastq.gz
+
+cat SRR25074781_1.fastq.gz SRR25074783_1.fastq.gz > T47D_Clone28_0hour_rep4_NextSeq550_PE1.fastq.gz
+cat SRR25074784_1.fastq.gz SRR25074786_1.fastq.gz > T47D_Clone28_0hour_rep3_NextSeq550_PE1.fastq.gz
+cat SRR25074787_1.fastq.gz SRR25074789_1.fastq.gz > T47D_Clone28_0hour_rep2_NextSeq550_PE1.fastq.gz
+cat SRR25074790_1.fastq.gz SRR25074792_1.fastq.gz > T47D_Clone28_0hour_rep1_NextSeq550_PE1.fastq.gz
+
+
+cat SRR25074724_2.fastq.gz SRR25074726_2.fastq.gz > T47D_Clone28_24hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074727_2.fastq.gz SRR25074729_2.fastq.gz > T47D_Clone28_24hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074730_2.fastq.gz SRR25074732_2.fastq.gz > T47D_Clone28_24hour_rep2_NextSeq550_PE2.fastq.gz
+
+cat SRR25074733_2.fastq.gz SRR25074735_2.fastq.gz > T47D_Clone28_4hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074736_2.fastq.gz SRR25074738_2.fastq.gz > T47D_Clone28_4hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074739_2.fastq.gz SRR25074741_2.fastq.gz > T47D_Clone28_4hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074742_2.fastq.gz SRR25074744_2.fastq.gz > T47D_Clone28_4hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074745_2.fastq.gz SRR25074747_2.fastq.gz > T47D_Clone28_2hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074748_2.fastq.gz SRR25074750_2.fastq.gz > T47D_Clone28_2hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074751_2.fastq.gz SRR25074753_2.fastq.gz > T47D_Clone28_2hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074754_2.fastq.gz SRR25074756_2.fastq.gz > T47D_Clone28_2hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074757_2.fastq.gz SRR25074759_2.fastq.gz > T47D_Clone28_1hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074760_2.fastq.gz SRR25074762_2.fastq.gz > T47D_Clone28_1hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074763_2.fastq.gz SRR25074765_2.fastq.gz > T47D_Clone28_1hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074766_2.fastq.gz SRR25074768_2.fastq.gz > T47D_Clone28_1hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074769_2.fastq.gz SRR25074771_2.fastq.gz > T47D_Clone28_0.5hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074772_2.fastq.gz SRR25074774_2.fastq.gz > T47D_Clone28_0.5hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074775_2.fastq.gz SRR25074777_2.fastq.gz > T47D_Clone28_0.5hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074778_2.fastq.gz SRR25074780_2.fastq.gz > T47D_Clone28_0.5hour_rep1_NextSeq550_PE2.fastq.gz
+
+cat SRR25074781_2.fastq.gz SRR25074783_2.fastq.gz > T47D_Clone28_0hour_rep4_NextSeq550_PE2.fastq.gz
+cat SRR25074784_2.fastq.gz SRR25074786_2.fastq.gz > T47D_Clone28_0hour_rep3_NextSeq550_PE2.fastq.gz
+cat SRR25074787_2.fastq.gz SRR25074789_2.fastq.gz > T47D_Clone28_0hour_rep2_NextSeq550_PE2.fastq.gz
+cat SRR25074790_2.fastq.gz SRR25074792_2.fastq.gz > T47D_Clone28_0hour_rep1_NextSeq550_PE2.fastq.gz
 ```
 
 Combine all reads for use in downstream analysis.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-for i in *_R1_001.fastq.gz
-do
-  name=$(echo $i | awk -F"_S" '{print $1}')
-  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE1.fastq.gz $i > ${name}_combined_PE1.fastq.gz
-  cat ../TRPS1_timecourse_PRO_2/${name}_combined_PE2.fastq.gz ${name}_*_R2_001.fastq.gz > ${name}_combined_PE2.fastq.gz
-done
+cat SRR25074724_1.fastq.gz SRR25074725_1.fastq.gz SRR25074726_1.fastq.gz > T47D_Clone28_24hour_rep4_combined_PE1.fastq.gz
+cat SRR25074727_1.fastq.gz SRR25074728_1.fastq.gz SRR25074729_1.fastq.gz > T47D_Clone28_24hour_rep3_combined_PE1.fastq.gz
+cat SRR25074730_1.fastq.gz SRR25074731_1.fastq.gz SRR25074732_1.fastq.gz > T47D_Clone28_24hour_rep2_combined_PE1.fastq.gz
+
+cat SRR25074733_1.fastq.gz SRR25074734_1.fastq.gz SRR25074735_1.fastq.gz > T47D_Clone28_4hour_rep4_combined_PE1.fastq.gz
+cat SRR25074736_1.fastq.gz SRR25074737_1.fastq.gz SRR25074738_1.fastq.gz > T47D_Clone28_4hour_rep3_combined_PE1.fastq.gz
+cat SRR25074739_1.fastq.gz SRR25074740_1.fastq.gz SRR25074741_1.fastq.gz > T47D_Clone28_4hour_rep2_combined_PE1.fastq.gz
+cat SRR25074742_1.fastq.gz SRR25074743_1.fastq.gz SRR25074744_1.fastq.gz > T47D_Clone28_4hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074745_1.fastq.gz SRR25074746_1.fastq.gz SRR25074747_1.fastq.gz > T47D_Clone28_2hour_rep4_combined_PE1.fastq.gz
+cat SRR25074748_1.fastq.gz SRR25074749_1.fastq.gz SRR25074750_1.fastq.gz > T47D_Clone28_2hour_rep3_combined_PE1.fastq.gz
+cat SRR25074751_1.fastq.gz SRR25074752_1.fastq.gz SRR25074753_1.fastq.gz > T47D_Clone28_2hour_rep2_combined_PE1.fastq.gz
+cat SRR25074754_1.fastq.gz SRR25074755_1.fastq.gz SRR25074756_1.fastq.gz > T47D_Clone28_2hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074757_1.fastq.gz SRR25074758_1.fastq.gz SRR25074759_1.fastq.gz > T47D_Clone28_1hour_rep4_combined_PE1.fastq.gz
+cat SRR25074760_1.fastq.gz SRR25074761_1.fastq.gz SRR25074762_1.fastq.gz > T47D_Clone28_1hour_rep3_combined_PE1.fastq.gz
+cat SRR25074763_1.fastq.gz SRR25074764_1.fastq.gz SRR25074765_1.fastq.gz > T47D_Clone28_1hour_rep2_combined_PE1.fastq.gz
+cat SRR25074766_1.fastq.gz SRR25074767_1.fastq.gz SRR25074768_1.fastq.gz > T47D_Clone28_1hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074769_1.fastq.gz SRR25074770_1.fastq.gz SRR25074771_1.fastq.gz > T47D_Clone28_0.5hour_rep4_combined_PE1.fastq.gz
+cat SRR25074772_1.fastq.gz SRR25074773_1.fastq.gz SRR25074774_1.fastq.gz > T47D_Clone28_0.5hour_rep3_combined_PE1.fastq.gz
+cat SRR25074775_1.fastq.gz SRR25074776_1.fastq.gz SRR25074777_1.fastq.gz > T47D_Clone28_0.5hour_rep2_combined_PE1.fastq.gz
+cat SRR25074778_1.fastq.gz SRR25074779_1.fastq.gz SRR25074780_1.fastq.gz > T47D_Clone28_0.5hour_rep1_combined_PE1.fastq.gz
+
+cat SRR25074781_1.fastq.gz SRR25074782_1.fastq.gz SRR25074783_1.fastq.gz > T47D_Clone28_0hour_rep4_combined_PE1.fastq.gz
+cat SRR25074784_1.fastq.gz SRR25074785_1.fastq.gz SRR25074786_1.fastq.gz > T47D_Clone28_0hour_rep3_combined_PE1.fastq.gz
+cat SRR25074787_1.fastq.gz SRR25074788_1.fastq.gz SRR25074789_1.fastq.gz > T47D_Clone28_0hour_rep2_combined_PE1.fastq.gz
+cat SRR25074790_1.fastq.gz SRR25074791_1.fastq.gz SRR25074792_1.fastq.gz > T47D_Clone28_0hour_rep1_combined_PE1.fastq.gz
+
+
+cat SRR25074724_2.fastq.gz SRR25074725_2.fastq.gz SRR25074726_2.fastq.gz > T47D_Clone28_24hour_rep4_combined_PE2.fastq.gz
+cat SRR25074727_2.fastq.gz SRR25074728_2.fastq.gz SRR25074729_2.fastq.gz > T47D_Clone28_24hour_rep3_combined_PE2.fastq.gz
+cat SRR25074730_2.fastq.gz SRR25074731_2.fastq.gz SRR25074732_2.fastq.gz > T47D_Clone28_24hour_rep2_combined_PE2.fastq.gz
+
+cat SRR25074733_2.fastq.gz SRR25074734_2.fastq.gz SRR25074735_2.fastq.gz > T47D_Clone28_4hour_rep4_combined_PE2.fastq.gz
+cat SRR25074736_2.fastq.gz SRR25074737_2.fastq.gz SRR25074738_2.fastq.gz > T47D_Clone28_4hour_rep3_combined_PE2.fastq.gz
+cat SRR25074739_2.fastq.gz SRR25074740_2.fastq.gz SRR25074741_2.fastq.gz > T47D_Clone28_4hour_rep2_combined_PE2.fastq.gz
+cat SRR25074742_2.fastq.gz SRR25074743_2.fastq.gz SRR25074744_2.fastq.gz > T47D_Clone28_4hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074745_2.fastq.gz SRR25074746_2.fastq.gz SRR25074747_2.fastq.gz > T47D_Clone28_2hour_rep4_combined_PE2.fastq.gz
+cat SRR25074748_2.fastq.gz SRR25074749_2.fastq.gz SRR25074750_2.fastq.gz > T47D_Clone28_2hour_rep3_combined_PE2.fastq.gz
+cat SRR25074751_2.fastq.gz SRR25074752_2.fastq.gz SRR25074753_2.fastq.gz > T47D_Clone28_2hour_rep2_combined_PE2.fastq.gz
+cat SRR25074754_2.fastq.gz SRR25074755_2.fastq.gz SRR25074756_2.fastq.gz > T47D_Clone28_2hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074757_2.fastq.gz SRR25074758_2.fastq.gz SRR25074759_2.fastq.gz > T47D_Clone28_1hour_rep4_combined_PE2.fastq.gz
+cat SRR25074760_2.fastq.gz SRR25074761_2.fastq.gz SRR25074762_2.fastq.gz > T47D_Clone28_1hour_rep3_combined_PE2.fastq.gz
+cat SRR25074763_2.fastq.gz SRR25074764_2.fastq.gz SRR25074765_2.fastq.gz > T47D_Clone28_1hour_rep2_combined_PE2.fastq.gz
+cat SRR25074766_2.fastq.gz SRR25074767_2.fastq.gz SRR25074768_2.fastq.gz > T47D_Clone28_1hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074769_2.fastq.gz SRR25074770_2.fastq.gz SRR25074771_2.fastq.gz > T47D_Clone28_0.5hour_rep4_combined_PE2.fastq.gz
+cat SRR25074772_2.fastq.gz SRR25074773_2.fastq.gz SRR25074774_2.fastq.gz > T47D_Clone28_0.5hour_rep3_combined_PE2.fastq.gz
+cat SRR25074775_2.fastq.gz SRR25074776_2.fastq.gz SRR25074777_2.fastq.gz > T47D_Clone28_0.5hour_rep2_combined_PE2.fastq.gz
+cat SRR25074778_2.fastq.gz SRR25074779_2.fastq.gz SRR25074780_2.fastq.gz > T47D_Clone28_0.5hour_rep1_combined_PE2.fastq.gz
+
+cat SRR25074781_2.fastq.gz SRR25074782_2.fastq.gz SRR25074783_2.fastq.gz > T47D_Clone28_0hour_rep4_combined_PE2.fastq.gz
+cat SRR25074784_2.fastq.gz SRR25074785_2.fastq.gz SRR25074786_2.fastq.gz > T47D_Clone28_0hour_rep3_combined_PE2.fastq.gz
+cat SRR25074787_2.fastq.gz SRR25074788_2.fastq.gz SRR25074789_2.fastq.gz > T47D_Clone28_0hour_rep2_combined_PE2.fastq.gz
+cat SRR25074790_2.fastq.gz SRR25074791_2.fastq.gz SRR25074792_2.fastq.gz > T47D_Clone28_0hour_rep1_combined_PE2.fastq.gz
 ```
 
-## Generate a plot of quality control metrics (Figure S1)
+## Generate a plot of quality control metrics (Figure S5)
 
 The script used in the next code chunk (220927_PROseq_analysis_on_input_file.sh) is below:
 
@@ -2079,6 +2544,48 @@ Combine the reads into one file.
 paste -d'\t' *combined_gene_counts.txt > TRPS1_timecourse_PRO_gene_counts_combined.txt
 ```
 
+
+## Merge bigWigs to upload to dREG
+
+Here we merge the bigWigs to create T47D_all_plus_PE1.bigWig and T47D_all_minus_PE1.bigWig to upload to the dREG portal (https://dreg.dnasequence.org/). The output includes a dTAG_TRPS1_timecourse_dREG.dREG.peak.full.bed file that represents the genomic coordinates of each bidirectionally transcribed putative regulatory element. We use this output above in this vignette to separate ATAC-seq peaks that are distal to bidirectional transcription.
+
+```{r engine='bash', eval=F, echo=TRUE}
+#This only worked for the positive strand because the counts are positive
+for i in T47D_Clone28_0hour_rep1_combined_*_PE1.bigWig
+do
+  strand=$(echo $i | awk -F"T47D_Clone28_0hour_rep1_combined_" '{print $2}' | awk -F"_PE1.bigWig" '{print $1}')
+  echo $strand
+  files=$(ls T47D_Clone28_*combined*_${strand}_PE1.bigWig)
+  echo $files
+  bigWigMerge $files tmp.bg
+  LC_COLLATE=C sort -k1,1 -k2,2n tmp.bg > tmp_sorted.bg
+  bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_${strand}_PE1.bigWig
+  rm tmp.bg
+  rm tmp_sorted.bg
+done
+
+#For minus strand
+#Could have done this for loop as independent jobs
+for i in T47D_*_combined_minus_PE1.bigWig
+do
+  name=$(echo $i | awk -F"_PE1.bigWig" '{print $1}')
+  echo $name
+  bigWigToBedGraph $i tmp.bg
+  echo normalizing
+  normalize_bedGraph.py -i tmp.bg -s -1 -o tmp2.bg
+  bedGraphToBigWig tmp2.bg hg38.chrom.sizes ${name}_positive_PE1.bigWig
+  rm tmp.bg
+  rm tmp2.bg
+done
+files=$(ls T47D_*_minus_positive_PE1.bigWig)
+echo $files
+bigWigMerge $files tmp.bg
+LC_COLLATE=C sort -k1,1 -k2,2n tmp.bg > tmp_sorted.bg
+bedGraphToBigWig tmp_sorted.bg hg38.chrom.sizes T47D_all_minus_PE1.bigWig
+rm tmp.bg
+rm tmp_sorted.bg
+```
+
 ## Scale and merge bigWigs for use in the genome browser
 
 The script used in the next code chunk (230403_PRO_scale_bigWig_whole_fragment.sh) is below. It scales each bigWig based on the read depth, broken down by strand.
@@ -2216,6 +2723,7 @@ scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_t
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_combined.txt .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_scaled.bedGraph.gz .
 scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/*us_combined_normalized.bigWig .
+scp ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/TRPS1_timecourse_PRO_3/T47D_all_*us_PE1.bigWig .
 ``` 
 
 # PRO-seq analysis
@@ -2263,6 +2771,32 @@ exit
 
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
 scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .
+```
+
+Calculate the PRO read density in each TRPS1 peak between DMSO and dTAG conditions
+
+```{r engine='bash', eval=F, echo=TRUE}
+cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps
+gzcat matrix_PRO_TRPS1_peaks.gz | awk '{print NF}' | sort -nu | tail -n 1
+gzcat matrix_PRO_TRPS1_peaks.gz | \
+  awk 'NR>1 { sum1=0; sum2=0; for(i=7;i<=206;i++) sum1+=$i; for(i=207;i<=406;i++) sum2+=$i; print sum1, sum2 }' \
+  > PRO_signal_DMSO_dTAG.txt
+```
+
+Perform a paired t-test on the log-normalized PRO read density across TRPS1 peaks
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+direc = "~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps/"
+setwd(direc)
+
+signal = read.table("PRO_signal_DMSO_dTAG.txt", sep = ' ', header = FALSE)
+
+#Find the minimum non-zero signal
+min(signal$V2[signal$V2 != 0]) #0.002522
+
+#Add a value much smaller than the above number before log normalizing (to avoid zeros)
+t.test(log(signal$V1[signal$V1 != 0 & signal$V2 != 0], 10), 
+       log(signal$V2[signal$V1 != 0 & signal$V2 != 0], 10), paired = T) #< 0.00000000000000022
 ```
 
 ## Cluster dynamic genes (Figure 4A,B)
@@ -2378,7 +2912,7 @@ Read in the counts table and change the column names. Here we focus on the early
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 #DESeq
-x = read.table("TRPS1_timecourse_PRO_gene_counts_Combined.txt", sep = '\t', header = TRUE)
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
 x = x[,!grepl("24hour", colnames(x))]
@@ -2391,6 +2925,7 @@ time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
 deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
 deseq.df = DESeq(deseq.df)
+save(deseq.df, file = "TRPS1_timecourse_PRO_deseq.df.RData")
 ```
 
 Run the likelihood ratio test to identify dynamic peaks over the time course.
@@ -2407,6 +2942,7 @@ Cluster the genes.
 rld = rlogTransformation(dds.lrt)
 rld_mat <- assay(rld)
 siglrt.re = res.lrt[res.lrt$padj < 0.1 & !is.na(res.lrt$padj),]
+nrow(siglrt.re) #1425
 cluster_rlog = rld_mat[rownames(siglrt.re),]
 meta = cbind.data.frame(time, rep)
 rownames(meta) = colnames(cluster_rlog)
@@ -2541,7 +3077,7 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 dev.off()
 ```
 
-## Over-representation analysis (Figure 4C,D)
+## Over-representation analysis (Figure 4C,D, Tables S5-8)
 
 Activated genes.
 
@@ -2607,6 +3143,26 @@ ggplot(gse_top, aes(reorder(ID, Ratio_ratio), Ratio_ratio, fill = log(p.adjust, 
   theme(text = element_text(size = 20),
         axis.text.x= element_text(size = 30)) 
 dev.off()
+```
+
+Write the gene names as tables.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Gradual Increase" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "gradually_activated_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Transient Increase" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "transiently_activated_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Gradual Decrease" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "gradually_repressed_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+genes = plot.df.pro$genes[plot.df.pro$supercluster == "Transient Decrease" & plot.df.pro$merge == "one_group0hour"]
+names = gene.symbol$symbol[gene.symbol$gene %in% genes]
+write.table(names, file = "transiently_repressed_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 ```
 
 # Integrative analysis
@@ -2703,7 +3259,7 @@ ecdfplot(~log(abs(dis), base = 10), groups = status, data = df.all,
 dev.off()
 ```
 
-## Identification of ER target genes (Figure S2)
+## Identification of ER target genes (Figure S7)
 
 Set up in R.
 
@@ -2832,7 +3388,7 @@ print(xyplot(ma.df$log2FoldChange ~ log(ma.df$baseMean, base=10),
 dev.off()
 ```
 
-## Cluster of dynamic ER target genes (Figure 5A)
+## Cluster of dynamic ER target genes (Figure 5A, Tables S9,10)
 
 Set up in R.
 
@@ -2873,20 +3429,18 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
 ```
 
-Read in the counts table and change the column names.
+Load the DESeq2 object and the counts table to get the variable names.
+
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-x = read.table("TRPS1_timecourse_PRO_60kb_gene_counts.txt", sep = '\t', header = TRUE)
+load("TRPS1_timecourse_PRO_deseq.df.RData")
+
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
 rownames(x) = x[,1]
 x = x[,seq(2,to=ncol(x),by=2)]
-```
+x = x[,!grepl("24hour", colnames(x))]
 
-Run DESeq2.
-
-```{r class.source="bg-info", engine='R', eval=F, echo=T}
-time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour"))
 rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
-deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
-deseq.df = DESeq(deseq.df)
 ```
 
 Run the likelihood ratio test to identify dynamic peaks over the time course.
@@ -2949,8 +3503,8 @@ plot.df = plot.df[order(plot.df$time),]
 plot.df$cluster = paste('cluster', as.character(plot.df$cluster), sep = '')
 head(plot.df)
 
-save(plot.df, file = "LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData")
-load("LRT_estrogen_response_gene_set_significant_at_30min_plot.df_60kb.RData")
+save(plot.df, file = "LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData")
+load("LRT_estrogen_response_gene_set_significant_at_30min_plot.df.RData")
 ```
 
 Assign the colors.
@@ -2960,8 +3514,8 @@ cat.colours = plot.df
 cat.colours$colour[plot.df$Class == "Activated at 30 minutes"] <- '#FF000064'
 cat.colours$colour[plot.df$Class == "Repressed at 30 minutes"] <- '#0000FF64'
 cat.colours$colour <- as.factor(cat.colours$colour)
-sum(plot.df$Class == "Activated at 30 minutes" & plot.df$time == 0) #37
-sum(plot.df$Class == "Repressed at 30 minutes" & plot.df$time == 0) #57
+sum(plot.df$Class == "Activated at 30 minutes" & plot.df$time == 0) #65
+sum(plot.df$Class == "Repressed at 30 minutes" & plot.df$time == 0) #58
 ```
 
 Plot.
@@ -2990,6 +3544,18 @@ print(
          })
 )
 dev.off()
+```
+
+Write the gene names as tables.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+activated = plot.df$genes[plot.df$Class == "Activated at 30 minutes"]
+activated = gene.symbol$symbol[gene.symbol$gene %in% activated]
+write.table(activated, file = "activated_ER_target_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+
+repressed = plot.df$genes[plot.df$Class == "Repressed at 30 minutes"]
+repressed = gene.symbol$symbol[gene.symbol$gene %in% repressed]
+write.table(repressed, file = "repressed_ER_target_genes.txt", sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 ```
 
 ## ER binding intensity near dynamic ER target genes (Figure 5B)
@@ -3172,7 +3738,7 @@ rownames(counts) = NULL
 Get dynamic ER target genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("deseq.df_all_reads.RData")
+load("TRPS1_timecourse_PRO_deseq.df.RData")
 res.deseq = results(deseq.df, contrast = c("time", "0.5hour", "0hour"))
 estrogen_response_genes = read.table("~/Library/CloudStorage/Box-Box/GuertinLab/ER_Antagonists_R/estrogen_activated_gene_names.txt", header = FALSE)$V1
 estrogen_response_genes = gene.symbol$gene[gene.symbol$symbol %in% estrogen_response_genes]
@@ -3410,7 +3976,15 @@ colnames(gene.symbol) = c("gene", "symbol")
 Identify differentially expressed genes at 24 hours, shrinking the fold changes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("deseq.df_all_reads.RData")
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
 i = "24hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
@@ -3612,17 +4186,17 @@ gene.symbol = gene.file[,c(4,5)]
 colnames(gene.symbol) = c("gene", "symbol")
 ```
 
-Identify primary TRPS1-reponsive genes.
+Identify primary TRPS1-responsive genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-load("deseq.df_all_reads.RData")
+load("TRPS1_timecourse_PRO_deseq.df.RData")
 i = "0.5hour"
 res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
 res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
 res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = "gene")
 
-activated = res.deseq$symbol[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0] 
-repressed = res.deseq$symbol[res.deseq$padj < 0.1 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0] 
+activated = res.deseq$symbol[res.deseq$padj < 0.01 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange > 0] 
+repressed = res.deseq$symbol[res.deseq$padj < 0.01 & !is.na(res.deseq$padj) & res.deseq$log2FoldChange < 0] 
 ```
 
 Define the TRPS1 regulon based on our own primary gene set.
@@ -3676,11 +4250,10 @@ sdata <-tnsGet(tns_both, "survivalData")
 attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
 ```
 
-Run KM and Cox analysis.
+Run Kaplan-Meier analysis.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
 ```
 
 Identify the patient with the highest TRPS1 activity score.
@@ -3692,28 +4265,45 @@ max = rownames(tns_both@results$regulonActivity$differential)[tns_both@results$r
 Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-pdf("RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.1.pdf", height = 3, width = 3)
+pdf("RTNsurvival_GSEA2_TRPS1_high_regulon_merged_METABRIC_30minutes_FDR_0.01.pdf", height = 3, width = 3)
 tnsPlotGSEA2(tns_both, max, regs = "TRPS1")
 dev.off()
 ```
 
-## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score(Figure 6E,F)
+## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)
 
 Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-#Logrank p-value 4.99e-4
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint.pdf", height = 3, width = 6)
+#Logrank p-value 8.3e-6
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.01_no_endpoint.pdf", height = 3, width = 6)
 tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()
 ```
 
-## Break down patient outcomes data by ER-positivity and by intrinsic subtype (Figure S10)
+## Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S8)
 
-Here we repeat the above analyses but only plotting subsets of the patients.
+Identify TRPS1-responsive genes.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
-#Just ER positive
+x = read.table("TRPS1_timecourse_PRO_gene_counts_combined.txt", sep = '\t', header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), '_'), '[', 3), levels = c("0hour", "0.5hour", "1hour", "2hour", "4hour", "24hour"))
+rep = factor(sapply(strsplit(colnames(x), 'rep'), '[', 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = DESeq(deseq.df)
+
+i = "24hour"
+res.deseq = results(deseq.df, contrast = c("time", i, "0hour"))
+res.deseq = res.deseq[rownames(res.deseq) %in% gene.symbol$gene,]
+res.deseq = merge(as.data.frame(res.deseq), gene.symbol, by.x = 0, by.y = "gene")
+```
+
+Define the TRPS1 regulon based on this gene set.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 data("rtni1st")
 TRPS1 = rtni1st@regulatoryElements["TRPS1"]
 ILMN_SYMBOL = rtni1st@rowAnnotation
@@ -3723,10 +4313,7 @@ rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in%
 rtni1st@results$tn.dpi[,TRPS1][names(rtni1st@results$tn.dpi[,TRPS1]) %in% 
                                  ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] <- 1
 
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade")
-                           , excludeAttribs = "ER-"
-                           )
+tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", event = "event", keycovar =c("Age","Grade"))
 tns1st <-tnsGSEA2(tns1st)
 
 data("rtni2nd")
@@ -3738,13 +4325,13 @@ rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in%
 rtni2nd@results$tn.dpi[,TRPS1][names(rtni2nd@results$tn.dpi[,TRPS1]) %in% 
                                  ILMN_SYMBOL$PROBEID[ILMN_SYMBOL$SYMBOL %in% repressed]] <- 1
 
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age", "Grade")
-                           , excludeAttribs = "ER-"
-                           )
+tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", event = "event", keycovar =c("Age", "Grade"))
 tns2nd <-tnsGSEA2(tns2nd)
+```
 
-#Merge
+Merge the two halves of the cohort.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tns_both = tns1st
 tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
 tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
@@ -3755,259 +4342,27 @@ tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity
                                                   tns2nd@results$regulonActivity$negative)
 tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
                                                 tns2nd@results$regulonActivity$status)
+```
 
-#Get regulon activity and sample attributes
+Get regulon activity and sample attributes.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
 sdata <-tnsGet(tns_both, "survivalData")
 attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
+```
 
-#Run KM and Cox analysis
+Run Kaplan-Meier analysis.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
 tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
+```
 
-#Logrank p-value 3.86e-6
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_ER_positive.pdf", height = 3, width = 6)
-tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
-dev.off()
+Plot.
 
-
-
-
-#Just ER negative
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = "ER+")
-tns1st <-tnsGSEA2(tns1st)
-
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = "ER+")
-tns2nd <-tnsGSEA2(tns2nd)
-
-#Merge
-tns_both = tns1st
-tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
-tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
-                                                      tns2nd@results$regulonActivity$differential)
-tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
-                                                  tns2nd@results$regulonActivity$positive)
-tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
-                                                  tns2nd@results$regulonActivity$negative)
-tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
-                                                tns2nd@results$regulonActivity$status)
-
-#Get regulon activity and sample attributes
-regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
-sdata <-tnsGet(tns_both, "survivalData")
-attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
-
-#Run KM and Cox analysis
-tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
-
-#Logrank p-value 
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_ER_negative.pdf", height = 3, width = 6)
-tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
-dev.off()
-
-
-
-
-#Just Basal
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("LumA", "LumB", "Her2", "Normal"))
-tns1st <-tnsGSEA2(tns1st)
-
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("LumA", "LumB", "Her2", "Normal"))
-tns2nd <-tnsGSEA2(tns2nd)
-
-#Merge
-tns_both = tns1st
-tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
-tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
-                                                      tns2nd@results$regulonActivity$differential)
-tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
-                                                  tns2nd@results$regulonActivity$positive)
-tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
-                                                  tns2nd@results$regulonActivity$negative)
-tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
-                                                tns2nd@results$regulonActivity$status)
-
-#Get regulon activity and sample attributes
-regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
-sdata <-tnsGet(tns_both, "survivalData")
-attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
-
-#Run KM and Cox analysis
-tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
-
-#Logrank p-value 
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_Basal.pdf", height = 3, width = 6)
-tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
-dev.off()
-
-
-
-#Just Normal
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("LumA", "LumB", "Her2", "Basal"))
-tns1st <-tnsGSEA2(tns1st)
-
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("LumA", "LumB", "Her2", "Basal"))
-tns2nd <-tnsGSEA2(tns2nd)
-
-#Merge
-tns_both = tns1st
-tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
-tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
-                                                      tns2nd@results$regulonActivity$differential)
-tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
-                                                  tns2nd@results$regulonActivity$positive)
-tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
-                                                  tns2nd@results$regulonActivity$negative)
-tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
-                                                tns2nd@results$regulonActivity$status)
-
-#Get regulon activity and sample attributes
-regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
-sdata <-tnsGet(tns_both, "survivalData")
-attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
-
-#Run KM and Cox analysis
-tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
-
-#Logrank p-value 
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_Normal.pdf", height = 3, width = 6)
-tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
-dev.off()
-
-
-
-#Just Her2-amplified
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("LumA", "LumB", "Normal", "Basal"))
-tns1st <-tnsGSEA2(tns1st)
-
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("LumA", "LumB", "Normal", "Basal"))
-tns2nd <-tnsGSEA2(tns2nd)
-
-#Merge
-tns_both = tns1st
-tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
-tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
-                                                      tns2nd@results$regulonActivity$differential)
-tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
-                                                  tns2nd@results$regulonActivity$positive)
-tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
-                                                  tns2nd@results$regulonActivity$negative)
-tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
-                                                tns2nd@results$regulonActivity$status)
-
-#Get regulon activity and sample attributes
-regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
-sdata <-tnsGet(tns_both, "survivalData")
-attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
-
-#Run KM and Cox analysis
-tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
-
-#Logrank p-value 
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_HER2.pdf", height = 3, width = 6)
-tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
-dev.off()
-
-
-
-
-#Just luminal A
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("Basal", "Her2", "Normal", "LumB"))
-tns1st <-tnsGSEA2(tns1st)
-
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("Basal", "Her2", "Normal", "LumB"))
-tns2nd <-tnsGSEA2(tns2nd)
-
-#Merge
-tns_both = tns1st
-tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
-tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
-                                                      tns2nd@results$regulonActivity$differential)
-tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
-                                                  tns2nd@results$regulonActivity$positive)
-tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
-                                                  tns2nd@results$regulonActivity$negative)
-tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
-                                                tns2nd@results$regulonActivity$status)
-
-#Get regulon activity and sample attributes
-regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
-sdata <-tnsGet(tns_both, "survivalData")
-attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
-
-#Run KM and Cox analysis
-tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
-
-#Logrank p-value 4.23e-4
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_luminal_A.pdf", height = 3, width = 6)
-tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
-dev.off()
-
-
-
-#Just luminal B
-tns1st <-tni2tnsPreprocess(tni = rtni1st, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("Basal", "Her2", "Normal", "LumA"))
-tns1st <-tnsGSEA2(tns1st)
-
-tns2nd <-tni2tnsPreprocess(tni = rtni2nd, regulatoryElements = c("TRPS1"), time = "time", 
-                           event = "event", keycovar =c("Age","Grade"), 
-                           excludeAttribs = c("Basal", "Her2", "Normal", "LumA"))
-tns2nd <-tnsGSEA2(tns2nd)
-
-#Merge
-tns_both = tns1st
-tns_both@survivalData <- rbind(tns1st@survivalData[,-ncol(tns1st@survivalData)], tns2nd@survivalData)
-tns_both@results$regulonActivity$differential = rbind(tns1st@results$regulonActivity$differential,
-                                                      tns2nd@results$regulonActivity$differential)
-tns_both@results$regulonActivity$positive = rbind(tns1st@results$regulonActivity$positive,
-                                                  tns2nd@results$regulonActivity$positive)
-tns_both@results$regulonActivity$negative = rbind(tns1st@results$regulonActivity$negative,
-                                                  tns2nd@results$regulonActivity$negative)
-tns_both@results$regulonActivity$status = rbind(tns1st@results$regulonActivity$status,
-                                                tns2nd@results$regulonActivity$status)
-
-#Get regulon activity and sample attributes
-regact_gsea <-tnsGet(tns_both, "regulonActivity")$dif
-sdata <-tnsGet(tns_both, "survivalData")
-attribs <-c("ER+", "ER-","LumA","LumB","Basal","Her2","Normal")
-
-#Run KM and Cox analysis
-tns_both <-tnsKM(tns_both)
-tns_both <-tnsCox(tns_both)
-
-#Logrank p-value 2.34e-1
-pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_30minutes_FDR_0.1_no_endpoint_just_luminal_B.pdf", height = 3, width = 6)
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Logrank p-value 8.3e-6
+pdf("RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.01_no_endpoint.pdf", height = 3, width = 6)
 tnsPlotKM(tns_both, regs = "TRPS1", attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()
 ```
-
-
-
-
