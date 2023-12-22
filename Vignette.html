@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 21 December 2023</h4>
+<h4 class="date">Last compiled on 22 December 2023</h4>
 
 </div>
 
@@ -776,8 +776,9 @@ function toggle_visibility(id1) {
 <li><a href="#pro-seq-analysis" id="toc-pro-seq-analysis"><span class="toc-section-number">10</span> PRO-seq analysis</a>
 <ul>
 <li><a href="#composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g" id="toc-composite-plot-of-pro-signal-around-trps1-chip-seq-peaks-figure-3g"><span class="toc-section-number">10.1</span> Composite plot of PRO signal around TRPS1 ChIP-seq peaks (Figure 3G)</a></li>
-<li><a href="#cluster-dynamic-genes-figure-4ab" id="toc-cluster-dynamic-genes-figure-4ab"><span class="toc-section-number">10.2</span> Cluster dynamic genes (Figure 4A,B)</a></li>
-<li><a href="#over-representation-analysis-figure-4cd-tables-s5-8" id="toc-over-representation-analysis-figure-4cd-tables-s5-8"><span class="toc-section-number">10.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</a></li>
+<li><a href="#identify-differentially-transcribed-trps1-peaks-figure-s" id="toc-identify-differentially-transcribed-trps1-peaks-figure-s"><span class="toc-section-number">10.2</span> Identify differentially transcribed TRPS1 peaks (Figure S?)</a></li>
+<li><a href="#cluster-dynamic-genes-figure-4ab" id="toc-cluster-dynamic-genes-figure-4ab"><span class="toc-section-number">10.3</span> Cluster dynamic genes (Figure 4A,B)</a></li>
+<li><a href="#over-representation-analysis-figure-4cd-tables-s5-8" id="toc-over-representation-analysis-figure-4cd-tables-s5-8"><span class="toc-section-number">10.4</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</a></li>
 </ul></li>
 <li><a href="#integrative-analysis" id="toc-integrative-analysis"><span class="toc-section-number">11</span> Integrative analysis</a>
 <ul>
@@ -900,7 +901,7 @@ wilcox.test(Chronos_luminal_last$TRPS1[cols == &quot;red&quot;],
 <p>Log in to the cluster to perform the processing for each sample in parallel.</p>
 <pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu
 ijob -A gioeli_lab -p standard --cpus-per-task=10 --time=8:00:00
-module load sratoolkit/2.10.5
+module load gcc/11.4.0 sratoolkit/3.0.3
 vdb-config -i #press x to exit</code></pre>
 <p>Make directories for the later scripts to write files.</p>
 <pre class="bash"><code>title=ChIP
@@ -935,7 +936,7 @@ for i in {76..99}
 do
   sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
     -o /scratch/ts2hx/${title}/logs/SRR250766${i}_fasterq_dump.log \
-    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250766${i}; gzip SRR250766${i}_*.fastq&quot;
+    --wrap=&quot;module load gcc/11.4.0 sratoolkit/3.0.3; fasterq-dump SRR250766${i}; gzip SRR250766${i}_*.fastq&quot;
   sleep 1
 done
 
@@ -943,7 +944,7 @@ for i in {00..61}
 do
   sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
     -o /scratch/ts2hx/${title}/logs/SRR250767${i}_fasterq_dump.log \
-    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250767${i}; gzip SRR250767${i}_*.fastq&quot;
+    --wrap=&quot;module load gcc/11.4.0 sratoolkit/3.0.3; fasterq-dump SRR250767${i}; gzip SRR250767${i}_*.fastq&quot;
   sleep 1
 done</code></pre>
 <p>Combine the reads and rename</p>
@@ -1654,7 +1655,7 @@ seqOutBias seqtable /project/genomes/Homo_sapiens/UCSC/hg38/Sequence/Bowtie2Inde
 <div id="download-the-raw-data-and-rename-the-files" class="section level2" number="6.2">
 <h2><span class="header-section-number">6.2</span> Download the raw data and rename the files</h2>
 <p>Download and gzip.</p>
-<pre class="bash"><code>module load sratoolkit/2.10.5
+<pre class="bash"><code>module load gcc/11.4.0 sratoolkit/3.0.3
 
 cd $main
 
@@ -1662,7 +1663,7 @@ for i in {46..69}
 do
   sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
     -o /scratch/ts2hx/${title}/logs/SRR250739${i}_fasterq_dump.log \
-    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250739${i}; gzip SRR250739${i}_*.fastq&quot;
+    --wrap=&quot;module load gcc/11.4.0 sratoolkit/3.0.3; fasterq-dump SRR250739${i}; gzip SRR250739${i}_*.fastq&quot;
   sleep 1
 done
 </code></pre>
@@ -2560,12 +2561,13 @@ $HOME/bin/seqOutBias seqtable $genome --read-size=$read_size</code></pre>
 <h2><span class="header-section-number">8.2</span> Download the raw data from the three sequencing runs, rename the files, and combine the reads</h2>
 <p>We sequenced the libraries 3 times, first on a NextSeq2000, and the next two runs on a NextSeq550. We found that the NextSeq2000 gave us many duplicate reads, which we attribute to the patterned flow cell and our small fragment sizes for PRO-seq. We first download the fastq’s and gzip.</p>
 <pre class="bash"><code>cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
+mkdir -p logs/
 
 for i in {24..92}
 do
   sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
     -o logs/SRR250747${i}_fasterq_dump.log \
-    --wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}; gzip SRR250747${i}_*.fastq&quot;
+    --wrap=&quot;module load gcc/11.4.0 sratoolkit/3.0.3; fasterq-dump SRR250747${i}; gzip SRR250747${i}_*.fastq&quot;
   sleep 1
 done</code></pre>
 <p>Combine the NextSeq550 reads to generate representative quality control metrics.</p>
@@ -2839,7 +2841,7 @@ paste -d&#39;\t&#39; *NextSeq550_gene_counts.txt &gt; TRPS1_timecourse_PRO_gene_
 </div>
 <div id="process-the-combined-reads" class="section level2" number="8.4">
 <h2><span class="header-section-number">8.4</span> Process the combined reads</h2>
-<p>The script used in the next code chunk (220928_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh) is below:</p>
+<p>The script used in the next code chunk (231221_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh) is below:</p>
 <pre class="bash"><code>#! /bin/bash
 UMI_length=8
 read_size=40
@@ -2851,12 +2853,12 @@ tallymer=$HOME/seqOutBias/genome.tal_${read_size}.gtTxt.gz
 table=$HOME/seqOutBias/genome_${read_size}.4.2.2.tbl
 
 module load cutadapt/3.4
-module load intel/18.0 intelmpi/18.0 R/4.1.1
-module load gcc/9.2.0 bowtie2/2.2.9
-module load samtools/1.12
+module load gcc/11.4.0  openmpi/4.1.4 R/4.3.1
+module load bowtie2/2.5.1
+module load samtools/1.17
 module load wigtobigwig/2.8
-module load bedtools/2.29.2
-module load pigz/2.4
+module load bedtools/2.30.0
+module load pigz/2.7
 
 PATH=$HOME/bin:$PATH
 
@@ -2914,7 +2916,7 @@ do
   name=`basename $i _PE1.fastq.gz`
   sbatch -p standard -A gioeli_lab -t 4:00:00 -N 1 -n 1 --cpus-per-task=20 \
     --job-name proseq-analysis -o ${name}_proseq.log --export=ALL,i=$i,name=$name \
-    /scratch/ts2hx/scripts/220928_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh
+    /scratch/ts2hx/scripts/231221_PROseq_analysis_on_input_file_no_QC_cut_PE1_to_48.sh
   sleep 1
 done</code></pre>
 <p>Combine the reads into one file.</p>
@@ -3111,7 +3113,7 @@ for i in #{24..92}
 do
   sbatch -p standard -A gioeli_lab -t 1:00:00 -N 1 -n 1 --cpus-per-task=10 --job-name fasterq-dump \
     #-o logs/SRR250747${i}_fasterq_dump.log \
-    #--wrap=&quot;module load sratoolkit/2.10.5; fasterq-dump SRR250747${i}&quot;
+    #--wrap=&quot;module load gcc/11.4.0 sratoolkit/3.0.3; fasterq-dump SRR250747${i}&quot;
   sleep 1
 done</code></pre>
 </div>
@@ -3306,33 +3308,98 @@ module load deeptools/3.5.1</code></pre>
 <pre class="bash"><code>plotProfile -m matrix_PRO_TRPS1_peaks.gz -out profile_PRO_TRPS1_peaks.pdf \
     --regionsLabel &quot;Functional TRPS1 peaks&quot; --perGroup --colors &quot;#8B0000&quot; &quot;#00008B&quot; &quot;#FF7F7F&quot; &quot;#7F7FFF&quot; \
     --samplesLabel &quot;DMSO plus strand&quot; &quot;DMSO minus strand&quot; &quot;dTAG plus strand&quot; &quot;dTAG minus strand&quot; </code></pre>
+<p>Count PRO reads in each TRPS1 peak for use in DESeq2</p>
+<pre class="bash"><code>cd /scratch/ts2hx/TRPS1_timecourse_PRO_3/
+
+module load bedtools/2.30.0
+
+slopBed -b 500 -i /scratch/ts2hx/ChIP/results/heatmaps/Functional_TRPS1_summits.bed \
+  -g $HOME/hg38/hg38.chrom.sizes &gt; \
+  /scratch/ts2hx/ChIP/results/heatmaps/Functional_TRPS1_summits_window.bed
+
+for i in *_combined_PE1.fastq.gz
+do
+  name=`basename $i _PE1.fastq.gz`
+  echo -e &quot;\t${name}&quot; &gt; ${name}_TRPS1_peak_counts.txt
+  mapBed -null &quot;0&quot; -a /scratch/ts2hx/ChIP/results/heatmaps/Functional_TRPS1_summits_window.bed \
+    -b ${name}_not_scaled_PE1.bed | awk &#39;{OFS=&quot;\t&quot;;} {print $4, $NF}&#39; &gt;&gt; ${name}_TRPS1_peak_counts.txt
+done
+
+paste -d&#39;\t&#39; *_TRPS1_peak_counts.txt &gt; \
+  /scratch/ts2hx/ChIP/results/heatmaps/TRPS1_timecourse_PRO_TRPS1_peak_counts.txt</code></pre>
 <p>Leave the cluster environment, and copy files to your local computer.</p>
 <pre class="bash"><code>exit
 exit
 
 cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results
-scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps .</code></pre>
-<p>Calculate the PRO read density in each TRPS1 peak between DMSO and dTAG conditions</p>
-<pre class="bash"><code>cd ~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps
-gzcat matrix_PRO_TRPS1_peaks.gz | awk &#39;{print NF}&#39; | sort -nu | tail -n 1
-gzcat matrix_PRO_TRPS1_peaks.gz | \
-  awk &#39;NR&gt;1 { sum1=0; sum2=0; for(i=7;i&lt;=206;i++) sum1+=$i; for(i=207;i&lt;=406;i++) sum2+=$i; print sum1, sum2 }&#39; \
-  &gt; PRO_signal_DMSO_dTAG.txt</code></pre>
-<p>Perform a paired t-test on the log-normalized PRO read density across TRPS1 peaks</p>
-<pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/ChIP/results/heatmaps/&quot;
-setwd(direc)
-
-signal = read.table(&quot;PRO_signal_DMSO_dTAG.txt&quot;, sep = &#39; &#39;, header = FALSE)
-
-#Find the minimum non-zero signal
-min(signal$V2[signal$V2 != 0]) #0.002522
-
-#Add a value much smaller than the above number before log normalizing (to avoid zeros)
-t.test(log(signal$V1[signal$V1 != 0 &amp; signal$V2 != 0], 10), 
-       log(signal$V2[signal$V1 != 0 &amp; signal$V2 != 0], 10), paired = T) #&lt; 0.00000000000000022</code></pre>
+scp -r ts2hx@rivanna.hpc.virginia.edu:/scratch/ts2hx/ChIP/results/heatmaps/ .</code></pre>
 </div>
-<div id="cluster-dynamic-genes-figure-4ab" class="section level2" number="10.2">
-<h2><span class="header-section-number">10.2</span> Cluster dynamic genes (Figure 4A,B)</h2>
+<div id="identify-differentially-transcribed-trps1-peaks-figure-s" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Identify differentially transcribed TRPS1 peaks (Figure S?)</h2>
+<p>Set up in R.</p>
+<pre class="r bg-info"><code>library(lattice)
+library(DESeq2)
+library(tidyverse)
+library(latticeExtra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(data.table)</code></pre>
+<p>Provide size factors based on reads in genes</p>
+<pre class="r bg-info"><code>x = read.table(&quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/TRPS1_timecourse_PRO_gene_counts_combined.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+x = x[,grepl(&quot;0&quot;, colnames(x))]
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+deseq.df = estimateSizeFactors(deseq.df)
+size_factors = sizeFactors(deseq.df)</code></pre>
+<p>Identify differentially transcribed peaks.</p>
+<pre class="r bg-info"><code>x = read.table(&quot;TRPS1_timecourse_PRO_TRPS1_peak_counts.txt&quot;, sep = &#39;\t&#39;, header = TRUE)
+rownames(x) = x[,1]
+x = x[,seq(2,to=ncol(x),by=2)]
+
+time = factor(sapply(strsplit(colnames(x), &#39;_&#39;), &#39;[&#39;, 3), levels = c(&quot;0hour&quot;, &quot;0.5hour&quot;))
+rep = factor(sapply(strsplit(colnames(x), &#39;rep&#39;), &#39;[&#39;, 2))
+deseq.df = DESeqDataSetFromMatrix(x, cbind.data.frame(time, rep), ~ rep + time)
+sizeFactors(deseq.df) &lt;- size_factors
+deseq.df = DESeq(deseq.df)
+
+res.deseq = results(deseq.df, contrast = c(&quot;time&quot;, &quot;0.5hour&quot;, &quot;0hour&quot;))
+
+sum(!is.na(res.deseq$log2FoldChange)) #12621
+sum(!is.na(res.deseq$log2FoldChange) &amp; res.deseq$log2FoldChange &gt; 0) #7900
+sum(!is.na(res.deseq$log2FoldChange) &amp; res.deseq$log2FoldChange &lt; 0) #4721
+
+sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0) #9
+sum(res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0) #0
+sum((colSums(x)/size_factors)[1:4])/sum((colSums(x)/size_factors)[5:8]) #1.065969
+
+t.test(res.deseq$log2FoldChange) # p-value &lt; 2.2e-16, mean 0.1317621
+
+df.deseq.effects.lattice = res.deseq
+df.deseq.effects.lattice$status = &quot;Other&quot;
+df.deseq.effects.lattice$status[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &gt; 0] = &quot;Activated&quot;
+df.deseq.effects.lattice$status[res.deseq$padj &lt; 0.1 &amp; !is.na(res.deseq$padj) &amp; res.deseq$log2FoldChange &lt; 0] = &quot;Repressed&quot;
+df.deseq.effects.lattice$status = factor(df.deseq.effects.lattice$status, levels = c(&quot;Other&quot;, &quot;Activated&quot;, &quot;Repressed&quot;))</code></pre>
+<p>Plot.</p>
+<pre class="r bg-info"><code>pdf(&quot;MA_PRO_at_TRPS1_peaks.pdf&quot;, width = 7, height = 3.5)
+ggplot(as.data.frame(df.deseq.effects.lattice) %&gt;% arrange(status), aes(x = log(baseMean, 10), y = log2FoldChange, color = status)) +
+  geom_point(aes(size = status)) +
+  scale_size_manual(values = c(0.1, 1, 1), guide = &#39;none&#39;) +
+  scale_color_manual(values = c(&quot;grey60&quot;, &quot;red&quot;, &quot;blue&quot;)) +
+  geom_hline(yintercept = 0, linetype=&quot;dashed&quot;) +
+  ylab(expression(&quot;log&quot;[2]~&quot;(fold change in PRO signal)&quot;)) +
+  xlab(expression(&quot;log&quot;[10]~&quot;(mean of normalized intensity)&quot;)) +
+  ggtitle(&quot;Bidirectional transcription at TRPS1 peaks 30 minutes after TRPS1 depletion&quot;) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(color=NULL)
+dev.off()</code></pre>
+</div>
+<div id="cluster-dynamic-genes-figure-4ab" class="section level2" number="10.3">
+<h2><span class="header-section-number">10.3</span> Cluster dynamic genes (Figure 4A,B)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/TRPS1_timecourse_PRO_3/&quot;
 setwd(direc)
@@ -3566,8 +3633,8 @@ print(xyplot(value ~  factor(time) | supercluster, group = genes,
 )
 dev.off()</code></pre>
 </div>
-<div id="over-representation-analysis-figure-4cd-tables-s5-8" class="section level2" number="10.3">
-<h2><span class="header-section-number">10.3</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</h2>
+<div id="over-representation-analysis-figure-4cd-tables-s5-8" class="section level2" number="10.4">
+<h2><span class="header-section-number">10.4</span> Over-representation analysis (Figure 4C,D, Tables S5-8)</h2>
 <p>Activated genes.</p>
 <pre class="r bg-info"><code>genes = plot.df.pro$genes[(plot.df.pro$supercluster == &quot;Gradual Increase&quot; | plot.df.pro$supercluster == &quot;Transient Increase&quot;) &amp; plot.df.pro$merge == &quot;one_group0hour&quot;]
 m_t2g &lt;- msigdbr(species = &quot;Homo sapiens&quot;, category = &quot;H&quot;) %&gt;% 
