@@ -3102,6 +3102,19 @@ ggplot(as.data.frame(df.deseq.effects.lattice) %>% arrange(status), aes(x = log(
 dev.off()
 ```
 
+ANOVA to determine if dTAG reproducibly increases transcription at these sites
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+library(tidyr)
+wide_counts = as.data.frame(counts(deseq.df, normalized = T))
+long_counts <- gather(wide_counts, condition, counts, factor_key=TRUE)
+long_counts$rep = factor(sapply(strsplit(as.character(long_counts$condition), '_'), '[', 4))
+long_counts$time = factor(sapply(strsplit(as.character(long_counts$condition), '_'), '[', 3))
+
+model = lm(log(counts + 1, 10) ~ rep + time, data = long_counts)
+anova(model) #p-value < 2.2e-16
+```
+
 ## Cluster dynamic genes (Figure 4A,B)
 
 Set up in R.
