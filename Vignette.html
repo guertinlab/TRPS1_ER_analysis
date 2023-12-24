@@ -700,7 +700,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">TRPS1-ER Analysis Vignette</h1>
-<h4 class="date">Last compiled on 22 December 2023</h4>
+<h4 class="date">Last compiled on 24 December 2023</h4>
 
 </div>
 
@@ -793,12 +793,13 @@ function toggle_visibility(id1) {
 <ul>
 <li><a href="#ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a" id="toc-ma-plot-of-gene-expression-at-24-hours-dtag-vs.-dmso-figure-6a"><span class="toc-section-number">12.1</span> MA plot of gene expression at 24 hours dTAG vs. DMSO (Figure 6A)</a></li>
 <li><a href="#hour-gene-set-enrichment-analysis-figure-6b" id="toc-hour-gene-set-enrichment-analysis-figure-6b"><span class="toc-section-number">12.2</span> 24 hour gene set enrichment analysis (Figure 6B)</a></li>
-<li><a href="#growth-curves-figure-6c" id="toc-growth-curves-figure-6c"><span class="toc-section-number">12.3</span> Growth curves (Figure 6C)</a></li>
+<li><a href="#growth-curves-figures-6c-and-s10" id="toc-growth-curves-figures-6c-and-s10"><span class="toc-section-number">12.3</span> Growth curves (Figures 6C and S10)</a></li>
 <li><a href="#plot-example-patient-with-high-trps1-activity-score-figure-6d" id="toc-plot-example-patient-with-high-trps1-activity-score-figure-6d"><span class="toc-section-number">12.4</span> Plot example patient with high TRPS1 activity score (Figure 6D)</a></li>
 <li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-figure-6ef"><span class="toc-section-number">12.5</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score (Figure 6E,F)</a></li>
 <li><a href="#plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10" id="toc-plot-kaplan-meier-curves-subdivided-by-er-positivity-or-intrinsic-subtype-figure-s10"><span class="toc-section-number">12.6</span> Plot Kaplan-Meier curves subdivided by ER-positivity or intrinsic subtype (Figure S10)</a></li>
 <li><a href="#plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11" id="toc-plot-distribution-of-trps1-activity-scores-and-kaplan-meier-curves-binned-by-trps1-activity-score-using-genes-differentially-expressed-at-24-hours-figure-s11"><span class="toc-section-number">12.7</span> Plot distribution of TRPS1 activity scores and Kaplan-Meier curves binned by TRPS1 activity score using genes differentially expressed at 24 hours (Figure S11)</a></li>
 </ul></li>
+<li><a href="#allele-sequencing" id="toc-allele-sequencing"><span class="toc-section-number">13</span> Allele sequencing</a></li>
 </ul>
 </div>
 
@@ -4562,8 +4563,8 @@ plotEnrichment(msigdbr_list[[&quot;HALLMARK_E2F_TARGETS&quot;]], gene_list) +
   labs(title=&quot;Hallmark E2F Targets&quot;)
 dev.off()</code></pre>
 </div>
-<div id="growth-curves-figure-6c" class="section level2" number="12.3">
-<h2><span class="header-section-number">12.3</span> Growth curves (Figure 6C)</h2>
+<div id="growth-curves-figures-6c-and-s10" class="section level2" number="12.3">
+<h2><span class="header-section-number">12.3</span> Growth curves (Figures 6C and S10)</h2>
 <p>Set up in R.</p>
 <pre class="r bg-info"><code>direc = &quot;~/Library/CloudStorage/Box-Box/GuertinLab/Cell_Counts/&quot;
 setwd(direc)
@@ -4626,6 +4627,52 @@ Cell_Counts$lwr[Cell_Counts$Condition != &quot;Untreated&quot;] = predict[,2]
 Cell_Counts$upr[Cell_Counts$Condition != &quot;Untreated&quot;] = predict[,3]</code></pre>
 <p>Plot.</p>
 <pre class="r bg-info"><code>pdf(&quot;dTAG_TRPS1_reps3_to_6_curve_fit_confidence.pdf&quot;, width = 14)
+ggplot(Cell_Counts, aes(x=Day, y=Count, colour=Condition, fill = Condition)) + 
+  geom_point(data=Cell_Counts, size=3, shape=21) +
+  stat_function(fun=function(x) 2^(as.numeric(fit$coefficients[1]) + as.numeric(fit$coefficients[2])*x), color = &quot;Black&quot;) +
+  stat_function(fun=function(x) 2^(as.numeric(fit$coefficients[1] + fit$coefficients[3]) + as.numeric(fit$coefficients[2] + fit$coefficients[4])*x), color = &quot;Red&quot;) +
+  geom_errorbar(aes(ymin=2^lwr, ymax=2^upr), width=.1) +
+  scale_colour_manual(values = c(&quot;Black&quot;, &quot;Red&quot;, &quot;Grey&quot;), labels = c(&quot;DMSO&quot;, &quot;dTAG&quot;, &quot;Untreated&quot;)) +   
+  scale_fill_manual(values = c(&quot;Black&quot;, &quot;Red&quot;, &quot;Grey&quot;), labels = c(&quot;DMSO&quot;, &quot;dTAG&quot;, &quot;Untreated&quot;)) +    
+  scale_x_continuous(breaks = c(0, 3, 7, 10, 14), minor_breaks = seq(0,14,1)) +
+  ylab(&quot;Cell Number&quot;) +
+  theme_bw() +
+  theme(legend.justification = &quot;center&quot;,
+        legend.position = c(0.2, 0.7),
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        legend.text = element_text(size=24),
+        axis.text=element_text(size=12),
+        axis.title=element_text(size=24,face=&quot;bold&quot;))      
+dev.off()</code></pre>
+<p>Repeat with parental T47D counts.</p>
+<pre class="r bg-info"><code>#Read data
+Cell_Counts &lt;- read_excel(&quot;231128_dTAG_T47D.xlsx&quot;)
+
+#Convert to cells/well
+Dilution_factor &lt;- 10000*2*Cell_Counts$mL/9
+Cell_Counts &lt;- Cell_Counts[,-6]
+Cell_Counts[,3:5] = Cell_Counts[,3:5]*Dilution_factor
+
+#Average technical replicates
+Cell_Counts &lt;- pivot_longer(Cell_Counts, colnames(Cell_Counts)[3:5], names_to = &quot;Condition&quot;, values_to = &quot;Count&quot;)
+Cell_Counts &lt;- summarySE(Cell_Counts, measurevar=&quot;Count&quot;, groupvars=c(&quot;Condition&quot;, &quot;Day&quot;, &quot;Rep&quot;))
+Cell_Counts &lt;- Cell_Counts[,c(1,2,3,5)]
+Cell_Counts &lt;- na.omit(Cell_Counts)
+
+#Mean and SEM for biological replicates
+Summary &lt;- summarySE(Cell_Counts, measurevar=&quot;Count&quot;, groupvars=c(&quot;Condition&quot;, &quot;Day&quot;))
+
+#Plot
+pd &lt;- position_dodge(0.1)
+ylim &lt;- c(0, 500000)
+fit = lm(log(Count, base = 2) ~ Day*Condition, data = Cell_Counts[Cell_Counts$Condition != &quot;Untreated&quot;,])
+fit_no_interaction = lm(log(Count, base = 2) ~ Day + Condition, data = Cell_Counts[Cell_Counts$Condition != &quot;Untreated&quot;,])
+anova(fit_no_interaction, fit) # p = 0.9411
+predict = predict(fit, interval = &quot;confidence&quot;)
+Cell_Counts$lwr[Cell_Counts$Condition != &quot;Untreated&quot;] = predict[,2]
+Cell_Counts$upr[Cell_Counts$Condition != &quot;Untreated&quot;] = predict[,3]
+pdf(&quot;dTAG_T47D_curve_fit_confidence.pdf&quot;, width = 14)
 ggplot(Cell_Counts, aes(x=Day, y=Count, colour=Condition, fill = Condition)) + 
   geom_point(data=Cell_Counts, size=3, shape=21) +
   stat_function(fun=function(x) 2^(as.numeric(fit$coefficients[1]) + as.numeric(fit$coefficients[2])*x), color = &quot;Black&quot;) +
@@ -5085,6 +5132,9 @@ pdf(&quot;RTNsurvival_TRPS1_regulon_merged_METABRIC_after_GSEA_24hour_FDR_0.1_no
 tnsPlotKM(tns_both, regs = &quot;TRPS1&quot;, attribs = attribs, panelWidths=c(3,1,4), width = 6)
 dev.off()</code></pre>
 </div>
+</div>
+<div id="allele-sequencing" class="section level1" number="13">
+<h1><span class="header-section-number">13</span> Allele sequencing</h1>
 </div>
 
 
