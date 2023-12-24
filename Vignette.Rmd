@@ -4487,7 +4487,7 @@ plotEnrichment(msigdbr_list[["HALLMARK_E2F_TARGETS"]], gene_list) +
 dev.off()
 ```
 
-## Growth curves (Figure 6C)
+## Growth curves (Figures 6C and S10)
 
 Set up in R.
 
@@ -4577,6 +4577,57 @@ Plot.
 
 ```{r class.source="bg-info", engine='R', eval=F, echo=T}
 pdf("dTAG_TRPS1_reps3_to_6_curve_fit_confidence.pdf", width = 14)
+ggplot(Cell_Counts, aes(x=Day, y=Count, colour=Condition, fill = Condition)) + 
+  geom_point(data=Cell_Counts, size=3, shape=21) +
+  stat_function(fun=function(x) 2^(as.numeric(fit$coefficients[1]) + as.numeric(fit$coefficients[2])*x), color = "Black") +
+  stat_function(fun=function(x) 2^(as.numeric(fit$coefficients[1] + fit$coefficients[3]) + as.numeric(fit$coefficients[2] + fit$coefficients[4])*x), color = "Red") +
+  geom_errorbar(aes(ymin=2^lwr, ymax=2^upr), width=.1) +
+  scale_colour_manual(values = c("Black", "Red", "Grey"), labels = c("DMSO", "dTAG", "Untreated")) +   
+  scale_fill_manual(values = c("Black", "Red", "Grey"), labels = c("DMSO", "dTAG", "Untreated")) +    
+  scale_x_continuous(breaks = c(0, 3, 7, 10, 14), minor_breaks = seq(0,14,1)) +
+  ylab("Cell Number") +
+  theme_bw() +
+  theme(legend.justification = "center",
+        legend.position = c(0.2, 0.7),
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        legend.text = element_text(size=24),
+        axis.text=element_text(size=12),
+        axis.title=element_text(size=24,face="bold"))      
+dev.off()
+```
+
+
+Repeat with parental T47D counts.
+
+```{r class.source="bg-info", engine='R', eval=F, echo=T}
+#Read data
+Cell_Counts <- read_excel("231128_dTAG_T47D.xlsx")
+
+#Convert to cells/well
+Dilution_factor <- 10000*2*Cell_Counts$mL/9
+Cell_Counts <- Cell_Counts[,-6]
+Cell_Counts[,3:5] = Cell_Counts[,3:5]*Dilution_factor
+
+#Average technical replicates
+Cell_Counts <- pivot_longer(Cell_Counts, colnames(Cell_Counts)[3:5], names_to = "Condition", values_to = "Count")
+Cell_Counts <- summarySE(Cell_Counts, measurevar="Count", groupvars=c("Condition", "Day", "Rep"))
+Cell_Counts <- Cell_Counts[,c(1,2,3,5)]
+Cell_Counts <- na.omit(Cell_Counts)
+
+#Mean and SEM for biological replicates
+Summary <- summarySE(Cell_Counts, measurevar="Count", groupvars=c("Condition", "Day"))
+
+#Plot
+pd <- position_dodge(0.1)
+ylim <- c(0, 500000)
+fit = lm(log(Count, base = 2) ~ Day*Condition, data = Cell_Counts[Cell_Counts$Condition != "Untreated",])
+fit_no_interaction = lm(log(Count, base = 2) ~ Day + Condition, data = Cell_Counts[Cell_Counts$Condition != "Untreated",])
+anova(fit_no_interaction, fit) # p = 0.9411
+predict = predict(fit, interval = "confidence")
+Cell_Counts$lwr[Cell_Counts$Condition != "Untreated"] = predict[,2]
+Cell_Counts$upr[Cell_Counts$Condition != "Untreated"] = predict[,3]
+pdf("dTAG_T47D_curve_fit_confidence.pdf", width = 14)
 ggplot(Cell_Counts, aes(x=Day, y=Count, colour=Condition, fill = Condition)) + 
   geom_point(data=Cell_Counts, size=3, shape=21) +
   stat_function(fun=function(x) 2^(as.numeric(fit$coefficients[1]) + as.numeric(fit$coefficients[2])*x), color = "Black") +
@@ -5098,4 +5149,5 @@ dev.off()
 ```
 
 
+# Allele sequencing
 
