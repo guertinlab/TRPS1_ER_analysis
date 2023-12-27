@@ -5236,7 +5236,7 @@ rm ${name}_*short.fastq ${name}_*noadap* ${name}_*dedup* ${name}.hist* ${name}.n
 pigz ${name}_PE[1,2].fastq</code></pre>
 <p>Run the above script on each file in parallel.</p>
 <pre class="bash"><code>ssh -Y ts2hx@rivanna.hpc.virginia.edu 
-ijob -p standard -A gioeli_lab -t 4:00:00 -N 1 -n 1 --cpus-per-task=10
+ijob -p standard -A gioeli_lab -t 4:00:00 -N 1 -n 1 --cpus-per-task=1
 
 chmod +x /scratch/$USER/scripts/231226_grep_prep.sh
 
@@ -5250,24 +5250,24 @@ do
     -o ${name}_grep_prep.log  --wrap=&quot;sh /scratch/$USER/scripts/231226_grep_prep.sh $filename&quot;
   sleep 1 # wait 1 second between each job submission
 done</code></pre>
-<p>Next we used <code>grep</code> to search for a unique sequence specific to the desired product and not found in the above alleles. CTTTGCAGATATGAAAAAGC is the designed junction between the 5’UTR and the start of the HygR gene. This produced a single unique result, with an insertion of 33 bases (the 30 bases upstream from the start codon and including the start codon) directly after the start codon in the ideally tagged allele from above. Immediately upstream from the 5’ end of the HDR template, we see a sequence from the opposite strand of the HygR gene (AGGTCGGAGACGCTGTCGAACTTTTCGATC).</p>
-<pre class="bash"><code>grep &quot;CTTTGCAGATATGAAAAAGC&quot; T47D_Clone28_*.extendedFrags.fastq</code></pre>
-<p>We search upstream from this junction.</p>
-<pre class="bash"><code>grep &quot;GCTGTCGAACTTTTCGATCG&quot; T47D_Clone28_*.extendedFrags.fastq</code></pre>
-<p>We can see as far the first two bases of valine 41 in HygR (ACATCGAAGCTGAAAGCACGAGATTCTTCGCCCTCCGAGAGCTGCATCAGGTCGGAGACGCTGTCGAACTTTTCGATC). We search around that site to see if we can distinguish two sequences, one from this region upstream from the insertion and one from the desired insertion. We want to see where this upstream region eventually reaches the 5’ UTR.</p>
-<pre class="bash"><code>grep &quot;ACATCGAAGCTGAAAGCACG&quot; T47D_Clone28_*.extendedFrags.fastq</code></pre>
-<p>We designed primers for each strand of this allele that should be specific for this allele (forward TTTATCTTTGCAGATATGTATCT and reverse GGAAAAGGCAGATACATATC). We also designed primers flanking the insertion site, closer to the insertion site than the original primers to extend how far we can sequence into the insertion (forward CCTCCGCTTCCTGAAAGTGA and reverse TCCTCCCTTACTGGGGCTTT). We used these primers for PCR of genomic DNA from Clone 28 and the parental T47D cells as a control. The reverse clone-specific primer and the forward flanking primer produced a band in Clone 28 and not in the parental cells. We submitted this purified PCR product for Sanger sequencing with the primers used in the PCR. However, this product appears to have amplified the third allele from above, as we found the two missing T’s in the string of 13 T’s.</p>
+<p>Next we used <code>grep</code> to search for a unique sequence specific to the desired product and not found in the above alleles. CTTTGCAGATATGAAAAAGC is the designed junction between the 5’UTR and the start of the HygR gene. This produced a single unique result, with a duplication of 33 bases (the 30 bases upstream from the start codon and including the start codon) directly after the start codon in the ideally tagged allele from above.</p>
+<pre class="bash"><code>grep &quot;CTTTGCAGATATGAAAAAGC&quot; T47D_Clone28_*_for_grep.fastq</code></pre>
+<p>We search upstream from this junction to find reads that are specific to this allele. We can see as far as 73 bases of the 5’ UTR.</p>
+<pre class="bash"><code>grep &quot;CTTTATCTTTGCAGATATGT&quot; T47D_Clone28_*_for_grep.fastq</code></pre>
+<p>We next searched downstream from the insertion junction to find reads that are specific to this allele. We can see as far as Leucine 28 of HygR.</p>
+<pre class="bash"><code>grep &quot;GAAAAAGCCTGAACTCACCG&quot; T47D_Clone28_*_for_grep.fastq</code></pre>
+<p>We look downstream from L28, which should still include only reads that are specific to this allele. We can see as far as Phenylalanine 57.</p>
+<pre class="bash"><code>grep &quot;TCTCCGACCTGATGCAGCTC&quot; T47D_Clone28_*_for_grep.fastq</code></pre>
+<p>We look downstream from F57, which should still include only reads that are specific to this allele. We can see as far as Serine 84.</p>
+<pre class="bash"><code>grep &quot;ATAGCTGCGCCGATGGTTTC&quot; T47D_Clone28_*_for_grep.fastq</code></pre>
+<p>We look downstream from Valine 77, which should still include only reads that are specific to this allele. We can see as far as Aspartic acid 102.</p>
+<pre class="bash"><code>grep &quot;GCTTGACATTGGGGAATTCA&quot; T47D_Clone28_*_for_grep.fastq</code></pre>
+<p>So from our PRO-seq reads, we can produce the following continuous sequence specific to this allele:</p>
+<pre class="bash bg-primary"><code>ATTCCAGATTCAACTGTATCTCTGTAACTTTCAGATAACACTGTATCTGCCTTTTCCCTTTATCTTTGCAGATATGTATCTGCCTTTTCCCTTTATCTTTGCAGATATGAAAAAGCCTGAACTCACCGCGACGTCTGTCGAGAAGTTTCTGATCGAAAAGTTCGACAGCGTCTCCGACCTGATGCAGCTCTCGGAGGGCGAAGAATCTCGTGCTTTCAGCTTCGATGTAGGAGGGCGTGGATATGTCCTGCGGGTAAATAGCTGCGCCGATGGTTTCTACAAAGATCGTTATGTTTATCGGCACTTTGCATCGGCCGCGCTCCCGATTCCGGAAGTGCTTGACATTGGGGAATTCAGCGAGAGCCTGACCTATTGCATCTCCCGCCGTGCACAGGGTGTCACGTTGCAAGAC</code></pre>
+<p>We designed primers predicted to anneal to each strand of the duplication event that should be specific for this allele (forward TTTATCTTTGCAGATATGTATCT and reverse GGAAAAGGCAGATACATATC). We also designed primers flanking the designed insertion site, closer to the insertion site than the original primers to extend how far we can sequence into the insertion (forward CCTCCGCTTCCTGAAAGTGA and reverse TCCTCCCTTACTGGGGCTTT). We used these primers for PCR of genomic DNA from Clone 28 and the parental T47D cells as a control. The reverse clone-specific primer and the forward flanking primer produced a band in Clone 28 and not in the parental cells. We submitted this purified PCR product for Sanger sequencing with the primers used in the PCR. However, this product appears to have amplified the third allele from above, as we found the two missing T’s in the string of 13 T’s.</p>
 <p>Using two different annealing temperatures, we could not use the forward clone-specific primer and the reverse flanking primer to generate a PCR product specifically in Clone 28 and not in the parental cells. We could attempt to further optimize this PCR. However,wWe realized this is the only allele that has the beginning of the HygR gene. We performed a PCR using the HDR template PCR primer, the 3’ end of which contains the beginning of the HygR gene, along with the reverse flanking primer. We submitted this purified PCR product for Sanger sequencing with the primers used in the PCR. From the 5’ end, we can see the entirety of the HygR gene and into the P2A site.</p>
 <pre class="bash bg-primary"><code>GCGACGTCTGTCGAGAAGTTTCTGATCGAAAAGTTCGACAGCGTCTCCGACCTGATGCAGCTCTCGGAGGGCGAAGAATCTCGTGCTTTCAGCTTCGATGTAGGAGGGCGTGGATATGTCCTGCGGGTAAATAGCTGCGCCGATGGTTTCTACAAAGATCGTTATGTTTATCGGCACTTTGCATCGGCCGCGCTCCCGATTCCGGAAGTGCTTGACATTGGGGAATTCAGCGAGAGCCTGACCTATTGCATCTCCCGCCGTGCACAGGGTGTCACGTTGCAAGACCTGCCTGAAACCGAACTGCCCGCTGTTCTGCAGCCGGTCGCGGAGGCCATGGATGCGATCGCTGCGGCCGATCTTAGCCAGACGAGCGGGTTCGGCCCATTCGGACCGCAAGGAATCGGTCAATACACTACATGGCGTGATTTCATATGCGCGATTGCTGATCCCCATGTGTATCACTGGCAAACTGTGATGGACGACACCGTCAGTGCGTCCGTCGCGCAGGCTCTCGATGAGCTGATGCTTTGGGCCGAGGACTGCCCCGAAGTCCGGCACCTCGTGCACGCGGATTTCGGCTCCAACAATGTCCTGACGGACAATGGCCGCATAACAGCGGTCATTGACTGGAGCGAGGCGATGTTCGGGGATTCCCAATACGAGGTCGCCAACATCTTCTTCTGGAGGCCGTGGTTGGCTTGTATGGAGCAGCAGACGCGCTACTTCGAGCGGAGGCATCCGGAGCTTGCAGGATCGCCGCGGCTCCGGGCGTATATGCTCCGCATTGGTCTTGACCAACTCTATCAGAGCTTGGTTGACGGCAATTTCGATGATGCAGCTTGGGCGCAGGGTCGATGCGACGCAATCGTCCGATCCGGAGCCGGGACTGTCGGGCGTACACAAATCGCCCGCAGAAGCGCGGCCGTCTGGACCGATGGCTGTGTAGAAGTACTCGCCGATAGTGGAAACCGACGCCCCAGCACTCGTCCGGATCGGGAGATGGGGGAGGCTAACGGAAGCGGAGCTACTAACTTCAGCCTGCTGAAGCAGGCTGGAGACGTGGAGGAGAACC</code></pre>
-<p>We next looked as far upstream as we could while keeping the unique junction between the first and second copies of the duplication.</p>
-<pre class="bash"><code>grep &quot;CTTTATCTTTGCAGATATGT&quot; T47D_Clone28_*.extendedFrags.fastq </code></pre>
-<p>We can see just up through the 5’ end of where the homology-directed repair template primer would start. Curiously, just upstream from there, we see TC instead of the expected CT. We search for the sequences around this unique junction.</p>
-<pre class="bash"><code>grep &quot;TCGTAACTTTCAGATAACACTG&quot; T47D_Clone28_*.extendedFrags.fastq </code></pre>
-<p>Strangely, we can see GAGAGCTGCATCAGGTCGGAGACGCTGTCGAACTTTTCGA, a sequence on the template strand of the HygR gene. We search for the sequences around this unique junction and then walk along this allele looking for another break point.</p>
-<pre class="bash"><code>grep &quot;GCTGTCGAACTTTTCGATCG&quot; T47D_Clone28_*.extendedFrags.fastq 
-grep &quot;ATCCACGCCCTCCTACATCG&quot; T47D_Clone28_*.extendedFrags.fastq
-grep &quot;TAACGATCTTTGTAGAAACC&quot; T47D_Clone28_*.extendedFrags.fastq
-grep &quot;ATTCCCCAATGTCAAGCACT&quot; T47D_Clone28_*.extendedFrags.fastq</code></pre>
+<p>We are awaiting sequencing of this PCR product from the other direction. In future, allele-specific primers can be designed to anneal to either strand of the 5’ end of the HygR gene (corresponding to amino acids 2-77), which should only be found in this allele.</p>
 </div>
 <div id="clone-35" class="section level2" number="13.2">
 <h2><span class="header-section-number">13.2</span> Clone 35</h2>
@@ -5276,19 +5276,19 @@ grep &quot;ATTCCCCAATGTCAAGCACT&quot; T47D_Clone28_*.extendedFrags.fastq</code><
 <p>The second allele is a knockout. Reading from the 5’ end, we see the 5’UTR except missing the last 7bp, then TRPS1 missing the start codon.</p>
 <pre class="bash bg-primary"><code>TTTGTCATCCTCCGCTTCCTGAAAGTGATGAGGCAGTTTTCACTCTGTTTATAACATAGCTGTTTCTGTCTTTTTGACTATGAAGATATTTTGTTTGAAACTATATTTACATCCCGGTTACATAGGGTAACAATATCGAATTCCAATTTATGTTATTTATGTATACATATATGTACCATATAAATAAATGTGATGTATTCTATAACCATAAACACATATATGTATTTTATAAACATAACATGTGTACATGTTATATATAATATAGACCATATATAAATATATAAGCATGCATATATATTGTTAGCTACAATCAAAGGAAGAAATTGGGCAAAAATATATTTTCAGGAAAGAATAAGTAATAGGGAGGGTAAACCTAGTAATAAAAATAAATCCTTCATTATTCCTAAAACCACCTTAAAATAATAAATGAGCCAGTCTTGGTTACAAAAGTAATTCTAAATGTAAATTGTTTGTTTTAGTCTCAACTTTTTGCTGTTTTTAGAATGGGTTTTTTTTTTTTTCCTAGAGGAAGCATTTGATTATGCACCTTAAAAAACTCACATAAGTAAAATATTCCAGATTCAACTGTATCTCTGTAACTTTCAGATAACACTGTATCTGCCTTTTCCCTTTATCTTGTCCGGAAAAAGAACCCCCCTCTGAGAAACGTTGCAAGTGAAGGCGAGGGCCAGATCCTGGAGCCTATAGGTACAGAAAGCAAGGTATCTGGAAAGAACAAAGAATTTTCTGCAGATCAGATGTCAGAAAATACGGATCAGAGTGATGCTGCAGAACTAAATCATAAGGAGGAACATAGCTTGCATGTTCAAGATCCATCTTCTAGCAGTAAGAAGGACTTGAAAAGCGCAGTTCTGAGTGAGAAGGCTGGCTTCAATTATGAAAGCCCCAGTAAGGGAGGAAACTTTCCCTCCTTTCCGCATGAT</code></pre>
 <p>We are still looking for up to two more unique alleles. Searching the PRO-seq data, we do see the designed junction between the 5’ UTR and the start of the HygR gene.</p>
-<pre class="bash"><code>grep &quot;CTTTGCAGATATGAAAAAGC&quot; T47D_Clone35_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;CTTTGCAGATATGAAAAAGC&quot; T47D_Clone35_*_for_grep.fastq</code></pre>
 <p>Upstream from this, we can see two distinct alleles, one with an unknown sequence (GCCCCTGGAACG) upstream from the last 50 bases of the 5’ UTR, and one with the end of dTAG and the first 2 bases of the linker (CGATGTGGAGCTTCTAAAACTGGAAAG) upstream from the last 50 bases of the 5’ UTR. Notably, the dTAG would not be in frame with HygR, so this is probably a knockout allele (unless there is another dTAG downstream on this allele and translation initiates at the HygR start codon).</p>
 <p>We searched for each of these unique junctions. The first only produced the read we saw before. This may actually be mis-sequencing, as there are similarities in the sequence, the junction is exactly the same, and the quality scores for the different bases are lower.</p>
-<pre class="bash"><code>grep &quot;CCCTGGAACGGTAA&quot; T47D_Clone35_*.extendedFrags.fastq
-grep -B 1 -A 2 &quot;CCCTGGAACGGTAA&quot; T47D_Clone35_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;CCCTGGAACGGTAA&quot; T47D_Clone35_*_for_grep.fastq
+grep -B 1 -A 2 &quot;CCCTGGAACGGTAA&quot; T47D_Clone35_*_for_grep.fastq</code></pre>
 <p>Upstream from the dTAG junction, we see up through glycine 86 of FKBP12. Downstream we see through 16 bases of HygR.</p>
-<pre class="bash"><code>grep &quot;AACTGGAAAGGTAACTTTCA&quot; T47D_Clone35_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;AACTGGAAAGGTAACTTTCA&quot; T47D_Clone35_*_for_grep.fastq</code></pre>
 <p>Let’s look for a stretch of 5’ UTR not contained in any of the other alleles, we find it, but right after the start codon is a stretch of 35 bases from chromosome 15 (ACAGTCAAATTAATTCCAATTATCTCTCTAACAGC).</p>
-<pre class="bash"><code>grep &quot;TGTAACTTTCAGATAACACTGTATCTGCCTTTTCCCTTTATCTTTGCA&quot; T47D_Clone35_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;TGTAACTTTCAGATAACACTGTATCTGCCTTTTCCCTTTATCTTTGCA&quot; T47D_Clone35_*_for_grep.fastq</code></pre>
 <p>Let’s look as far downstream as we can. We can see 83 bases into this region of chromosome 15, so this may return to chromosome 8 farther downstream that we can’t ambiguously assign to this allele, or we have caused a translocation.</p>
-<pre class="bash"><code>grep &quot;GACAGTCAAATTAATTCCAATTATCTCTCTAACAGC&quot; T47D_Clone35_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;GACAGTCAAATTAATTCCAATTATCTCTCTAACAGC&quot; T47D_Clone35_*_for_grep.fastq</code></pre>
 <p>Looking for the junction of the linker and TRPS1, we find it and can see back through valine 98 of FKBP12. This would be in frame, as long as there is translation of an upstream HygR gene that is correctly initiated.</p>
-<pre class="bash"><code>grep &quot;AGGTTCAGGTGTCCGGAAAA&quot; T47D_Clone35_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;AGGTTCAGGTGTCCGGAAAA&quot; T47D_Clone35_*_for_grep.fastq</code></pre>
 </div>
 <div id="clone-39" class="section level2" number="13.3">
 <h2><span class="header-section-number">13.3</span> Clone 39</h2>
@@ -5299,7 +5299,7 @@ grep -B 1 -A 2 &quot;CCCTGGAACGGTAA&quot; T47D_Clone35_*.extendedFrags.fastq</co
 <p>The third allele is a knockout. From the 5’ end, the 5’ UTR extends through 31 bases upstream from the start codon, then an unknown 50bp sequence (CAGGCTGATGACGTGGAGGAGATCCCTGGTCCTTACCCCTACGACGTGCC), then an inversion of (48bp of the 5’UTR (the wrong end of the HDR template) into the first 319bp of the HygR gene), then the 5’ end of TRPS1 as expected after the start codon.</p>
 <pre class="bash bg-primary"><code>TTTGTCATCCTCCGCTTCCTGAAAGTGATGAGGCAGTTTTCACTCTGTTTATAACATAGCTGTTTCTGTCTTTTTGACTATGAAGATATTTTGTTTGAAACTATATTTACATCCCGGTTACATAGGGTAACAATATCGAATTCCAATTTATGTTATTTATGTATACATATATGTACCATATAAATAAATGTGATGTATTCTATAACCATAAACACATATATGTATTTTATAAACATAACATGTGTACATGTTATATATAATATAGACCATATATAAATATATAAGCATGCATATATATTGTTAGCTACAATCAAAGGAAGAAATTGGGCAAAAATATATTTTCAGGAAAGAATAAGTAATAGGGAGGGTAAACCTAGTAATAAAAATAAATCCTTCATTATTCCTAAAACCACCTTAAAATAATAAATGAGCCAGTCTTGGTTACAAAAGTAATTCTAAATGTAAATTGTTTGTTTTAGTCTCAACTTTTTGCTGTTTTTAGAATGGGTTTTTTTTTTTTTCCTAGAGGAAGCATTTGATTATGCACCTTAAAAAACTCACATAAGTAAAATATTCCAGATTCAACTGTATCTCTGTAACTTTCAGATAACACTGCAGGCTGATGACGTGGAGGAGATCCCTGGTCCTTACCCCTACGACGTGCCCGGTTTCAGGCAGGTCTTGCAACGTGACACCCTGTGCACGGCGGGAGATGCAATAGGTCAGGCTCTCGCTGAATTCCCCAATGTCAAGCACTTCCGGAATCGGGAGCGCGGCCGATGCAAAGTGCCGATAAACATAACGATCTTTGTAGAAACCATCGGCGCAGCTATTTACCCGCAGGACATATCCACGCCCTCCTACATCGAAGCTGAAAGCACGAGATTCTTCGCCCTCCGAGAGCTGCATCAGGTCGGAGACGCTGTCGAACTTTTCGATCAGAAACTTCTCGACAGACGTCGCGGTGAGTTCAGGCTTTTTCATATCTGCAAAGATAAAGGGAAAAGGCAGATACAGTGTTATCTGAAAGTTGTCCGGAAAAAGAACCCCCCTCTGAGAAACGTTGCAAGTGAAGGCGAGGGCCAGATCCTGGAGCCTATAGGTACAGAAAGCAAGGTATCTGGAAAGAACAAAGAATTTTCTGCAGATCAGATGTCAGAAAATACGGATCAGAGTGATGCTGCAGAACTAAATCATAAGGAGGAACATAGCTTGCATGTTCAAGATCCATCTTCTAGCAGTAAGAAGGACTTGAAAAGCGCAGTTCTGAGTGAGAAGGCTGGCTTCAATTATGAAAGCCCCAGTAAGGGAGGAAACTTTCCCTCCTTTCCGCATGAT</code></pre>
 <p>We are still looking for up to one more unique allele. Searching the PRO-seq data, we do see the designed junction between the 5’ UTR and the start of the HygR gene.</p>
-<pre class="bash"><code>grep &quot;CTTTGCAGATATGAAAAAGC&quot; T47D_Clone39_*.extendedFrags.fastq</code></pre>
+<pre class="bash"><code>grep &quot;CTTTGCAGATATGAAAAAGC&quot; T47D_Clone39_*_for_grep.fastq</code></pre>
 </div>
 </div>
 
