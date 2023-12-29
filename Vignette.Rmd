@@ -5368,32 +5368,32 @@ grep "CTTTGCAGATATGAAAAAGC" T47D_Clone35_*_for_grep.fastq
 
 Upstream from this, we can see two distinct sequences, one with an unknown sequence (GCCCCTGGAACG) upstream from the last 50 bases of the 5' UTR, and one with the end of dTAG and the first 2 bases of the linker (CGATGTGGAGCTTCTAAAACTGGAAAG) upstream from the last 50 bases of the 5' UTR. Notably, the dTAG would not be in frame with HygR, so this is probably a knockout allele (unless there is another dTAG downstream on this allele and translation initiates at the HygR start codon).
 
-We search for each of these unique junctions. The first only produced the read we saw before. This may actually be mis-sequencing, as there are similarities in the sequence, the junction is exactly the same, and the quality scores for the different bases are lower.
+We search for each of these unique junctions. The first only produced the read we saw before. This may actually be mis-sequencing, as there are similarities in the sequence, the junction is exactly the same, and the quality scores for the different bases are lower. Thus we hypothesize that these sequences correspond to one unique allele.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 grep "CCCTGGAACGGTAA" T47D_Clone35_*_for_grep.fastq
 grep -B 1 -A 2 "CCCTGGAACGGTAA" T47D_Clone35_*_for_grep.fastq
 ```
 
-We search around this junction to find reads that are specific to this allele. Upstream we see through glycine 86 of FKBP12. Downstream we see through 16 bases of HygR.
+We search around the junction to find reads that are specific to this allele. Upstream we see through glycine 86 of FKBP12. Downstream we see through 16 bases of HygR.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 grep "AACTGGAAAGGTAACTTTCA" T47D_Clone35_*_for_grep.fastq
 ```
 
-We search for a stretch of 5' UTR not contained in any of the other alleles, we find it, but right after the start codon is a stretch of 35 bases from chromosome 15 (ACAGTCAAATTAATTCCAATTATCTCTCTAACAGC).
+More upstream we see through one base beyond Serine 77 of FKBP12.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-grep "TGTAACTTTCAGATAACACTGTATCTGCCTTTTCCCTTTATCTTTGCA" T47D_Clone35_*_for_grep.fastq
+grep "AGCTTCTAAAACTGGAAAGG" T47D_Clone35_*_for_grep.fastq
 ```
 
-We search as far downstream as we can. We can see 83 bases into this region of chromosome 15, so this may return to chromosome 8 farther downstream that we can't ambiguously assign to this allele, or we have caused a translocation. Alternatively, this could be an errant insertion of the HDR template into chromosome 15, as we can only see as far into the 5' UTR as one base beyond the 5' end of the HDR template.
+More downstream the farthest we can see is the read above that extends through 16 bases of HygR.
 
 ```{r engine='bash', eval=F, echo=TRUE}
-grep "GACAGTCAAATTAATTCCAATTATCTCTCTAACAGC" T47D_Clone35_*_for_grep.fastq
+grep "GGTAACTTTCAGATAACACT" T47D_Clone35_*_for_grep.fastq
 ```
 
-Looking for the junction of the linker and TRPS1, we find it and can see back through Valine 98 of FKBP12 and forward through one base beyond Arginine 10 of TRPS1. This would be in frame, as long as there is translation of an upstream HygR gene that is correctly initiated.
+Looking for a fourth unique allele, we search for the junction of the linker and TRPS1, we find it and can see back through Valine 98 of FKBP12 and forward through one base beyond Arginine 10 of TRPS1. This would be in frame, as long as there is translation of an upstream HygR gene that is correctly initiated.
 
 ```{r engine='bash', eval=F, echo=TRUE}
 grep "AGGTTCAGGTGTCCGGAAAA" T47D_Clone35_*_for_grep.fastq
