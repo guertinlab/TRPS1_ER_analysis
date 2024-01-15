@@ -2747,8 +2747,6 @@ $HOME/bin/seqOutBias seqtable $genome --read-size=$read_size
 
 ## Download the raw data and rename the files
 
-Update this with the SRA numbers once available.
-
 ```{r engine='bash', eval=F, echo=TRUE}
 main=/scratch/ts2hx/TRPS1
 cd $main
@@ -3187,7 +3185,6 @@ library(viridis)
 library(tidyverse)
 library(latticeExtra)
 library(msigdbr)
-library(clusterProfiler)
 library(fgsea)
 library(enrichplot)
 library(EnhancedVolcano)
